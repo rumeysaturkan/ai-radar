@@ -11,7 +11,7 @@ import { fetchPage, parseFeedXml } from "./net.js";
 import { buildPreset, checkPreset, slugifyId } from "./preset-build.js";
 import { buildProfile } from "./profile.js";
 import { rankFeeds } from "./rank.js";
-import type { DiscoveryRequest, FeedFinding } from "./types.js";
+import type { DiscoveryRequest, FeedFinding, RankedFeed } from "./types.js";
 
 const MODELS = { cheap: "gpt-5-mini", strong: "gpt-5.1" };
 
@@ -37,31 +37,54 @@ async function exists(path: string): Promise<boolean> {
   }
 }
 
+export type DiscoveryEvent =
+  | { kind: "step"; label: string }
+  | { kind: "note"; label: string }
+  | { kind: "done"; label: string };
+
 export type DiscoverOptions = {
   assumeYes: boolean;
   force: boolean;
   id?: string;
+  /** Verilmezse ilerleme terminale basılır. */
+  onEvent?: (event: DiscoveryEvent) => void;
 };
 
-export async function runDiscovery(
+export type DiscoveryOutcome = {
+  ranked: RankedFeed[];
+  rejected: FeedFinding[];
+  deps: FindFeedDeps;
+};
+
+/**
+ * Keşfin insan onayına kadarki kısmı. Ayrı durmasının sebebi, onayın nerede
+ * alındığının değişmesi: terminalde readline, tarayıcıda bir form.
+ */
+export async function discoverSources(
   request: DiscoveryRequest,
-  options: DiscoverOptions,
-): Promise<string | null> {
+  options: { onEvent?: (event: DiscoveryEvent) => void } = {},
+): Promise<DiscoveryOutcome | null> {
   const deps: FindFeedDeps = {
     fetchPage,
     parseFeed: parseFeedXml,
     now: () => new Date(),
   };
 
+  // Sunucu aynı akışı SSE'ye aktarabilsin diye ilerleme olay olarak çıkıyor.
+  const emit = options.onEvent;
+  const emitStep = (label: string) => (emit ? emit({ kind: "step", label }) : step(label));
+  const emitNote = (label: string) => (emit ? emit({ kind: "note", label }) : note(label));
+  const emitDone = (label: string) => (emit ? emit({ kind: "done", label }) : done(label));
+
   // 1 — Konuyu aranabilir hale getir.
-  step("Konu çözümleniyor...");
+  emitStep("Konu çözümleniyor...");
   const brief = await makeTopicBrief(request, MODELS.cheap);
-  done(`${brief.searchQueries.length} sorgu, ${brief.seedDomains.length} tohum alan`);
+  emitDone(`${brief.searchQueries.length} sorgu, ${brief.seedDomains.length} tohum alan`);
 
   // 2 — Aday siteler. Buradan çıkan hiçbir adres doğrulanmadan kullanılmıyor.
-  step("Aday kaynaklar aranıyor...");
-  const sites = await findCandidateSites(brief, (message) => note(message));
-  done(`${sites.length} aday site`);
+  emitStep("Aday kaynaklar aranıyor...");
+  const sites = await findCandidateSites(brief, emitNote);
+  emitDone(`${sites.length} aday site`);
 
   if (sites.length === 0) {
     warn("Hiç aday site bulunamadı. Konuyu biraz daha genel yazmayı dene.");
@@ -69,16 +92,16 @@ export async function runDiscovery(
   }
 
   // 3 — Feed bulma ve doğrulama. Tamamen deterministik.
-  step(`${sites.length} sitede feed aranıyor...`);
+  emitStep(`${sites.length} sitede feed aranıyor...`);
   const findings = await findFeeds(sites, deps);
   const usable = findings.filter((finding) => finding.feed !== null);
   const rejected = findings.filter((finding) => finding.feed === null);
   const requests = findings.reduce((total, finding) => total + finding.requestCount, 0);
-  done(`${usable.length} feed doğrulandı (${requests} istek)`);
+  emitDone(`${usable.length} feed doğrulandı (${requests} istek)`);
 
   if (usable.length === 0) {
     warn("Doğrulanabilen hiç feed çıkmadı.");
-    note(
+    emitNote(
       "Bu konuda RSS sunan kaynak bulunamadı. Google News akışıyla bir taban " +
         "preset kurulabilir ama içerik yalnızca arama özetinden gelir.",
     );
@@ -86,25 +109,32 @@ export async function runDiscovery(
   }
 
   // 4 — Güvenilirlik sıralaması, tek toplu çağrı.
-  step("Kaynaklar değerlendiriliyor...");
+  emitStep("Kaynaklar değerlendiriliyor...");
   const ranked = await rankFeeds(usable, request, MODELS.cheap);
-  done(`${ranked.filter((feed) => feed.verdict === "keep").length} kaynak öneriliyor`);
+  emitDone(`${ranked.filter((feed) => feed.verdict === "keep").length} kaynak öneriliyor`);
 
-  // 5 — İnsan onayı. Buraya kadarki maliyet birkaç tenge.
-  const approval = await approveFeeds(ranked, rejected, request, deps, {
-    assumeYes: options.assumeYes,
-  });
+  return { ranked, rejected, deps };
+}
 
-  if (approval.aborted || approval.accepted.length === 0) {
-    note("Vazgeçildi, preset yazılmadı.");
-    return null;
-  }
+/**
+ * Onaylanmış kaynaklardan preset üretip yazar. Profil çağrısı burada:
+ * yarıda bırakılan bir çalıştırma pahalı çağrıyı ödemiyor.
+ */
+export async function finalizePreset(
+  request: DiscoveryRequest,
+  accepted: readonly RankedFeed[],
+  options: DiscoverOptions,
+): Promise<string | null> {
+  const emit = options.onEvent;
+  const emitStep = (label: string) => (emit ? emit({ kind: "step", label }) : step(label));
+  const emitNote = (label: string) => (emit ? emit({ kind: "note", label }) : note(label));
+  const emitDone = (label: string) => (emit ? emit({ kind: "done", label }) : done(label));
 
   // 6 — Profil, KABUL EDİLEN feed'lerin gerçek başlıklarından. Onaydan sonra
   // çalışıyor: yarıda bırakılan çalıştırmada pahalı çağrı ödenmiyor.
-  step("Alan profili çıkarılıyor...");
-  const profile = await buildProfile(request, approval.accepted, MODELS.strong);
-  done(`${profile.categories.length} kategori, ${profile.topics.length} konu`);
+  emitStep("Alan profili çıkarılıyor...");
+  const profile = await buildProfile(request, accepted, MODELS.strong);
+  emitDone(`${profile.categories.length} kategori, ${profile.topics.length} konu`);
 
   const id = options.id ?? slugifyId(profile.name || request.topic);
 
@@ -117,7 +147,7 @@ export async function runDiscovery(
     id,
     language: request.language,
     profile,
-    accepted: approval.accepted,
+    accepted: accepted,
   });
 
   const problems = checkPreset(config);
@@ -126,7 +156,7 @@ export async function runDiscovery(
     warn("Üretilen preset doğrulamadan geçmedi:");
 
     for (const problem of problems) {
-      note(`- ${problem}`);
+      emitNote(`- ${problem}`);
     }
 
     return null;
@@ -148,7 +178,7 @@ export async function runDiscovery(
       ).trim().toLowerCase();
 
       if (answer !== "e" && answer !== "y") {
-        note("Yazılmadı.");
+        emitNote("Yazılmadı.");
         return null;
       }
     } finally {
@@ -173,6 +203,34 @@ export async function runDiscovery(
   console.log("");
 
   return id;
+}
+
+
+/** CLI yolu: keşif, terminalde onay, preset. */
+export async function runDiscovery(
+  request: DiscoveryRequest,
+  options: DiscoverOptions,
+): Promise<string | null> {
+  const outcome = await discoverSources(request, options);
+
+  if (!outcome) {
+    return null;
+  }
+
+  const approval = await approveFeeds(
+    outcome.ranked,
+    outcome.rejected,
+    request,
+    outcome.deps,
+    { assumeYes: options.assumeYes },
+  );
+
+  if (approval.aborted || approval.accepted.length === 0) {
+    note("Vazgeçildi, preset yazılmadı.");
+    return null;
+  }
+
+  return finalizePreset(request, approval.accepted, options);
 }
 
 export { googleNewsFeed };

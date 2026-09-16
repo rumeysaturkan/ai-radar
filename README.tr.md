@@ -26,6 +26,33 @@ bülten **yayınlamak zorunda** olan kişi için: haftalık iç radar gönderen 
 mühendis, iyi bir bültenin bulunmadığı bir nişi ya da dili takip eden biri,
 boş sayfa yerine düzeltilecek bir taslak isteyen bir yazar.
 
+## Konudan başlamak
+
+Kaynak listesini kendin kurmak zorunda değilsin.
+
+```bash
+npm run discover -- "kahve sektörü" --lang tr
+npm run ui            # aynısının tarayıcılı hali, localhost:3000
+```
+
+Ne arayacağını çıkarır, aday siteleri toplar, her birinin feed'ini bulup
+doğrular, gerçek başlıklarına bakarak sıralar, listeyi sana gösterir ve
+onayladıklarından preset'i yazar.
+
+Kahve konusunda ölçüldü: **$0.018 ve 95 saniyede** preset, ardından ilk sayı
+için $0.063. Seçtiği kaynaklar Daily Coffee News, Perfect Daily Grind, World
+Coffee Portal, Barista Magazine ve Sprudge oldu — bir insanın bir öğleden
+sonrasını vereceği meslek basını. `presets/kahve.json` ve ilk sayısı örnek
+olarak depoda duruyor.
+
+Bunu güvenli kılan kural: **model asla preset'e ulaşan bir adres üretmez.**
+Model çıktısı bir ipucudur; her adres indirilip parse edilir ve yalnızca
+doğrulanmış feed'ler hayatta kalır. "Model olmayan bir kaynak uydurdu" hata
+sınıfının tamamı böylece ortadan kalkıyor.
+
+Onay adımı isteğe bağlı değil. Keşif çöp de buluyor; `--yes` yalnızca CI
+çalışabilsin diye var — kasıtlı bir bayrak, varsayılan değil.
+
 ## Ne üretiyor
 
 `npm start yazilim` çalıştırdığınızda:
@@ -150,10 +177,17 @@ bir değişikliği her seferinde canlı çalıştırma ödemek yerine **bedava v
 
 ```bash
 npm run render          # sayfaları arşivlerden yeniden üret, API çağrısı yok
+npm run health ai       # hangi kaynak yerini hak ediyor
 ```
 
-Hem CI'da yayına almak için, hem düzenleme için:
+`render` hem CI'da yayına almanın hem de düzenlemenin yolu:
 `data/<alan>/archive/<sayı>.json` içinde bir özeti düzeltip yeniden üretin.
+
+`health` arşivin zaten kaydettiği huniyi okuyor — kaynak başına taranan,
+puanlanan, yayınlanan — yani hacim üretip sonuç vermeyen bir besleme görünür
+oluyor. Yalnızca öneri veriyor ve en az üç sayıdan sonra: kullanıcının
+preset'ini arkasından yeniden yazmak kötü bir varsayılan, ve tek bir kötü
+hafta kanıt değil.
 
 ## Anahtarlar
 
@@ -176,8 +210,9 @@ ile üretilir.
   ayırt etme işini puan değil, `select.ts`'teki eşitlik bozma kuralı yapıyor.
   Tek 0-10 yerine iki 0-5 ekseni denendi, daha iyi çıkmadı. Asıl çözüm en iyi
   ~25 aday için ikinci bir *sıralama* çağrısı; yazılmadı.
-- Kaynak keşfi yarım: feed bulma, doğrulama ve dil tespiti çalışıyor ve gerçek
-  sitelerde 16/20 ölçüldü. Konuyu aday sitelere çeviren katman henüz yok.
+- Feed bulma gerçek sitelerde 20'de 16 çözüyor. Kaçanlar akışını kapatmış,
+  hiç açmamış ya da feed dizinini JavaScript ile render eden siteler. Onay
+  adımında elle adres yapıştırabilirsiniz.
 - `src/llm.ts` içindeki fiyat tablosu birkaç model biliyor. Diğerleri yine
   çalışır ama raporlanan maliyet eksik kalır ve uyarı basılır.
 - Yayıncı başına çeşitlilik sınırı, tam kamu son ek listesi yerine küçük bir

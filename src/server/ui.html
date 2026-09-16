@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar — Kaynak keşfi</title>
+<style>
+:root {
+  --paper: #faf9f7; --surface: #ffffff; --ink: #16161a; --muted: #6b6f78;
+  --line: #e7e3dc; --accent: #c8412a; --accent-soft: #fdf1ed;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #121316; --surface: #1a1b1f; --ink: #eceef2; --muted: #979ba5;
+    --line: #2b2d33; --accent: #ff7d5e; --accent-soft: #241a18;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 720px; margin: 0 auto; padding: 48px 20px 80px; }
+header { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 32px; }
+.wordmark { font-size: 13px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; }
+.wordmark .dot { color: var(--accent); }
+.tagline { color: var(--muted); font-size: 13px; margin-top: 2px; }
+h1 { font-size: 24px; margin: 0 0 8px; line-height: 1.3; }
+p.lede { color: var(--muted); margin: 0 0 28px; }
+label { display: block; font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+input[type=text], select {
+  width: 100%; padding: 12px 14px; font-size: 16px; font-family: inherit;
+  border: 1px solid var(--line); border-radius: 4px;
+  background: var(--surface); color: var(--ink);
+}
+input[type=text]:focus, select:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.row { display: flex; gap: 12px; align-items: flex-end; margin-bottom: 20px; }
+.row > div:first-child { flex: 1; }
+.row > div:last-child { width: 130px; }
+button {
+  font: inherit; font-weight: 600; padding: 12px 22px; border: 0; border-radius: 4px;
+  background: var(--accent); color: #fff; cursor: pointer;
+}
+button:disabled { opacity: .5; cursor: default; }
+button.ghost { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+.hidden { display: none; }
+.log { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+.log div { padding: 3px 0; color: var(--muted); }
+.log div.step { color: var(--ink); font-weight: 600; margin-top: 10px; }
+.log div.done::before { content: "✓ "; color: #2e9e5b; }
+.log div.failed { color: var(--accent); font-weight: 600; }
+.feed {
+  display: flex; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line);
+  align-items: flex-start;
+}
+.feed input { margin-top: 4px; width: 17px; height: 17px; accent-color: var(--accent); }
+.feed .body { flex: 1; min-width: 0; }
+.feed .name { font-weight: 600; }
+.feed .meta { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.feed .reason { font-size: 13.5px; color: var(--muted); margin-top: 6px; }
+.feed .titles { font-size: 12.5px; color: var(--muted); margin-top: 6px; opacity: .8; }
+.badge {
+  font-size: 11px; letter-spacing: .04em; border: 1px solid var(--line);
+  border-radius: 999px; padding: 1px 8px; background: var(--surface); margin-left: 6px;
+}
+.badge.keep { border-color: #2e9e5b; color: #2e9e5b; }
+.badge.maybe { color: var(--muted); }
+.actions { display: flex; gap: 12px; align-items: center; margin-top: 24px; }
+.count { color: var(--muted); font-size: 14px; }
+.done-box {
+  background: var(--accent-soft); border: 1px solid var(--line);
+  border-left: 3px solid var(--accent); border-radius: 4px; padding: 20px 22px;
+}
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 3px; padding: 2px 6px; }
+.error { color: var(--accent); }
+@media (max-width: 480px) {
+  .wrap { padding: 32px 16px 60px; }
+  .row { flex-direction: column; align-items: stretch; }
+  .row > div:last-child { width: auto; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="wordmark">Radar<span class="dot">.</span></div>
+    <div class="tagline">Kaynak keşfi</div>
+  </header>
+
+  <section id="screen-topic">
+    <h1>Hangi konuda bülten?</h1>
+    <p class="lede">
+      Konuyu yaz; kaynakları bulup doğrulayalım. Onayladıklarınla bir preset
+      yazılır, haftalık bülteni o üretir.
+    </p>
+
+    <form id="form">
+      <div class="row">
+        <div>
+          <label for="topic">Konu</label>
+          <input type="text" id="topic" name="topic" required
+                 placeholder="kahve sektörü ve kahve ticareti" autocomplete="off">
+        </div>
+        <div>
+          <label for="lang">Dil</label>
+          <select id="lang" name="lang">
+            <option value="tr">Türkçe</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" id="go">Kaynakları bul</button>
+    </form>
+  </section>
+
+  <section id="screen-progress" class="hidden">
+    <h1 id="progress-title">Kaynaklar aranıyor</h1>
+    <p class="lede">Bu birkaç dakika sürer. Adımlar aşağıda.</p>
+    <div class="log" id="log"></div>
+  </section>
+
+  <section id="screen-approve" class="hidden">
+    <h1>Hangileri girsin?</h1>
+    <p class="lede" id="approve-lede"></p>
+    <div id="feeds"></div>
+    <div class="actions">
+      <button id="create">Preset oluştur</button>
+      <span class="count" id="count"></span>
+      <button class="ghost" id="restart" type="button">Baştan</button>
+    </div>
+    <p class="error hidden" id="approve-error"></p>
+  </section>
+
+  <section id="screen-done" class="hidden">
+    <h1>Hazır</h1>
+    <div class="done-box">
+      <p style="margin:0 0 12px"><strong id="done-id"></strong> yazıldı.</p>
+      <p style="margin:0">Şimdi: <code id="done-cmd"></code></p>
+    </div>
+    <div class="actions">
+      <button class="ghost" id="again" type="button">Başka bir konu</button>
+    </div>
+  </section>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const show = (name) => {
+  for (const s of ["topic", "progress", "approve", "done"]) {
+    $("screen-" + s).classList.toggle("hidden", s !== name);
+  }
+};
+
+let session = null;
+let feeds = [];
+let stream = null;
+
+function logLine(text, kind) {
+  const line = document.createElement("div");
+  line.className = kind || "";
+  line.textContent = text;
+  $("log").appendChild(line);
+  line.scrollIntoView({ block: "nearest" });
+}
+
+function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+
+function renderFeeds() {
+  const list = $("feeds");
+  list.textContent = "";
+
+  feeds.forEach((feed, index) => {
+    const row = document.createElement("div");
+    row.className = "feed";
+
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.id = "feed-" + index;
+    // Modelin "keep" dedikleri ön seçili; karar yine insanın.
+    box.checked = feed.verdict === "keep";
+    box.addEventListener("change", updateCount);
+
+    const body = document.createElement("div");
+    body.className = "body";
+
+    const name = document.createElement("label");
+    name.setAttribute("for", box.id);
+    name.className = "name";
+    name.style.cssText = "display:block;text-transform:none;letter-spacing:0;font-size:16px;color:inherit;margin:0;cursor:pointer";
+    name.textContent = feed.name;
+
+    const badge = document.createElement("span");
+    badge.className = "badge " + feed.verdict;
+    badge.textContent = feed.verdict === "keep" ? "önerilen" : feed.verdict === "maybe" ? "belki" : "zayıf";
+    name.appendChild(badge);
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const bits = [feed.domain, Math.round(feed.itemsPerWeek) + "/hafta", feed.credibility + "/10"];
+    if (feed.language) bits.push(feed.language);
+    if (feed.daysSinceLastPost !== null && feed.daysSinceLastPost > 30) {
+      bits.push("son yazı " + feed.daysSinceLastPost + " gün önce");
+    }
+    meta.textContent = bits.join(" · ");
+
+    body.append(name, meta);
+
+    if (feed.reason) {
+      const reason = document.createElement("div");
+      reason.className = "reason";
+      reason.textContent = feed.reason;
+      body.appendChild(reason);
+    }
+
+    if (feed.sampleTitles.length) {
+      const titles = document.createElement("div");
+      titles.className = "titles";
+      titles.textContent = feed.sampleTitles.join(" · ");
+      body.appendChild(titles);
+    }
+
+    row.append(box, body);
+    list.appendChild(row);
+  });
+
+  updateCount();
+}
+
+function selectedIndexes() {
+  return feeds
+    .map((_, index) => index)
+    .filter((index) => $("feed-" + index).checked);
+}
+
+function updateCount() {
+  const n = selectedIndexes().length;
+  $("count").textContent = plural(n, "kaynak seçili", "kaynak seçili");
+  $("create").disabled = n === 0;
+}
+
+$("form").addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const topic = $("topic").value.trim();
+  if (!topic) return;
+
+  $("log").textContent = "";
+  $("progress-title").textContent = topic;
+  show("progress");
+
+  const params = new URLSearchParams({ topic, lang: $("lang").value });
+  stream = new EventSource("/api/discover?" + params);
+
+  stream.addEventListener("step", (e) => logLine(JSON.parse(e.data), "step"));
+  stream.addEventListener("note", (e) => logLine("   " + JSON.parse(e.data)));
+  stream.addEventListener("done", (e) => logLine(JSON.parse(e.data), "done"));
+
+  stream.addEventListener("failed", (e) => {
+    logLine(JSON.parse(e.data), "failed");
+    stream.close();
+  });
+
+  stream.addEventListener("sources", (e) => {
+    const data = JSON.parse(e.data);
+    session = data.sessionId;
+    feeds = data.feeds;
+    stream.close();
+
+    $("approve-lede").textContent =
+      plural(feeds.length, "kaynak doğrulandı", "kaynak doğrulandı") +
+      (data.rejected.length ? ", " + data.rejected.length + " tanesinde feed bulunamadı." : ".");
+
+    renderFeeds();
+    show("approve");
+  });
+
+  stream.onerror = () => {
+    // Akış normal bittiğinde de tetikleniyor; yalnızca gerçekten yarım
+    // kaldıysa haber ver.
+    if (stream.readyState === EventSource.CLOSED && !session) {
+      logLine("Bağlantı kesildi.", "failed");
+    }
+    stream.close();
+  };
+});
+
+$("create").addEventListener("click", async () => {
+  $("create").disabled = true;
+  $("create").textContent = "Oluşturuluyor...";
+  $("approve-error").classList.add("hidden");
+
+  try {
+    const response = await fetch("/api/preset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sessionId: session, selected: selectedIndexes() }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || "Bilinmeyen hata");
+
+    $("done-id").textContent = "presets/" + data.id + ".json";
+    $("done-cmd").textContent = data.command;
+    show("done");
+  } catch (error) {
+    $("approve-error").textContent = error.message;
+    $("approve-error").classList.remove("hidden");
+  } finally {
+    $("create").disabled = false;
+    $("create").textContent = "Preset oluştur";
+  }
+});
+
+for (const id of ["restart", "again"]) {
+  $(id).addEventListener("click", () => {
+    session = null;
+    feeds = [];
+    show("topic");
+  });
+}
+</script>
+</body>
+</html>

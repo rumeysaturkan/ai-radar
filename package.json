@@ -21,6 +21,7 @@
     "start": "tsx src/bulletin.ts",
     "bulletin": "tsx src/bulletin.ts",
     "discover": "tsx src/discover.ts",
+    "ui": "tsx src/server/index.ts",
     "research": "tsx src/index.ts",
     "inspect": "tsx src/inspect.ts",
     "health": "tsx src/health.ts",

@@ -33,6 +33,33 @@ for people who have to **publish** one: an engineer sending a weekly internal
 radar, someone covering a niche or a language where no good briefing exists,
 a writer who wants a draft to edit rather than a blank page.
 
+## Starting from a topic
+
+You do not have to assemble the feed list yourself.
+
+```bash
+npm run discover -- "kahve sektörü" --lang tr
+npm run ui            # the same thing with a browser, on localhost:3000
+```
+
+It works out what to search for, collects candidate sites, finds and validates
+each one's feed, ranks them on their real headlines, shows you the list, and
+writes the preset from what you approve.
+
+Measured on a coffee topic: **$0.018 and 95 seconds** to a preset, then $0.063
+for the first issue. The sources it picked were Daily Coffee News, Perfect
+Daily Grind, World Coffee Portal, Barista Magazine and Sprudge — the trade
+press a person would have spent an afternoon assembling. `presets/kahve.json`
+and its first issue are in this repository as the worked example.
+
+The rule that makes this safe: **a model never produces a URL that reaches the
+preset.** Model output is a hint; every address is fetched and parsed, and only
+verified feeds survive. That removes the entire "the model invented a source"
+failure class.
+
+Approval is not optional. Discovery finds rubbish too, and `--yes` exists only
+so CI can run — it is a deliberate flag, not a default.
+
 ## What comes out
 
 Running `npm start yazilim` writes:
@@ -156,10 +183,17 @@ of paying for a live run each time.
 
 ```bash
 npm run render          # rebuild every page from the archives, no API calls
+npm run health ai       # which feeds actually earn their place
 ```
 
-Useful for publishing in CI, and for editing: fix a summary in
-`data/<domain>/archive/<issue>.json`, re-render, done.
+`render` is how the site is published in CI, and how you edit: fix a summary
+in `data/<domain>/archive/<issue>.json` and re-render.
+
+`health` reads the funnel the archive already records — scanned, scored and
+published per source — so a feed that produces volume and no results becomes
+visible. It only ever recommends, and only after three issues; quietly
+rewriting your preset would be a bad default, and one bad week is not
+evidence.
 
 ## Keys
 
@@ -187,9 +221,14 @@ src/
   pipeline/
     collect.ts  dedupe.ts  score.ts  select.ts
     enrich.ts   compose.ts render.ts stats.ts
-  discovery/             # topic → sources → preset (deterministic half)
-    feed-links.ts  feed-health.ts  find-feed.ts
+  discover.ts            # topic → preset
+  health.ts              # source efficiency report
+  discovery/
+    feed-links.ts  feed-health.ts  find-feed.ts   # deterministic: find a feed
     language.ts    decode.ts       net.ts
+    brief.ts       candidates.ts   rank.ts        # model-assisted: which sources
+    profile.ts     preset-build.ts approve.ts
+  server/                # npm run ui: two screens, SSE, no dependencies
   agent/research-agent.ts
   tools/                 # web search, page reading, knowledge notes
   util/                  # http, concurrency, urls, dates, seeded shuffle
@@ -214,9 +253,9 @@ npm run check            # typecheck + tests
   a score — so the tie-break in `select.ts` is doing the work, not the score.
   Two 0-5 axes were tried instead of one 0-10 and measured no better. The real
   fix is a second, comparative ranking pass over the top ~25; it is not built.
-- Source discovery is half done: feed finding, validation and language
-  detection work and are measured at 16/20 on real sites. The layer that turns
-  a topic into candidate sites is not written yet.
+- Feed discovery resolves 16 of 20 real sites. The misses are sites that
+  retired their feeds, never had one, or render their feed index with
+  JavaScript. The approval step lets you paste an address by hand.
 - The cost table in `src/llm.ts` knows a handful of models. Others still run,
   but the reported cost is short and a warning says so.
 - The per-publisher diversity cap groups by registrable domain using a small
