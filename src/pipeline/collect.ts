@@ -5,6 +5,7 @@ import type { Candidate } from "../types.js";
 import { daysAgo } from "../util/date.js";
 import { fetchJson } from "../util/http.js";
 import { mapWithConcurrency } from "../util/pool.js";
+import { isBlockedSource } from "../util/blocklist.js";
 import { canonicalUrl, isHttpUrl } from "../util/url.js";
 import { hashUrl } from "../store.js";
 import { note, warn } from "../util/log.js";
@@ -159,6 +160,12 @@ async function collectWebSearch(config: Config): Promise<Candidate[]> {
       const results = await searchNews(query, config.windowDays);
 
       for (const item of results) {
+        // RSS kaynakları zaten seçilmiş yayınlar; arama açık uçlu ve bir
+        // sosyal medya gönderisini haber diye getirebiliyor.
+        if (isBlockedSource(item.url)) {
+          continue;
+        }
+
         const candidate = toCandidate(
           item.title,
           item.url,

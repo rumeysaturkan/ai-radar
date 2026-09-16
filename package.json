@@ -20,8 +20,10 @@
   "scripts": {
     "start": "tsx src/bulletin.ts",
     "bulletin": "tsx src/bulletin.ts",
+    "discover": "tsx src/discover.ts",
     "research": "tsx src/index.ts",
     "inspect": "tsx src/inspect.ts",
+    "health": "tsx src/health.ts",
     "render": "tsx src/render.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test --test-reporter=spec \"test/**/*.test.ts\"",
