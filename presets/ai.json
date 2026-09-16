@@ -1,0 +1,108 @@
+{
+  "id": "ai",
+  "name": "Yapay Zeka",
+  "title": "AI Radar",
+  "tagline": "Haftalık yapay zeka bülteni",
+  "language": "tr",
+  "siteUrl": "",
+  "audience": "Yazılım geliştiriciler ve teknik ekip liderleri",
+  "topics": [
+    "LLM ve temel model sürümleri",
+    "AI agent mimarileri ve tool-calling",
+    "açık kaynak modeller ve araçlar",
+    "geliştirici araçları ve API değişiklikleri",
+    "önemli araştırma makaleleri",
+    "sektörel gelişmeler ve regülasyon"
+  ],
+  "categories": [
+    "Model & Sürümler",
+    "Agent & Araçlar",
+    "Araştırma",
+    "Açık Kaynak",
+    "Geliştirici Araçları",
+    "Sektör & Regülasyon"
+  ],
+  "windowDays": 7,
+  "candidateLimit": 160,
+  "maxPerSource": 12,
+  "shortlist": 12,
+  "minScore": 6,
+  "models": {
+    "scorer": "gpt-4o-mini",
+    "writer": "gpt-4o"
+  },
+  "feeds": [
+    {
+      "name": "OpenAI",
+      "url": "https://openai.com/blog/rss.xml"
+    },
+    {
+      "name": "Google DeepMind",
+      "url": "https://deepmind.google/blog/rss.xml"
+    },
+    {
+      "name": "Google Research",
+      "url": "https://research.google/blog/rss/"
+    },
+    {
+      "name": "Latent Space",
+      "url": "https://www.latent.space/feed"
+    },
+    {
+      "name": "Ahead of AI",
+      "url": "https://magazine.sebastianraschka.com/feed"
+    },
+    {
+      "name": "Simon Willison",
+      "url": "https://simonwillison.net/atom/everything/"
+    },
+    {
+      "name": "Import AI",
+      "url": "https://importai.substack.com/feed"
+    },
+    {
+      "name": "MIT Tech Review",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed"
+    },
+    {
+      "name": "The Verge AI",
+      "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml"
+    },
+    {
+      "name": "Ars Technica",
+      "url": "https://feeds.arstechnica.com/arstechnica/technology-lab"
+    },
+    {
+      "name": "arXiv cs.AI",
+      "url": "https://rss.arxiv.org/rss/cs.AI",
+      "max": 8
+    },
+    {
+      "name": "arXiv cs.CL",
+      "url": "https://rss.arxiv.org/rss/cs.CL",
+      "max": 8
+    },
+    {
+      "name": "Hugging Face Blog",
+      "url": "https://huggingface.co/blog/feed.xml"
+    }
+  ],
+  "hackerNews": {
+    "enabled": true,
+    "minPoints": 80,
+    "queries": [
+      "AI",
+      "LLM",
+      "agent",
+      "open source model"
+    ]
+  },
+  "webSearch": {
+    "enabled": true,
+    "queries": [
+      "major AI model release this week",
+      "AI agent framework news",
+      "OpenAI Anthropic Google AI announcement"
+    ]
+  }
+}

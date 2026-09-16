@@ -1,0 +1,59 @@
+{
+  "id": "siber-guvenlik",
+  "name": "Siber Güvenlik",
+  "title": "Güvenlik Radar",
+  "tagline": "Haftalık siber güvenlik bülteni",
+  "language": "tr",
+  "siteUrl": "",
+  "audience": "Güvenlik mühendisleri, sistem yöneticileri ve teknik ekip liderleri",
+  "topics": [
+    "kritik güvenlik açıkları ve aktif istismar edilen zafiyetler",
+    "veri ihlalleri ve saldırı kampanyaları",
+    "savunma araçları ve güvenlik otomasyonu",
+    "kimlik doğrulama, şifreleme ve protokol değişiklikleri",
+    "tedarik zinciri ve açık kaynak paket güvenliği",
+    "regülasyon, uyumluluk ve veri koruma"
+  ],
+  "categories": [
+    "Zafiyet & Yama",
+    "İhlal & Saldırı",
+    "Savunma Araçları",
+    "Kripto & Kimlik",
+    "Tedarik Zinciri",
+    "Regülasyon & Uyum"
+  ],
+  "windowDays": 7,
+  "candidateLimit": 160,
+  "maxPerSource": 12,
+  "shortlist": 12,
+  "minScore": 6,
+  "models": {
+    "scorer": "gpt-4o-mini",
+    "writer": "gpt-4o"
+  },
+  "feeds": [
+    { "name": "Krebs on Security", "url": "https://krebsonsecurity.com/feed/" },
+    { "name": "The Hacker News", "url": "https://feeds.feedburner.com/TheHackersNews", "max": 8 },
+    { "name": "BleepingComputer", "url": "https://www.bleepingcomputer.com/feed/", "max": 8 },
+    { "name": "Schneier on Security", "url": "https://www.schneier.com/feed/atom/" },
+    { "name": "Google Project Zero", "url": "https://googleprojectzero.blogspot.com/feeds/posts/default" },
+    { "name": "Google Security Blog", "url": "https://security.googleblog.com/feeds/posts/default" },
+    { "name": "CISA Advisories", "url": "https://www.cisa.gov/cybersecurity-advisories/all.xml", "max": 6 },
+    { "name": "Troy Hunt", "url": "https://www.troyhunt.com/rss/" },
+    { "name": "Dark Reading", "url": "https://www.darkreading.com/rss.xml", "max": 8 },
+    { "name": "Rapid7", "url": "https://blog.rapid7.com/rss/" }
+  ],
+  "hackerNews": {
+    "enabled": true,
+    "minPoints": 80,
+    "queries": ["security vulnerability", "data breach", "CVE exploit", "encryption"]
+  },
+  "webSearch": {
+    "enabled": true,
+    "queries": [
+      "critical vulnerability disclosed this week",
+      "major data breach announcement",
+      "new security tool release"
+    ]
+  }
+}

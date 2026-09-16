@@ -1,0 +1,64 @@
+{
+  "id": "veri-altyapi",
+  "name": "Veri & Altyapı",
+  "title": "Altyapı Radar",
+  "tagline": "Haftalık veri ve altyapı bülteni",
+  "language": "tr",
+  "siteUrl": "",
+  "audience": "Platform mühendisleri, SRE'ler ve veri ekipleri",
+  "topics": [
+    "bulut sağlayıcı duyuruları ve fiyat değişiklikleri",
+    "veritabanı sürümleri ve depolama motorları",
+    "Kubernetes, konteyner ve orkestrasyon",
+    "veri hattı, akış işleme ve analitik araçlar",
+    "gözlemlenebilirlik, güvenilirlik ve olay analizleri",
+    "dağıtık sistem mimarisi ve ölçekleme deneyimleri"
+  ],
+  "categories": [
+    "Bulut & Platform",
+    "Veritabanı & Depolama",
+    "Konteyner & Orkestrasyon",
+    "Veri & Analitik",
+    "Gözlemlenebilirlik",
+    "Mimari & Ölçekleme"
+  ],
+  "windowDays": 7,
+  "candidateLimit": 160,
+  "maxPerSource": 12,
+  "shortlist": 12,
+  "minScore": 6,
+  "models": {
+    "scorer": "gpt-4o-mini",
+    "writer": "gpt-4o"
+  },
+  "feeds": [
+    { "name": "AWS News", "url": "https://aws.amazon.com/blogs/aws/feed/", "max": 8 },
+    { "name": "Google Cloud", "url": "https://cloudblog.withgoogle.com/rss/", "max": 8 },
+    { "name": "Azure", "url": "https://azure.microsoft.com/en-us/blog/feed/", "max": 8 },
+    { "name": "Cloudflare", "url": "https://blog.cloudflare.com/rss/" },
+    { "name": "Kubernetes", "url": "https://kubernetes.io/feed.xml" },
+    { "name": "CNCF", "url": "https://www.cncf.io/feed/", "max": 6 },
+    { "name": "HashiCorp", "url": "https://www.hashicorp.com/blog/feed.xml" },
+    { "name": "Docker", "url": "https://www.docker.com/blog/feed/" },
+    { "name": "PostgreSQL", "url": "https://www.postgresql.org/news.rss" },
+    { "name": "MongoDB", "url": "https://www.mongodb.com/blog/rss", "max": 6 },
+    { "name": "Redis", "url": "https://redis.io/blog/feed/" },
+    { "name": "Elastic", "url": "https://www.elastic.co/blog/feed", "max": 6 },
+    { "name": "Grafana", "url": "https://grafana.com/blog/index.xml" },
+    { "name": "Netflix Tech Blog", "url": "https://netflixtechblog.com/feed" },
+    { "name": "Werner Vogels", "url": "https://www.allthingsdistributed.com/index.xml" }
+  ],
+  "hackerNews": {
+    "enabled": true,
+    "minPoints": 100,
+    "queries": ["database", "kubernetes", "distributed systems", "cloud infrastructure"]
+  },
+  "webSearch": {
+    "enabled": true,
+    "queries": [
+      "major cloud provider announcement this week",
+      "database new release",
+      "kubernetes ecosystem news"
+    ]
+  }
+}

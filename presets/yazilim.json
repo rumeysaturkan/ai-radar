@@ -1,0 +1,63 @@
+{
+  "id": "yazilim",
+  "name": "Yazılım Geliştirme",
+  "title": "Dev Radar",
+  "tagline": "Haftalık yazılım geliştirme bülteni",
+  "language": "tr",
+  "siteUrl": "",
+  "audience": "Yazılım geliştiriciler ve teknik ekip liderleri",
+  "topics": [
+    "programlama dili sürümleri ve dil tasarımı",
+    "framework ve kütüphane çıkışları",
+    "geliştirici araçları, IDE ve derleyiciler",
+    "web platformu ve tarayıcı yenilikleri",
+    "yazılım mimarisi ve mühendislik pratikleri",
+    "açık kaynak ekosistemi ve lisans değişiklikleri"
+  ],
+  "categories": [
+    "Dil & Runtime",
+    "Framework & Kütüphane",
+    "Geliştirici Araçları",
+    "Web Platformu",
+    "Mimari & Pratik",
+    "Açık Kaynak"
+  ],
+  "windowDays": 7,
+  "candidateLimit": 160,
+  "maxPerSource": 12,
+  "shortlist": 12,
+  "minScore": 6,
+  "models": {
+    "scorer": "gpt-4o-mini",
+    "writer": "gpt-4o"
+  },
+  "feeds": [
+    { "name": "GitHub Blog", "url": "https://github.blog/feed/", "max": 8 },
+    { "name": "Stack Overflow Blog", "url": "https://stackoverflow.blog/feed/" },
+    { "name": "Martin Fowler", "url": "https://martinfowler.com/feed.atom" },
+    { "name": "TypeScript", "url": "https://devblogs.microsoft.com/typescript/feed/" },
+    { "name": "Go Blog", "url": "https://go.dev/blog/feed.atom" },
+    { "name": "Rust Blog", "url": "https://blog.rust-lang.org/feed.xml" },
+    { "name": "V8", "url": "https://v8.dev/blog.atom" },
+    { "name": "Node.js", "url": "https://nodejs.org/en/feed/blog.xml" },
+    { "name": "Deno", "url": "https://deno.com/feed" },
+    { "name": "web.dev", "url": "https://web.dev/static/blog/feed.xml" },
+    { "name": "Chrome Developers", "url": "https://developer.chrome.com/static/blog/feed.xml" },
+    { "name": "InfoQ", "url": "https://feed.infoq.com/", "max": 8 },
+    { "name": "JetBrains", "url": "https://blog.jetbrains.com/feed/", "max": 6 },
+    { "name": "Pragmatic Engineer", "url": "https://newsletter.pragmaticengineer.com/feed" }
+  ],
+  "hackerNews": {
+    "enabled": true,
+    "minPoints": 100,
+    "queries": ["programming language", "framework release", "developer tools", "open source"]
+  },
+  "webSearch": {
+    "enabled": true,
+    "queries": [
+      "major programming language release this week",
+      "popular framework new version announcement",
+      "developer tooling news"
+    ]
+  }
+}

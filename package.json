@@ -1,0 +1,26 @@
+{
+  "name": "ai-radar",
+  "version": "1.0.0",
+  "description": "Sectigin alanda haftalik bulteni kendi kendine derleyen, yayina hazir HTML sayfasi ureten acik kaynak arac.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^26.5.1",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "openai": "^7.15.0",
+    "rss-parser": "^3.13.0"
+  },
+  "scripts": {
+    "start": "tsx src/bulletin.ts",
+    "bulletin": "tsx src/bulletin.ts",
+    "research": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  }
+}
