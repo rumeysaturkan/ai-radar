@@ -1,5 +1,10 @@
 node_modules/
 .env
 dist/
-data/*/
+
+# Per-domain state. Archives are tracked on purpose: they are the corpus for
+# evaluating the scorer and the only input `npm run health` has. seen.json is
+# rebuildable from them and is the file that would conflict between machines.
 data/last-preset
+data/*/seen.json
+data/discovery/

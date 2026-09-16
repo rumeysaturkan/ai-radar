@@ -1,0 +1,259 @@
+{
+  "id": "2026-W38",
+  "number": 1,
+  "title": "AI Radar",
+  "tagline": "Haftalık yapay zeka bülteni",
+  "generatedAt": "2026-09-15T12:41:06.062Z",
+  "periodStart": "2026-09-08T12:41:06.062Z",
+  "periodEnd": "2026-09-15T12:41:06.062Z",
+  "intro": "Hızla gelişen yapay zeka dünyasında bu hafta, geliştiricilere yönelik yeni araçların öne çıkışı ve ABD'deki AI regülasyon tartışmaları damgasını vuruyor. OpenAI'nin Agents API'si, karmaşık iş akışlarının yönetimini kolaylaştırırken, senato müzakereleri yapay zekanın hukuki zeminini şekillendirmeye çalışıyor.",
+  "highlightId": "2b26a8066576",
+  "items": [
+    {
+      "id": "2b26a8066576",
+      "title": "Introducing the Agents API",
+      "url": "https://openai.com/index/introducing-the-agents-api",
+      "source": "OpenAI",
+      "publishedAt": "2026-09-10T00:00:00.000Z",
+      "snippet": "Build and launch cloud agents with the Agents API, a managed service powered by the Codex harness for orchestration, long-running sessions, and tool use.",
+      "points": null,
+      "score": 9,
+      "reason": "Yeni bir API hizmeti sunarak AI ajanlarının kolayca oluşturulmasını sağlıyor; bu, sektörde önemli bir gelişme.",
+      "category": "Geliştirici Araçları",
+      "tldr": "OpenAI, geliştiricilere bulut tabanlı ajanlar (agents) oluşturma ve çalıştırma imkanı veren Agents API'yi duyurdu. Bu API, Codex'i destekleyen altyapıyı geliştiricilere basit ve esnek bir API aracılığıyla sunarak, karmaşık iş akışlarının kolayca yönetilebilmesini sağlıyor.",
+      "whyItMatters": "Geliştiriciler, karmaşık ve uzun süreli çalışan ajanlar oluşturabilir ve bunları daha verimli bir şekilde yöneterek projelerinin geliştirme süresini ve maliyetlerini optimize edebilirler.",
+      "tags": [
+        "API",
+        "Codex",
+        "bulut ajanları",
+        "altyapı"
+      ]
+    },
+    {
+      "id": "12e9dd685180",
+      "title": "Perplexity trusts GPT-6 Astra with end-to-end systems",
+      "url": "https://openai.com/index/perplexity-improving-accuracy-with-astra",
+      "source": "OpenAI",
+      "publishedAt": "2026-09-14T00:00:00.000Z",
+      "snippet": "Perplexity uses Astra to write communications, change software, and monitor production systems, and checks in much less frequently than with earlier models.",
+      "points": null,
+      "score": 8,
+      "reason": "Astra'nın end-to-end sistemlerdeki kullanımı, yazılımcılara pratik bir çözüm sunuyor.",
+      "category": "Geliştirici Araçları",
+      "tldr": "Perplexity, GPT-6 Astra'yı iletişim yazmak, yazılım değiştirmek ve üretim sistemlerini izlemek için kullanıyor; bu modelle önceki nesillere göre sistemleri daha az sık kontrol etmeleri gerekiyor. GPT-6 Astra, test kodu oluşturması ve gerçek dünya sistemleri üzerinde uygulama yapabilmesi sayesinde Perplexity'nin arama motorunun doğruluğunu artırıyor.",
+      "whyItMatters": "GPT-6 Astra, yazılım geliştirme süreçlerini otomatikleştirerek geliştiricilere zaman kazandırabilir.",
+      "tags": [
+        "AI",
+        "GPT-6",
+        "otomasyon",
+        "yazılım geliştirme"
+      ]
+    },
+    {
+      "id": "c7d3c8aeae42",
+      "title": "Rapidly scaling online storage to serve over 1 billion ChatGPT users",
+      "url": "https://openai.com/index/scaling-storage-one-billion-users-part-one",
+      "source": "OpenAI",
+      "publishedAt": "2026-09-11T10:00:00.000Z",
+      "snippet": "Learn how OpenAI evolved Habitat from a Python library into a globally distributed storage platform serving 1 billion ChatGPT users and 22M requests per second.",
+      "points": null,
+      "score": 8,
+      "reason": "OpenAI'nin 1 milyardan fazla kullanıcıya hizmet eden yeni depolama platformu, geliştiriciler için önemli bir altyapı sağlıyor.",
+      "category": "Geliştirici Araçları",
+      "tldr": "Habitat, OpenAI'nin geliştiriciler için başlattığı basit bir Python kütüphanesi olarak hayatına başladı ve şu an 1 milyar ChatGPT kullanıcısını destekleyecek şekilde büyütülmüş devasa bir online depolama platformuna dönüştü. Habitat, veri yönetiminin karmaşıklığını geliştiricilerden alarak OpenAI ürünlerinin 500 petabayt üzerinde veriyi güvenilir bir şekilde işlemesini sağlıyor ve her saniye 70 milyondan fazla isteği işleyebiliyor.",
+      "whyItMatters": "Geliştirici ekipleri, büyük ölçekli online depolama ihtiyaçlarını yönetmek için Habitat gibi sistemlerden ilham alarak verimliliği artırabilir ve karmaşık veri işlemlerini daha basit yöntemlerle yönetebilir.",
+      "tags": [
+        "online depolama",
+        "veritabanı yönetimi",
+        "ölçeklenebilirlik"
+      ]
+    },
+    {
+      "id": "4d4e7920d8a7",
+      "title": "Now everyone can put data to work",
+      "url": "https://openai.com/index/put-data-to-work",
+      "source": "OpenAI",
+      "publishedAt": "2026-09-10T15:00:00.000Z",
+      "snippet": "Meet the Data agent in ChatGPT Work. Connect company data, uncover insights, and build interactive dashboards with AI using natural language.",
+      "points": null,
+      "score": 8,
+      "reason": "ChatGPT Work içinde veri ajansı ile etkileşimli panolar oluşturmak, geliştiriciler için pratik ve faydalı bir araç.",
+      "category": "Geliştirici Araçları",
+      "tldr": "OpenAI, ChatGPT Work içine 'Data agent' adlı yeni bir özellik ekledi. Bu özellik, şirketlerin verilerini Amazon Redshift, Snowflake ve Google BigQuery gibi platformlarla entegre ederek, etkileşimli panolar oluşturmalarını ve bu veriler üzerinden analiz yapmalarını sağlıyor.",
+      "whyItMatters": "Bu yeni Data agent ile yazılım geliştiriciler, veri analiz yeteneklerini genişleterek işletmelerin daha hızlı ve etkili kararlar almasına yardımcı olabilir.",
+      "tags": [
+        "veri analizi",
+        "ChatGPT",
+        "entegrasyon",
+        "panolar"
+      ]
+    },
+    {
+      "id": "4e410dad70fb",
+      "title": "Build more natural voice experiences with GPT‑Live‑1 in the API",
+      "url": "https://openai.com/index/introducing-gpt-live-1-in-the-api",
+      "source": "OpenAI",
+      "publishedAt": "2026-09-10T00:00:00.000Z",
+      "snippet": "GPT‑Live‑1 brings natural, full-duplex voice conversations to the API, with stronger instruction following, custom voices, and telephony support.",
+      "points": null,
+      "score": 8,
+      "reason": "Yeni API, kullanıcıların daha doğal ses deneyimleri yaratmasına olanak tanıyor; bu, geliştiriciler için pratik bir yenilik.",
+      "category": "Geliştirici Araçları",
+      "tldr": "OpenAI, GPT-Live-1'i API üzerinde kullanıma sundu. Bu model, tam-dupleks konuşma yetenekleri ile sesli uygulamalar geliştirilmesine olanak tanıyor ve özellikle akıcı kesinti yönetimi, arka plan gürültüleri ile başa çıkma ve telefon çağrılarında kullanılabilirlik gibi güçlü özelliklerle dikkat çekiyor.",
+      "whyItMatters": "Bu, yazılım geliştiriciler için sesli uygulama geliştirirken entegrasyon ve kod karmaşıklığını azaltırken daha doğal insan-makine etkileşimleri sunma imkanı tanır.",
+      "tags": [
+        "Sesli arayüz",
+        "API",
+        "Tam-dupleks",
+        "GPT-6 Astra"
+      ]
+    },
+    {
+      "id": "7eb64b51a9c5",
+      "title": "U.S. Senate negotiators consider requiring AI firms to mitigate known major risks",
+      "url": "https://spokesman.com/stories/2026/sep/11/us-senate-negotiators-consider-requiring-ai-firms-",
+      "source": "Web araması",
+      "publishedAt": "Sat, 12 Sep 2026 12:00:00 GMT",
+      "snippet": "All of it is still being negotiated. The bill would apply to AI models with the most advanced capabilities. ⁠The U.S. companies with the most advanced AI models include Alphabet’s Google, Anthropic and OpenAI. Even if negotiators reach agreement, the congressional calendar will complicate passage. The House of Representatives is scheduled to be ‌in session for only one week before ‌the November 3 midterm elections, while the Senate is expected to be in Washington for three weeks. [...] Negotiators aim to ⁠give the U.S. government the power to block the release of certain AI models that are dee",
+      "points": null,
+      "score": 9,
+      "reason": "AI firmalarının bilinen büyük riskleri azaltmalarını zorunlu kılacak yeni düzenlemeler, sektörü önemli ölçüde etkileyebilir.",
+      "category": "Sektör & Regülasyon",
+      "tldr": "ABD Senatosu'ndaki müzakereciler, AI geliştiren firmalara bilinen büyük riskleri hafifletmeleri için sorumluluk getirecek yasaları tartışıyor. Bu yasa, AI modellerinin güvenli olmadıkları takdirde hükümet tarafından engellenebilmesini ve şirketlerin federal mahkemede itiraz edebilmesini öngörüyor.",
+      "whyItMatters": "Bu düzenleme, özellikle güvenlik ve etik kaygıları nedeniyle AI uygulamalarının geliştirilmesi ve piyasaya sürülmesini yavaşlatabilir veya karmaşık hale getirebilir.",
+      "tags": [
+        "AI güvenliği",
+        "mevzuat",
+        "risk yönetimi"
+      ]
+    },
+    {
+      "id": "145a2bcfb15c",
+      "title": "Google, OpenAI, Anthropic Weigh High-Stakes AI Pact",
+      "url": "https://finance.yahoo.com/technology/ai/articles/google-openai-anthropic-weigh-high-191132328.html",
+      "source": "Web araması",
+      "publishedAt": "Mon, 14 Sep 2026 18:00:00 GMT",
+      "snippet": "Anthropic, OpenAI and Alphabet's (NASDAQ:GOOGL) Google are discussing the creation of an industry-led body to set common standards for artificial-intelligence testing and auditing, a move that could shape how frontier models are evaluated before regulators impose tougher rules themselves. For investors, the talks matter because shared standards could raise development costs and slow deployment, but they could also reduce regulatory uncertainty for the companies spending most aggressively on AI. [...] The proposal would effectively give leading AI developers a larger role in deciding how increa",
+      "points": null,
+      "score": 8,
+      "reason": "AI test ve denetimi için ortak standartların belirlenmesi, geliştirme süreçleri üzerinde önemli bir etkisi olabilir.",
+      "category": "Sektör & Regülasyon",
+      "tldr": "Google, OpenAI ve Anthropic, AI test ve denetimlerinde ortak standartlar belirleyecek bir endüstri liderliğinde kuruluş oluşturmayı tartışıyor. Bu standartlar, daha güçlü model testlerinin nasıl yapılacağını şekillendirebilir ve AI geliştirme maliyetlerini artırabilir.",
+      "whyItMatters": "Endüstri standartları geliştiriciler için AI sistemlerinin daha güvenilir olmasını sağlamanın yanı sıra, düzenleyici belirsizlikleri azaltarak pazar erişimini kolaylaştırabilir.",
+      "tags": [
+        "AI test",
+        "uygulama standartları",
+        "OpenAI",
+        "Google"
+      ]
+    },
+    {
+      "id": "15e83ccaebb1",
+      "title": "Toward Self-Adaptive Physical AI: Can LLM Agents Manage Long-Horizon Physical Tasks?",
+      "url": "https://arxiv.org/abs/2609.13436",
+      "source": "arXiv cs.AI",
+      "publishedAt": "2026-09-15T04:00:00.000Z",
+      "snippet": "arXiv:2609.13436v1 Announce Type: new Abstract: Large Language Model (LLM) agents offer a promising path toward autonomously managing long-term physical tasks without human intervention. However, physical tasks require agents to continuously observe the environment, make consequential actions, and remain effective as the environment changes. Existing approaches either require substantial data and retraining, or primarily focus on agents operating in the virtual world. In this work, we explore the feasibility of building a self-adaptive physical AI agent that manages long-term physical tasks in",
+      "points": null,
+      "score": 8,
+      "reason": "Uzun vadeli fiziksel görevleri yönetmeye yönelik yeni bir LLM ajanı, uygulama potansiyeli açısından önemli.",
+      "category": "Agent & Araçlar",
+      "tldr": "Büyük Dil Modelleri (LLM) ile oluşturulan ajanlar, tarım gibi alanlarda uzun vadeli fiziksel görevleri insan müdahalesi olmadan yönetme konusunda, mevcut takviyeli öğrenme tabanlı ajanlara kıyasla daha uyumlu sonuçlar veriyor.",
+      "whyItMatters": "LLM tabanlı ajanlar, değişken çevre koşullarında daha iyi uyum sağlama potansiyeli ile, yazılım geliştiriciler için yeni otonomi çözümleri sunabilir.",
+      "tags": [
+        "LLM",
+        "fiziksel yapay zeka",
+        "otomasyon"
+      ]
+    },
+    {
+      "id": "36716e4d6470",
+      "title": "AI agents to start spending your money with Visa, Mastercard",
+      "url": "https://sg.finance.yahoo.com/news/ai-agents-start-spending-money-010300686.html",
+      "source": "Web araması",
+      "publishedAt": "Mon, 14 Sep 2026 12:00:00 GMT",
+      "snippet": "On September 10, Visa, Mastercard, and Ant International said they would develop a shared Know Your Agent (KYA) framework, according to a joint press release. A KYA framework is a system that checks whether an AI agent is trusted and authorized before it checks out. Each firm already has its own version. Visa runs Trusted Agent Protocol, Mastercard uses Verifiable Intent, and Ant built Agentic Mobile Protocol. [...] Adoption: updates on Mastercard's Agent Pay and Visa's Intelligent Commerce pilot programs. Earnings: agent-linked volume in upcoming quarterly reports. Rules: whether the KYA fram",
+      "points": null,
+      "score": 8,
+      "reason": "Visa ve Mastercard'ın AI agent'lar için ortak bir çerçeve geliştirmesi, sektörde yenilikçi bir yaklaşım.",
+      "category": "Agent & Araçlar",
+      "tldr": "Visa ve Mastercard, küresel fintech Ant International ile AI (yapay zeka) alışveriş ajanlarını tanımlamak ve güven sağlamak için ortak bir 'Know Your Agent' framework geliştirmeye karar verdiklerini duyurdular. Bu sistem, AI ajanlarının kullanıcıların adına alışveriş yaparken güven ve yetki kontrolünü gerçekleştirecek ve farklı ağlarda tanınmasını sağlayacak.",
+      "whyItMatters": "Bu gelişme, yazılım geliştiricilere AI alışveriş ajanları için yeni güvenlik ve kimlik doğrulama sistemleri geliştirme fırsatları sunabilir.",
+      "tags": [
+        "AI ajanları",
+        "Ödeme sistemleri",
+        "Bilgi güvenliği"
+      ]
+    },
+    {
+      "id": "95bad4f09da4",
+      "title": "Root-Cause Attribution Is a Search Problem: Continual Search for Long-Horizon Agent Failures",
+      "url": "https://arxiv.org/abs/2609.13463",
+      "source": "arXiv cs.AI",
+      "publishedAt": "2026-09-15T04:00:00.000Z",
+      "snippet": "arXiv:2609.13463v1 Announce Type: new Abstract: The increasing deployment of AI agents in long-horizon tasks yields massive execution logs. Diagnosing failures within these records is crucial for reliability, as it transforms outcome-level signals into actionable interventions. The sheer scale of the data renders human review impractical, driving the need for automated root-cause attribution (RCA). However, automated RCA methods using LLMs suffer from low diagnostic accuracy, especially as execution traces grow larger. They struggle because relevant information is often sparse, distributed acr",
+      "points": null,
+      "score": 8,
+      "reason": "AI ajanlarının uzun vadeli görevlerindeki hataların tespitine dair yapılan bu çalışma, geliştiriciler için kritik olabilir.",
+      "category": "Agent & Araçlar",
+      "tldr": "Araştırma, uzun vadeli AI görevlerinde kök neden atıfını (root-cause attribution) geliştirmek için bir arama problemi olarak ele alıyor ve 'Continual Search' adlı tekrarlayan bir framework öneriyor. MegaRCA-Mix adlı yeni bir test seti üzerinde yapılan denemeler, bu yöntemle GPT-5.5 modelinde F1 skorunun %40'ı aşkın bir iyileşme gösterdiğini ortaya koyuyor.",
+      "whyItMatters": "Bu yöntem, daha hassas hata teşhisi sayesinde uzun vadeli AI sistemlerinin güvenilirliğini ve robustluğunu artırabilir.",
+      "tags": [
+        "AI hata analizi",
+        "LLM",
+        "kök neden atıfı"
+      ]
+    },
+    {
+      "id": "062061e61712",
+      "title": "ZGCM-1: A Fully Open and Extremely Efficient Foundation Model for Math and Agentic Search",
+      "url": "https://arxiv.org/abs/2609.13356",
+      "source": "arXiv cs.AI",
+      "publishedAt": "2026-09-15T04:00:00.000Z",
+      "snippet": "arXiv:2609.13356v1 Announce Type: new Abstract: In this work, we present ZGCM-1, a fully open 7B dense foundation model trained from scratch with extreme data, system, and algorithmic efficiency. ZGCM-1 is founded on a core premise: compact models cannot passively memorize the open web, but can overcome parametric capacity limits by coupling deliberate internal thinking with active external tool use. To support this paradigm across a 256K context, we develop an end-to-end, high-efficiency open training recipe: Architecture & System Co-design: interleaved gated sliding-window and full attention",
+      "points": null,
+      "score": 8,
+      "reason": "ZGCM-1 modeli, açık kaynak olarak geliştirilmiş ve etkili bir temel modeli temsil ediyor.",
+      "category": "Açık Kaynak",
+      "tldr": "ZGCM-1, tamamen açık kaynaklı bir 7 milyar parametreli temel modeldir ve matematiksel akıl yürütme ve aracı arama görevlerinde öne çıkar. Modelin eğitimi, parametre kapasitesini aşmak için planlı iç düşünce ve aktif dış araç kullanımını birleştirerek, olağanüstü veri ve sistem verimliliği ile gerçekleştirilmiştir.",
+      "whyItMatters": "ZGCM-1, büyük modellerle rekabet ederken açık kaynak olması, yazılım geliştiriciler ve teknik liderler için iş akışlarını hızlandırabilecek ve kaynak tasarrufu yapabilecek yeni fırsatlar sunar.",
+      "tags": [
+        "açık kaynak",
+        "temel model",
+        "matematik",
+        "aracı arama"
+      ]
+    },
+    {
+      "id": "e8608e40b722",
+      "title": "IBM releases SOTA Granite Time Series PatchTST-FM-r2 model with commercial-friendly license",
+      "url": "https://huggingface.co/blog/ibm-research/ibm-releases-sota-granite-time-series",
+      "source": "Hugging Face Blog",
+      "publishedAt": "2026-09-09T15:36:24.000Z",
+      "snippet": "",
+      "points": null,
+      "score": 8,
+      "reason": "IBM'in yeni modelinin ticari bir lisansla yayınlanması, sektördeki uygulamalar için dikkate değer bir gelişme.",
+      "category": "Model & Sürümler",
+      "tldr": "IBM, Granite Time Series PatchTST-FM-r2 modelini, ticari kullanıma uygun bir lisansla piyasaya sürdü. Bu model, zaman serisi (time series) verilerini daha etkin ve hassas bir şekilde analiz edebilme kapasitesine sahip, son teknoloji bir çözüm sunuyor.",
+      "whyItMatters": "Ticari lisansla sunulan bu model, yazılım geliştiricilerin ve teknik ekiplerin zaman serisi verilerini daha iyi analiz ederek iş süreçlerinde rekabet avantajı elde etmelerine olanak tanır.",
+      "tags": [
+        "zaman serisi",
+        "modeller",
+        "IBM",
+        "ticari lisans"
+      ]
+    }
+  ],
+  "stats": {
+    "collected": 1107,
+    "fresh": 97,
+    "scored": 97,
+    "published": 12
+  },
+  "usage": {
+    "inputTokens": 26217,
+    "outputTokens": 6142,
+    "estimatedCostUsd": 0.0642
+  }
+}
