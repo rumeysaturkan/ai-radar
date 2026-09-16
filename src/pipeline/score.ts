@@ -1,6 +1,7 @@
 import type { Config } from "../config.js";
 import { structured } from "../llm.js";
 import type { Candidate, ScoredCandidate } from "../types.js";
+import { outputLanguageRule } from "../i18n.js";
 import { isoWeekId } from "../util/date.js";
 import { mapWithConcurrency } from "../util/pool.js";
 import { shuffle } from "../util/shuffle.js";
@@ -55,25 +56,26 @@ function clamp(value: number, min: number, max: number): number {
  */
 function systemPrompt(config: Config): string {
   return [
-    `Sen "${config.title}" adlı haftalık bültenin editörüsün.`,
-    `Okuyucu kitlen: ${config.audience}.`,
-    "İlgilendiğin konular:",
+    `You are the editor of a weekly briefing called "${config.title}".`,
+    `Your readers: ${config.audience}.`,
+    "Topics you care about:",
     ...config.topics.map((topic) => `- ${topic}`),
     "",
-    "Sana bir aday haber listesi verilecek. Her biri için 0-10 arası puan ver:",
-    "- 9-10: sektörü gerçekten değiştiren, herkesin bilmesi gereken gelişme",
-    '     örn. "X dili artık bellek güvenliğini derleyicide zorunlu kılıyor"',
-    "- 7-8: okuyucunun işine doğrudan yarayacak somut haber veya araç",
-    '     örn. "Y kütüphanesi 3.0 çıktı, eski API kaldırıldı"',
-    "- 4-6: ilginç ama kritik değil",
-    '     örn. "Z şirketi bir araştırma ekibi kurdu"',
-    "- 0-3: reklam, spekülasyon, içerik pazarlaması, tekrar, alakasız",
-    '     örn. "2026\'nın en iyi 10 aracı"',
+    "You will be given candidate stories. Score each one from 0 to 10:",
+    "- 9-10: genuinely shifts the field; everyone in this audience should know",
+    '     e.g. "Language X now enforces memory safety in the compiler"',
+    "- 7-8: a concrete tool, release or change the reader can act on",
+    '     e.g. "Library Y 3.0 ships and the old API is gone"',
+    "- 4-6: interesting but not important",
+    '     e.g. "Company Z formed a research team"',
+    "- 0-3: advertising, speculation, content marketing, a repeat, irrelevant",
+    '     e.g. "The 10 best tools of 2026"',
     "",
-    "Kurallar: Başlıktaki abartıya değil somut olguya bak. 'X şirketi bu alana",
-    "yatırım yapacak' türü içi boş haberlere düşük puan ver. Bir şeyin kim",
-    "tarafından yayınlandığını bilmiyorsun; yalnızca içeriğe göre karar ver.",
-    "Gerekçeyi tek cümlede, Türkçe yaz.",
+    "Judge the substance, not the headline. Announcements of intent such as",
+    '"Company X will invest in this area" score low. You are not told who',
+    "published an item; decide on the content alone.",
+    "Give the reason in one sentence.",
+    outputLanguageRule(config.language),
   ].join("\n");
 }
 

@@ -1,6 +1,9 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { describeProblems, SAFE_ID, validateConfig } from "./config-validate.js";
+import type { ReasoningEffort } from "./llm.js";
+import { warn } from "./util/log.js";
 
 export type Feed = {
   name: string;
@@ -31,8 +34,9 @@ export type Config = {
    * GPT-5 ailesi varsayilan olarak gorunmez akil yurutme token'i uretir ve
    * bunlar cikti olarak faturalanir. Bu hattaki isler derin akil yurutme
    * gerektirmiyor; varsayilanla birakmak sayi maliyetini 7 katina cikariyor.
+   * Desteklenen degerler modele gore degisir, "low" hepsinde calisir.
    */
-  reasoningEffort: "minimal" | "low" | "medium" | "high";
+  reasoningEffort: ReasoningEffort;
   feeds: Feed[];
   hackerNews: { enabled: boolean; minPoints: number; queries: string[] };
   webSearch: { enabled: boolean; queries: string[] };
@@ -58,7 +62,7 @@ const defaults: Omit<Config, "id" | "name"> = {
   webSearch: { enabled: false, queries: [] },
 };
 
-const presetsDir = fileURLToPath(new URL("../presets/", import.meta.url));
+export const presetsDir = fileURLToPath(new URL("../presets/", import.meta.url));
 
 export type PresetSummary = {
   id: string;
@@ -67,7 +71,7 @@ export type PresetSummary = {
   feedCount: number;
 };
 
-function presetPath(id: string): string {
+export function presetPath(id: string): string {
   return path.join(presetsDir, `${id}.json`);
 }
 
@@ -76,7 +80,7 @@ function presetPath(id: string): string {
  * ayiricisi veya ".." icermemeli.
  */
 function assertSafeId(id: string): void {
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(id)) {
+  if (!SAFE_ID.test(id)) {
     throw new Error(
       `Geçersiz alan kimliği: "${id}". Yalnızca küçük harf, rakam ve tire kullanılabilir.`,
     );
@@ -134,7 +138,28 @@ export async function loadConfig(id: string): Promise<Config> {
     );
   }
 
-  const parsed = JSON.parse(raw) as Partial<Config>;
+  let parsedJson: unknown;
+
+  try {
+    parsedJson = JSON.parse(raw);
+  } catch (error) {
+    throw new Error(
+      `presets/${id}.json okunamadı (geçersiz JSON): ` +
+        (error instanceof Error ? error.message : String(error)),
+    );
+  }
+
+  const { problems, warnings } = validateConfig(parsedJson, id);
+
+  if (problems.length > 0) {
+    throw new Error(describeProblems(id, problems));
+  }
+
+  for (const warning of warnings) {
+    warn(warning);
+  }
+
+  const parsed = parsedJson as Partial<Config>;
 
   // Preset dosyasinda sadece degistirilmek istenen alan yazilabilsin.
   return {

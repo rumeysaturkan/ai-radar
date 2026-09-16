@@ -1,4 +1,5 @@
 import type { Config } from "../config.js";
+import { outputLanguageRule } from "../i18n.js";
 import { structured } from "../llm.js";
 import type { Issue, Item } from "../types.js";
 
@@ -39,7 +40,7 @@ export async function composeIssue(
   const previousBlock = previous
     ? [
         "",
-        `Geçen sayıda (${previous.id}) şunlar vardı:`,
+        `The previous issue (${previous.id}) carried:`,
         ...previous.items.map((item) => `- ${item.title}`),
       ].join("\n")
     : "";
@@ -47,20 +48,22 @@ export async function composeIssue(
   const composition = await structured<Composition>({
     model: config.models.writer,
     system: [
-      `Sen "${config.title}" haftalık bülteninin baş editörüsün.`,
-      `Okuyucu kitlen: ${config.audience}.`,
+      `You are the chief editor of the weekly briefing "${config.title}".`,
+      `Your readers: ${config.audience}.`,
       "",
-      "Bu haftanın haberlerine bakıp şunları üret:",
-      "- intro: 2-3 cümlelik giriş. Haftanın ana hattını söyle; haberleri tek",
-      "  tek sayma. Doğrudan konuya gir, 'Bu hafta X dünyasında' türü klişe",
-      "  açılış yapma. Geçen sayıya göre bir devamlılık varsa belirt.",
-      "- highlightIndex: Haftanın öne çıkan haberinin index'i.",
-      "- categoryOrder: Kategorileri okuyucu için en önemliden en az önemliye",
-      "  sırala. Sadece listede geçen kategorileri yaz.",
+      "Look at this week's stories and produce:",
+      "- intro: 2-3 sentences naming the week's through-line. Do not list the",
+      "  stories one by one. Open on the substance, not on a formula like",
+      '  "this week in X". If something continues from the previous issue,',
+      "  say so.",
+      "- highlightIndex: the index of the week's standout story.",
+      "- categoryOrder: the categories ordered from most to least important",
+      "  for this reader. Only include categories present in the list.",
       "",
-      "Türkçe yaz, sade ve doğrudan bir dille.",
+      "Write plainly and directly.",
+      outputLanguageRule(config.language),
     ].join("\n"),
-    user: `Bu haftanın haberleri:\n${JSON.stringify(payload, null, 1)}${previousBlock}`,
+    user: `This week's stories:\n${JSON.stringify(payload, null, 1)}${previousBlock}`,
     schemaName: "composition",
     schema,
     stage: "compose",

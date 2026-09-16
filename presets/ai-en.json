@@ -1,26 +1,26 @@
 {
-  "id": "ai",
-  "name": "Yapay Zeka (TR)",
+  "id": "ai-en",
+  "name": "Artificial Intelligence",
   "title": "AI Radar",
-  "tagline": "Haftalık yapay zeka bülteni",
-  "language": "tr",
+  "tagline": "A weekly AI briefing",
+  "language": "en",
   "siteUrl": "",
-  "audience": "Yazılım geliştiriciler ve teknik ekip liderleri",
+  "audience": "Software engineers and technical team leads",
   "topics": [
-    "LLM ve temel model sürümleri",
-    "AI agent mimarileri ve tool-calling",
-    "açık kaynak modeller ve araçlar",
-    "geliştirici araçları ve API değişiklikleri",
-    "önemli araştırma makaleleri",
-    "sektörel gelişmeler ve regülasyon"
+    "LLM and foundation model releases",
+    "AI agent architectures and tool calling",
+    "open-source models and tooling",
+    "developer tools and API changes",
+    "research papers that matter in practice",
+    "industry moves and regulation"
   ],
   "categories": [
-    "Model & Sürümler",
-    "Agent & Araçlar",
-    "Araştırma",
-    "Açık Kaynak",
-    "Geliştirici Araçları",
-    "Sektör & Regülasyon"
+    "Models & Releases",
+    "Agents & Tooling",
+    "Research",
+    "Open Source",
+    "Developer Tools",
+    "Industry & Regulation"
   ],
   "windowDays": 7,
   "candidateLimit": 160,

@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Config } from "../config.js";
 import type { Issue, Item } from "../types.js";
+import { t, uiLang } from "../i18n.js";
 import { formatDate } from "../util/date.js";
 import { domainOf, isHttpUrl, safeHref } from "../util/url.js";
 
@@ -187,7 +188,7 @@ function itemMeta(item: Item, language: string): string {
   parts.push(escapeHtml(domainOf(item.url)));
 
   if (item.points !== null) {
-    parts.push(`${item.points} puan`);
+    parts.push(`${item.points} ${t(language, "html.points")}`);
   }
 
   return parts.join(" &middot; ");
@@ -210,18 +211,18 @@ function renderItem(item: Item, language: string): string {
   <h3>${titleLink(item)}</h3>
   <div class="meta">${itemMeta(item, language)}</div>
   <p class="tldr">${escapeHtml(item.tldr)}</p>
-  <p class="matters"><strong>Neden önemli:</strong> ${escapeHtml(item.whyItMatters)}</p>
+  <p class="matters"><strong>${t(language, "html.whyItMatters")}</strong> ${escapeHtml(item.whyItMatters)}</p>
   ${renderTags(item)}
 </article>`;
 }
 
 function renderHighlight(item: Item, language: string): string {
   return `<section class="highlight">
-  <div class="label">Haftanın öne çıkanı</div>
+  <div class="label">${t(language, "html.highlight")}</div>
   <h2>${titleLink(item, ' style="text-decoration:none"')}</h2>
   <div class="meta">${itemMeta(item, language)}</div>
   <p class="tldr">${escapeHtml(item.tldr)}</p>
-  <p class="matters"><strong>Neden önemli:</strong> ${escapeHtml(item.whyItMatters)}</p>
+  <p class="matters"><strong>${t(language, "html.whyItMatters")}</strong> ${escapeHtml(item.whyItMatters)}</p>
   ${renderTags(item)}
 </section>`;
 }
@@ -253,6 +254,10 @@ function renderCostBreakdown(issue: Issue): string {
   );
 
   return `<p class="cost">${parts.join(" &middot; ")}</p>`;
+}
+
+function issueTitle(config: Config, issue: Issue): string {
+  return `${config.title} — ${t(config.language, "html.issue")} ${issue.number}`;
 }
 
 export function renderIssueHtml(config: Config, issue: Issue): string {
@@ -290,29 +295,32 @@ export function renderIssueHtml(config: Config, issue: Issue): string {
   const body = [
     masthead(config, "index.html"),
     `<div class="issue-meta">
-      <span class="issue-no">SAYI ${issue.number} &middot; ${escapeHtml(issue.id)}</span>
+      <span class="issue-no">${t(config.language, "html.issue")} ${issue.number} &middot; ${escapeHtml(issue.id)}</span>
       <span>${escapeHtml(period)}</span>
-      <span>${issue.items.length} haber</span>
+      <span>${issue.items.length} ${t(config.language, "html.itemCount")}</span>
     </div>`,
     `<p class="lede">${escapeHtml(issue.intro)}</p>`,
     highlight ? renderHighlight(highlight, config.language) : "",
     sections.join("\n"),
     `<footer class="colophon">
       <div class="stats">
-        <div class="stat"><strong>${issue.stats.collected}</strong><span>aday tarandı</span></div>
-        <div class="stat"><strong>${issue.stats.fresh}</strong><span>yeni içerik</span></div>
-        <div class="stat"><strong>${issue.stats.published}</strong><span>bültene girdi</span></div>
-        <div class="stat"><strong>$${issue.usage.estimatedCostUsd.toFixed(3)}</strong><span>üretim maliyeti</span></div>
+        <div class="stat"><strong>${issue.stats.collected}</strong><span>${t(config.language, "html.scanned")}</span></div>
+        <div class="stat"><strong>${issue.stats.fresh}</strong><span>${t(config.language, "html.fresh")}</span></div>
+        <div class="stat"><strong>${issue.stats.published}</strong><span>${t(config.language, "html.published")}</span></div>
+        <div class="stat"><strong>$${issue.usage.estimatedCostUsd.toFixed(3)}</strong><span>${t(config.language, "html.cost")}</span></div>
       </div>
       ${renderCostBreakdown(issue)}
-      <p>${escapeHtml(config.title)} tarafından ${escapeHtml(
-        formatDate(issue.generatedAt, config.language),
-      )} tarihinde otomatik derlendi.
-      <a href="index.html">Tüm sayılar &rarr;</a></p>
+      <p>${escapeHtml(
+        t(config.language, "html.compiledBy", {
+          title: config.title,
+          date: formatDate(issue.generatedAt, config.language),
+        }),
+      )}
+      <a href="index.html">${t(config.language, "html.allIssues")} &rarr;</a></p>
     </footer>`,
   ].join("\n");
 
-  return page(`${config.title} — Sayı ${issue.number}`, body, config.language);
+  return page(issueTitle(config, issue), body, config.language);
 }
 
 export function renderIndexHtml(
@@ -329,7 +337,7 @@ export function renderIndexHtml(
       const firstSentence = issue.intro.split(/(?<=[.!?])\s/)[0] ?? issue.id;
 
       return `<a class="archive-row" href="${escapeHtml(issue.id)}.html">
-  <div class="label">Sayı ${issue.number} &middot; ${escapeHtml(
+  <div class="label">${t(config.language, "html.issue")} ${issue.number} &middot; ${escapeHtml(
     formatDate(issue.periodEnd, config.language),
   )}</div>
   <h3>${escapeHtml(firstSentence)}</h3>
@@ -342,10 +350,10 @@ export function renderIndexHtml(
     masthead(config, "index.html"),
     `<p class="lede">${escapeHtml(
       config.tagline,
-    )}. Her sayı otomatik derleniyor: kaynaklar taranır, tekrarlar elenir, kalanlar puanlanır ve en iyileri buraya düşer.</p>`,
-    `<h2 class="section">Arşiv</h2>`,
-    rows || `<p>Henüz sayı yok.</p>`,
-    `<p class="lede"><a href="../index.html">← Tüm alanlar</a></p>`,
+    )}. ${t(config.language, "index.lede")}</p>`,
+    `<h2 class="section">${t(config.language, "html.archive")}</h2>`,
+    rows || `<p>${t(config.language, "html.noIssues")}</p>`,
+    `<p class="lede"><a href="../index.html">← ${t(config.language, "hub.domains")}</a></p>`,
   ].join("\n");
 
   return page(`${config.title} — Arşiv`, body, config.language);
@@ -372,10 +380,10 @@ export function renderHubHtml(
     .map((entry) => {
       const inner = `  <div class="label">${
         entry.latest
-          ? `Sayı ${entry.latest.number} &middot; ${escapeHtml(
+          ? `${t(language, "html.issue")} ${entry.latest.number} &middot; ${escapeHtml(
               formatDate(entry.latest.periodEnd, language),
-            )} &middot; ${entry.issueCount} sayı`
-          : `Henüz sayı yok &middot; npm start ${escapeHtml(entry.id)}`
+            )} &middot; ${entry.issueCount} ${t(language, "hub.issueCount")}`
+          : `${t(language, "hub.pending")} &middot; npm start ${escapeHtml(entry.id)}`
       }</div>
   <h3>${escapeHtml(entry.name)}</h3>
   <p>${escapeHtml(entry.tagline)}</p>`;
@@ -389,20 +397,20 @@ export function renderHubHtml(
 
   const body = [
     `<header class="masthead">
-  <a class="wordmark" href="index.html">Radar<span class="dot">.</span></a>
-  <div class="tagline">Haftalık bültenler</div>
+  <a class="wordmark" href="index.html">${t(language, "hub.title")}<span class="dot">.</span></a>
+  <div class="tagline">${t(language, "hub.tagline")}</div>
 </header>`,
-    `<p class="lede">Her alan kendi kaynaklarını tarar, tekrarları eler ve kalanları puanlar. Bir alanı seçip arşivine göz at.</p>`,
-    `<h2 class="section">Alanlar</h2>`,
-    rows || `<p>Henüz alan yok.</p>`,
+    `<p class="lede">${t(language, "hub.lede")}</p>`,
+    `<h2 class="section">${t(language, "hub.domains")}</h2>`,
+    rows || `<p>${t(language, "hub.noDomains")}</p>`,
   ].join("\n");
 
-  return page("Radar — Alanlar", body, language);
+  return page(`${t(language, "hub.title")} — ${t(language, "hub.domains")}`, body, language);
 }
 
 export function renderMarkdown(config: Config, issue: Issue): string {
   const lines: string[] = [
-    `# ${config.title} — Sayı ${issue.number}`,
+    `# ${issueTitle(config, issue)}`,
     "",
     `_${formatDate(issue.periodStart, config.language)} – ${formatDate(
       issue.periodEnd,
@@ -417,13 +425,13 @@ export function renderMarkdown(config: Config, issue: Issue): string {
 
   if (highlight) {
     lines.push(
-      "## Haftanın öne çıkanı",
+      `## ${t(config.language, "md.highlight")}`,
       "",
       `${markdownLink(highlight)} — ${highlight.source}`,
       "",
       highlight.tldr,
       "",
-      `> **Neden önemli:** ${highlight.whyItMatters}`,
+      `> **${t(config.language, "md.whyItMatters")}** ${highlight.whyItMatters}`,
       "",
     );
   }
@@ -445,7 +453,7 @@ export function renderMarkdown(config: Config, issue: Issue): string {
         "",
         item.tldr,
         "",
-        `> **Neden önemli:** ${item.whyItMatters}`,
+        `> **${t(config.language, "md.whyItMatters")}** ${item.whyItMatters}`,
         "",
       );
     }
@@ -454,7 +462,11 @@ export function renderMarkdown(config: Config, issue: Issue): string {
   lines.push(
     "---",
     "",
-    `${issue.stats.collected} aday tarandı, ${issue.stats.published} haber seçildi. ${config.title} ile otomatik derlendi.`,
+    t(config.language, "md.footer", {
+      collected: issue.stats.collected,
+      published: issue.stats.published,
+      title: config.title,
+    }),
   );
 
   return lines.join("\n");
@@ -473,7 +485,7 @@ export function renderFeed(
     .slice(0, 20)
     .map(
       (issue) => `  <item>
-    <title>${escapeHtml(`${config.title} — Sayı ${issue.number}`)}</title>
+    <title>${escapeHtml(issueTitle(config, issue))}</title>
     <link>${escapeHtml(`${base}/${issue.id}.html`)}</link>
     <guid isPermaLink="false">${escapeHtml(issue.id)}</guid>
     <pubDate>${new Date(issue.generatedAt).toUTCString()}</pubDate>

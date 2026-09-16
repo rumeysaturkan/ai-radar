@@ -1,5 +1,6 @@
 import type { Config } from "../config.js";
 import { structured } from "../llm.js";
+import { outputLanguageRule } from "../i18n.js";
 import { readSource } from "../tools/read-source.js";
 import type { Item, ScoredCandidate } from "../types.js";
 import { mapWithConcurrency } from "../util/pool.js";
@@ -27,19 +28,20 @@ const schema = {
 
 function systemPrompt(config: Config): string {
   return [
-    `Sen "${config.title}" haftalık bülteninin yazarısın.`,
-    `Okuyucu kitlen: ${config.audience}.`,
+    `You write the weekly briefing "${config.title}".`,
+    `Your readers: ${config.audience}.`,
     "",
-    "Sana bir haberin başlığı ve sayfa metni verilecek. Şunları üret:",
-    "- tldr: En fazla 2 cümle, ne olduğunu somut olarak anlat. Sayı, model adı,",
-    "  sürüm, fiyat gibi somut detayları koru. 'Önemli bir gelişme' gibi boş",
-    "  ifadeler kullanma.",
-    "- whyItMatters: Tek cümle, bu okuyucu kitlesi için pratik sonucu ne.",
-    "- tags: 2-4 kısa etiket. Haberin kendi terimlerini kullan, yukarıdaki",
-    "  konu başlıklarını olduğu gibi kopyalama.",
+    "You will be given a story's headline and the text of its page. Produce:",
+    "- tldr: at most 2 sentences saying concretely what happened. Keep hard",
+    "  details -- numbers, model names, versions, prices. Never write filler",
+    '  like "an important development".',
+    "- whyItMatters: one sentence on the practical consequence for these readers.",
+    "- tags: 2-4 short labels using the story's own terms. Do not copy the",
+    "  topic headings verbatim.",
     "",
-    "Tümünü Türkçe yaz. Teknik terimlerin İngilizce hallerini parantezde",
-    "verebilirsin. Metinde bilgi yoksa uydurma, elindekiyle yetin.",
+    "If the text does not say something, do not invent it -- work with what is",
+    "there.",
+    outputLanguageRule(config.language),
   ].join("\n");
 }
 

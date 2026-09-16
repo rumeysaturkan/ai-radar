@@ -152,3 +152,33 @@ describe("renderIndexHtml", () => {
     assert.match(html, /<html lang="tr">/);
   });
 });
+
+describe("language switching", () => {
+  it("renders the chrome in the configured language", () => {
+    // config.language used to control only the date format and <html lang>;
+    // every visible label was hardcoded Turkish.
+    const items = [makeItem()];
+    const tr = renderIssueHtml(makeConfig({ language: "tr" }), makeIssue(items));
+    const en = renderIssueHtml(
+      makeConfig({ language: "en", categories: ["Birinci", "İkinci"] }),
+      makeIssue(items),
+    );
+
+    assert.match(tr, /Neden önemli:/);
+    assert.match(tr, /Haftanın öne çıkanı/);
+
+    assert.match(en, /Why it matters:/);
+    assert.match(en, /This week's pick/);
+    assert.ok(!en.includes("Neden önemli"), "Turkish chrome leaked into the English page");
+  });
+
+  it("switches the markdown chrome too", () => {
+    const items = [makeItem()];
+
+    assert.match(renderMarkdown(makeConfig({ language: "tr" }), makeIssue(items)), /Neden önemli/);
+    assert.match(
+      renderMarkdown(makeConfig({ language: "en" }), makeIssue(items)),
+      /Why it matters/,
+    );
+  });
+});
