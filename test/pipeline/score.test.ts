@@ -1,0 +1,202 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { scoreCandidates, type ScoreDeps } from "../../src/pipeline/score.js";
+import type { Candidate } from "../../src/types.js";
+import { makeConfig } from "../fixtures/issue.js";
+
+function candidate(id: string, title = `title ${id}`): Candidate {
+  return {
+    id,
+    title,
+    url: `https://example.com/${id}`,
+    source: "Example",
+    publishedAt: "2026-09-15T00:00:00.000Z",
+    snippet: "snippet",
+    points: null,
+  };
+}
+
+type Rating = {
+  index: number;
+  impact: number;
+  novelty: number;
+  category: string;
+  reason: string;
+};
+
+type Payload = { index: number; title: string; snippet: string };
+
+function parsePayload(user: string): Payload[] {
+  return JSON.parse(user.replace(/^Adaylar:\n/, "")) as Payload[];
+}
+
+/**
+ * Stands in for the model. Records what it was asked and returns what we say,
+ * so the branches where bugs actually live are testable without a network
+ * call. The cast is needed because `structured` is generic over its result.
+ */
+function fakeStructured(
+  handler: (request: { system: string; user: string }) => unknown,
+): ScoreDeps["structured"] {
+  return (async (request: { system: string; user: string }) =>
+    handler(request)) as ScoreDeps["structured"];
+}
+
+function fakeModel(reply: (payload: Payload[]) => Rating[]): {
+  deps: ScoreDeps;
+  calls: { system: string; user: string }[];
+} {
+  const calls: { system: string; user: string }[] = [];
+
+  return {
+    calls,
+    deps: {
+      structured: fakeStructured((request) => {
+        calls.push(request);
+        return { ratings: reply(parsePayload(request.user)) };
+      }),
+    },
+  };
+}
+
+const config = makeConfig();
+
+describe("scoreCandidates", () => {
+  it("never tells the model which source an item came from", async () => {
+    // Otherwise the model judges the brand before it judges the item, which is
+    // how one publisher's blog came to dominate a real issue.
+    const { deps, calls } = fakeModel((payload) =>
+      payload.map((p) => ({
+        index: p.index,
+        impact: 4,
+        novelty: 4,
+        category: "Birinci",
+        reason: "",
+      })),
+    );
+
+    await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
+
+    assert.equal(calls.length, 1);
+    assert.ok(!calls[0]!.user.includes("Example"), "payload leaked the source");
+    assert.ok(!calls[0]!.user.includes("source"));
+  });
+
+  it("adds the two axes into a 0-10 score", async () => {
+    const { deps } = fakeModel((payload) =>
+      payload.map((p) => ({
+        index: p.index,
+        impact: 5,
+        novelty: 3,
+        category: "Birinci",
+        reason: "why",
+      })),
+    );
+
+    const scored = await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
+
+    assert.equal(scored[0]!.score, 8);
+    assert.equal(scored[0]!.impact, 5);
+    assert.equal(scored[0]!.novelty, 3);
+  });
+
+  it("clamps axes the model pushes out of range", async () => {
+    const { deps } = fakeModel((payload) =>
+      payload.map((p) => ({
+        index: p.index,
+        impact: 9,
+        novelty: -2,
+        category: "Birinci",
+        reason: "",
+      })),
+    );
+
+    const scored = await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
+
+    assert.equal(scored[0]!.impact, 5);
+    assert.equal(scored[0]!.novelty, 0);
+    assert.equal(scored[0]!.score, 5);
+  });
+
+  it("ignores a rating pointing at an index that does not exist", async () => {
+    const { deps } = fakeModel(() => [
+      { index: 0, impact: 4, novelty: 4, category: "Birinci", reason: "" },
+      { index: 99, impact: 5, novelty: 5, category: "Birinci", reason: "" },
+    ]);
+
+    const scored = await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
+
+    assert.equal(scored.length, 1);
+  });
+
+  it("drops a batch that fails rather than the whole run", async () => {
+    let call = 0;
+    const deps: ScoreDeps = {
+      structured: fakeStructured((request) => {
+        call += 1;
+
+        if (call === 1) {
+          throw new Error("rate limited");
+        }
+
+        return {
+          ratings: parsePayload(request.user).map((p) => ({
+            index: p.index,
+            impact: 4,
+            novelty: 4,
+            category: "Birinci",
+            reason: "",
+          })),
+        };
+      }),
+    };
+
+    // 45 candidates spans two batches; one fails, the other should survive.
+    const candidates = Array.from({ length: 45 }, (_, i) => candidate(`c${i}`));
+    const scored = await scoreCandidates(config, candidates, { seed: "s" }, deps);
+
+    assert.ok(scored.length > 0 && scored.length < 45);
+  });
+
+  it("returns candidates sorted by score", async () => {
+    const { deps } = fakeModel((payload) =>
+      payload.map((p) => ({
+        index: p.index,
+        impact: p.title.includes("good") ? 5 : 1,
+        novelty: p.title.includes("good") ? 5 : 1,
+        category: "Birinci",
+        reason: "",
+      })),
+    );
+
+    const scored = await scoreCandidates(
+      config,
+      [candidate("a", "weak"), candidate("b", "good one"), candidate("c", "weak")],
+      { seed: "s" },
+      deps,
+    );
+
+    assert.equal(scored[0]!.score, 10);
+    assert.ok(scored.at(-1)!.score < 10);
+  });
+
+  it("gives the same result for the same seed", async () => {
+    const run = async () => {
+      const { deps } = fakeModel((payload) =>
+        payload.map((p) => ({
+          index: p.index,
+          impact: 4,
+          novelty: 4,
+          category: "Birinci",
+          reason: "",
+        })),
+      );
+      const candidates = Array.from({ length: 40 }, (_, i) => candidate(`c${i}`));
+      return (
+        await scoreCandidates(config, candidates, { seed: "2026-W38" }, deps)
+      ).map((c) => c.id);
+    };
+
+    assert.deepEqual(await run(), await run());
+  });
+});

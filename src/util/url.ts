@@ -76,3 +76,37 @@ export function domainOf(rawUrl: string): string {
     return rawUrl;
   }
 }
+
+/**
+ * Tam kamu son ek listesi yerine yaygın çok parçalı uzantıların küçük bir
+ * tablosu. Çeşitlilik sınırı için yeterli: amaç kesin tescil sınırını
+ * bulmak değil, aynı yayıncıyı tek kova altında toplamak.
+ */
+const MULTI_PART_TLDS = new Set([
+  "co.uk", "org.uk", "ac.uk", "gov.uk",
+  "com.tr", "org.tr", "net.tr", "gov.tr", "edu.tr",
+  "co.jp", "or.jp", "ne.jp",
+  "com.au", "net.au", "org.au",
+  "com.br", "com.cn", "com.mx", "com.sg", "com.hk",
+  "co.nz", "co.in", "co.za", "co.kr",
+]);
+
+/**
+ * Yayıncı kimliği: finance.yahoo.com ve sg.finance.yahoo.com aynı kovaya
+ * düşsün. Alt alan adı üzerinden bir çeşitlilik sınırı, tek yayıncının
+ * birden fazla alt alanla sınırı aşmasına izin verirdi.
+ */
+export function registrableDomain(rawUrl: string): string {
+  const host = domainOf(rawUrl);
+  const parts = host.split(".");
+
+  if (parts.length <= 2) {
+    return host;
+  }
+
+  const lastTwo = parts.slice(-2).join(".");
+
+  return MULTI_PART_TLDS.has(lastTwo)
+    ? parts.slice(-3).join(".")
+    : lastTwo;
+}

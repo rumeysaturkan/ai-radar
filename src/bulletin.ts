@@ -12,30 +12,14 @@ import {
   type HubEntry,
 } from "./pipeline/render.js";
 import { scoreCandidates } from "./pipeline/score.js";
+import { select } from "./pipeline/select.js";
 import { sourceStats } from "./pipeline/stats.js";
 import { resolvePreset } from "./preset.js";
 import { ensureKeys } from "./setup.js";
 import { listIssues, readSeen, saveIssue, writeSeen } from "./store.js";
-import type { Issue, ScoredCandidate } from "./types.js";
+import type { Issue } from "./types.js";
 import { daysAgo, isoWeekId } from "./util/date.js";
 import { banner, done, note, result, step, warn } from "./util/log.js";
-
-/** Bülteni boş bırakmamak için puan eşiği gerektiğinde gevşetilir. */
-const MIN_ITEMS = 5;
-
-function select(
-  scored: readonly ScoredCandidate[],
-  minScore: number,
-  shortlist: number,
-): ScoredCandidate[] {
-  const strong = scored.filter((item) => item.score >= minScore);
-
-  if (strong.length >= MIN_ITEMS) {
-    return strong.slice(0, shortlist);
-  }
-
-  return scored.slice(0, Math.min(shortlist, Math.max(MIN_ITEMS, strong.length)));
-}
 
 function openInBrowser(filePath: string): void {
   const command =
@@ -117,10 +101,16 @@ async function main(): Promise<void> {
 
   // 3 — Puanla
   step("İçerikler puanlanıyor...");
-  const scored = await scoreCandidates(config, deduped.fresh);
+  // Sayı kimliği puanlamadaki karıştırmanın tohumu: aynı hafta içindeki
+  // tekrar çalıştırmalar aynı sonucu versin.
+  const issueId = isoWeekId(new Date());
+  const scored = await scoreCandidates(config, deduped.fresh, { seed: issueId });
   done(`${scored.length} içerik değerlendirildi`);
 
-  const selected = select(scored, config.minScore, config.shortlist);
+  const selected = select(scored, {
+    minScore: config.minScore,
+    shortlist: config.shortlist,
+  });
 
   if (selected.length === 0) {
     warn("Eşiği geçen içerik çıkmadı.");
@@ -148,7 +138,6 @@ async function main(): Promise<void> {
 
   const now = new Date();
   const highlight = items[composition.highlightIndex] ?? items[0];
-  const issueId = isoWeekId(now);
 
   // Aynı hafta içinde ikinci kez çalıştırıldığında arşivde zaten bu hafta
   // var; numarayı artırmak sayıyı "Sayı 2" yapıp aynı dosyanın üzerine

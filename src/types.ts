@@ -12,9 +12,17 @@ export type Candidate = {
 };
 
 export type ScoredCandidate = Candidate & {
+  /** 0-10; impact + novelty toplamı. */
   score: number;
   reason: string;
   category: string;
+  /**
+   * Puanı oluşturan iki eksen, 0-5. Ayrı saklanıyor çünkü tek bir toplam
+   * puan, sıralamanın neden ayırt edemediğini görünmez kılıyor.
+   * Eski sayılarda bulunmaz.
+   */
+  impact?: number;
+  novelty?: number;
 };
 
 export type Item = ScoredCandidate & {
