@@ -1,11 +1,16 @@
 import { spawn } from "node:child_process";
 import { listPresets, loadConfig } from "./config.js";
-import { usageSoFar } from "./llm.js";
+import { unpricedModels, usageSoFar } from "./llm.js";
 import { collectCandidates } from "./pipeline/collect.js";
 import { composeIssue } from "./pipeline/compose.js";
 import { dedupe } from "./pipeline/dedupe.js";
 import { enrichItems } from "./pipeline/enrich.js";
-import { writeHub, writeOutputs, type HubEntry } from "./pipeline/render.js";
+import {
+  resolveSiteUrl,
+  writeHub,
+  writeOutputs,
+  type HubEntry,
+} from "./pipeline/render.js";
 import { scoreCandidates } from "./pipeline/score.js";
 import { resolvePreset } from "./preset.js";
 import { ensureKeys } from "./setup.js";
@@ -142,10 +147,16 @@ async function main(): Promise<void> {
 
   const now = new Date();
   const highlight = items[composition.highlightIndex] ?? items[0];
+  const issueId = isoWeekId(now);
+
+  // Aynı hafta içinde ikinci kez çalıştırıldığında arşivde zaten bu hafta
+  // var; numarayı artırmak sayıyı "Sayı 2" yapıp aynı dosyanın üzerine
+  // yazıyordu. Var olan sayının numarası korunur.
+  const existing = archive.find((entry) => entry.id === issueId);
 
   const issue: Issue = {
-    id: isoWeekId(now),
-    number: archive.length + 1,
+    id: issueId,
+    number: existing?.number ?? archive.length + 1,
     title: config.title,
     tagline: config.tagline,
     generatedAt: now.toISOString(),
@@ -184,11 +195,12 @@ async function main(): Promise<void> {
   await saveIssue(config.id, issue);
 
   const previousIssues = archive.filter((entry) => entry.id !== issue.id);
+  const siteUrl = resolveSiteUrl(config);
   const paths = await writeOutputs(
     config,
     issue,
     [issue, ...previousIssues],
-    config.siteUrl,
+    siteUrl,
   );
   const hubPath = await writeHub(await hubEntries(), config.language);
   done(`sayı ${issue.number} hazır`);
@@ -198,10 +210,29 @@ async function main(): Promise<void> {
   result("Markdown:", paths.markdown);
   result("Arşiv   :", paths.index);
   result("Alanlar :", hubPath);
+
+  if (paths.feed) {
+    result("RSS     :", paths.feed);
+  } else {
+    note(
+      `RSS akışı üretilmedi: presets/${config.id}.json içindeki "siteUrl" boş ` +
+        "(ya da RADAR_SITE_URL tanımla). Mutlak adres olmadan akış geçersiz olur.",
+    );
+  }
+
   result(
     "Maliyet :",
     `$${issue.usage.estimatedCostUsd.toFixed(3)} (${issue.usage.inputTokens} girdi / ${issue.usage.outputTokens} çıktı token)`,
   );
+
+  const unpriced = unpricedModels();
+
+  if (unpriced.length > 0) {
+    warn(
+      `Fiyatı bilinmeyen model: ${unpriced.join(", ")}. ` +
+        "Gösterilen maliyet eksik — src/llm.ts içindeki PRICING tablosuna ekle.",
+    );
+  }
   console.log("");
 
   openInBrowser(paths.html);

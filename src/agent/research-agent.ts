@@ -10,6 +10,15 @@ const client = new OpenAI();
 // Cap how much page text is fed back to the model to stay within token limits.
 const MAX_SOURCE_CHARS = 6000;
 
+const MODEL = "gpt-5.1";
+
+/**
+ * Bir ajan döngüsünün kaç adım atacağı baştan bilinmez — üretim hattında
+ * ajan yerine sabit bir hat kullanılmasının sebebi de bu. Döngünün sınırsız
+ * olması harcamayı da sınırsız yapardı.
+ */
+const MAX_TURNS = 12;
+
 const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
   {
     type: "function",
@@ -139,9 +148,9 @@ export async function runResearchAgent(query: string): Promise<string> {
     },
   ];
 
-  while (true) {
+  for (let turn = 0; turn < MAX_TURNS; turn += 1) {
     const response = await client.chat.completions.create({
-      model: "gpt-4o",
+      model: MODEL,
       messages,
       tools,
     });
@@ -181,4 +190,8 @@ export async function runResearchAgent(query: string): Promise<string> {
       });
     }
   }
+
+  throw new Error(
+    `Ajan ${MAX_TURNS} adımda sonuca varamadı. Soruyu daralt ya da MAX_TURNS'ü artır.`,
+  );
 }

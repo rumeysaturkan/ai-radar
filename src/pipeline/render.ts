@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Config } from "../config.js";
 import type { Issue, Item } from "../types.js";
 import { formatDate } from "../util/date.js";
-import { domainOf } from "../util/url.js";
+import { domainOf, isHttpUrl, safeHref } from "../util/url.js";
 
 const distDir = fileURLToPath(new URL("../../dist/", import.meta.url));
 
@@ -124,9 +124,9 @@ footer.colophon {
 }
 `;
 
-function page(title: string, body: string): string {
+function page(title: string, body: string, language: string): string {
   return `<!doctype html>
-<html lang="tr">
+<html lang="${escapeHtml(language)}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -147,6 +147,29 @@ function masthead(config: Config, href: string): string {
   <a class="wordmark" href="${href}">${escapeHtml(config.title)}<span class="dot">.</span></a>
   <div class="tagline">${escapeHtml(config.tagline)}</div>
 </header>`;
+}
+
+/**
+ * Başlığı bağlantıya çevirir; adres güvenli değilse bağlantı üretmeden düz
+ * metin döner. Besleme içeriği güvenilmez veri, ve kaynaklar otomatik
+ * keşfedilmeye başladığında bu sınır daha da genişliyor.
+ */
+function titleLink(item: Item, extraAttrs = ""): string {
+  const href = safeHref(item.url);
+  const title = escapeHtml(item.title);
+
+  return href
+    ? `<a href="${escapeHtml(href)}" target="_blank" rel="noopener"${extraAttrs}>${title}</a>`
+    : title;
+}
+
+/** Markdown karşılığı: aynı şema kontrolü, artı köşeli parantez temizliği. */
+function markdownLink(item: Item): string {
+  const href = safeHref(item.url);
+  // Başlıktaki köşeli parantez bağlantı metninden kaçar ve biçimi bozar.
+  const title = item.title.replace(/[[\]]/g, "");
+
+  return href ? `**[${title}](${href})**` : `**${title}**`;
 }
 
 function itemMeta(item: Item, language: string): string {
@@ -179,7 +202,7 @@ function renderTags(item: Item): string {
 
 function renderItem(item: Item, language: string): string {
   return `<article class="item">
-  <h3><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a></h3>
+  <h3>${titleLink(item)}</h3>
   <div class="meta">${itemMeta(item, language)}</div>
   <p class="tldr">${escapeHtml(item.tldr)}</p>
   <p class="matters"><strong>Neden önemli:</strong> ${escapeHtml(item.whyItMatters)}</p>
@@ -190,7 +213,7 @@ function renderItem(item: Item, language: string): string {
 function renderHighlight(item: Item, language: string): string {
   return `<section class="highlight">
   <div class="label">Haftanın öne çıkanı</div>
-  <h2><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener" style="text-decoration:none">${escapeHtml(item.title)}</a></h2>
+  <h2>${titleLink(item, ' style="text-decoration:none"')}</h2>
   <div class="meta">${itemMeta(item, language)}</div>
   <p class="tldr">${escapeHtml(item.tldr)}</p>
   <p class="matters"><strong>Neden önemli:</strong> ${escapeHtml(item.whyItMatters)}</p>
@@ -254,7 +277,7 @@ export function renderIssueHtml(config: Config, issue: Issue): string {
     </footer>`,
   ].join("\n");
 
-  return page(`${config.title} — Sayı ${issue.number}`, body);
+  return page(`${config.title} — Sayı ${issue.number}`, body, config.language);
 }
 
 export function renderIndexHtml(
@@ -290,7 +313,7 @@ export function renderIndexHtml(
     `<p class="lede"><a href="../index.html">← Tüm alanlar</a></p>`,
   ].join("\n");
 
-  return page(`${config.title} — Arşiv`, body);
+  return page(`${config.title} — Arşiv`, body, config.language);
 }
 
 /** Kapak sayfasinda bir alani temsil eden satir. */
@@ -339,7 +362,7 @@ export function renderHubHtml(
     rows || `<p>Henüz alan yok.</p>`,
   ].join("\n");
 
-  return page("Radar — Alanlar", body);
+  return page("Radar — Alanlar", body, language);
 }
 
 export function renderMarkdown(config: Config, issue: Issue): string {
@@ -361,7 +384,7 @@ export function renderMarkdown(config: Config, issue: Issue): string {
     lines.push(
       "## Haftanın öne çıkanı",
       "",
-      `**[${highlight.title}](${highlight.url})** — ${highlight.source}`,
+      `${markdownLink(highlight)} — ${highlight.source}`,
       "",
       highlight.tldr,
       "",
@@ -383,7 +406,7 @@ export function renderMarkdown(config: Config, issue: Issue): string {
 
     for (const item of bucket) {
       lines.push(
-        `**[${item.title}](${item.url})** — ${item.source}`,
+        `${markdownLink(item)} — ${item.source}`,
         "",
         item.tldr,
         "",
@@ -441,14 +464,25 @@ export type RenderedPaths = {
   html: string;
   markdown: string;
   index: string;
-  feed: string;
+  /** siteUrl tanımlı değilse akış üretilmez. */
+  feed: string | null;
 };
+
+/**
+ * RSS mutlak adres ister. siteUrl boşken üretilen akış hiçbir okuyucunun
+ * kabul etmeyeceği göreli bağlantılar içeriyordu; hiç akış olmaması
+ * bozuk bir akıştan iyidir.
+ */
+export function resolveSiteUrl(config: Config): string | null {
+  const candidate = (config.siteUrl || process.env.RADAR_SITE_URL || "").trim();
+  return isHttpUrl(candidate) ? candidate.replace(/\/+$/, "") : null;
+}
 
 export async function writeOutputs(
   config: Config,
   issue: Issue,
   allIssues: readonly Issue[],
-  siteUrl: string,
+  siteUrl: string | null,
 ): Promise<RenderedPaths> {
   const outDir = presetDistDir(config.id);
   await mkdir(outDir, { recursive: true });
@@ -456,12 +490,17 @@ export async function writeOutputs(
   const htmlPath = path.join(outDir, `${issue.id}.html`);
   const mdPath = path.join(outDir, `${issue.id}.md`);
   const indexPath = path.join(outDir, "index.html");
-  const feedPath = path.join(outDir, "feed.xml");
 
   await writeFile(htmlPath, renderIssueHtml(config, issue), "utf8");
   await writeFile(mdPath, renderMarkdown(config, issue), "utf8");
   await writeFile(indexPath, renderIndexHtml(config, allIssues), "utf8");
-  await writeFile(feedPath, renderFeed(config, allIssues, siteUrl), "utf8");
+
+  let feedPath: string | null = null;
+
+  if (siteUrl) {
+    feedPath = path.join(outDir, "feed.xml");
+    await writeFile(feedPath, renderFeed(config, allIssues, siteUrl), "utf8");
+  }
 
   return {
     html: htmlPath,

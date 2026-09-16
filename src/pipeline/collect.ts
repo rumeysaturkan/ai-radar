@@ -5,7 +5,7 @@ import type { Candidate } from "../types.js";
 import { daysAgo } from "../util/date.js";
 import { fetchJson } from "../util/http.js";
 import { mapWithConcurrency } from "../util/pool.js";
-import { canonicalUrl } from "../util/url.js";
+import { canonicalUrl, isHttpUrl } from "../util/url.js";
 import { hashUrl } from "../store.js";
 import { note, warn } from "../util/log.js";
 
@@ -24,7 +24,7 @@ function toCandidate(
 ): Candidate | null {
   const cleanTitle = title.replace(/\s+/g, " ").trim();
 
-  if (!cleanTitle || !url.startsWith("http")) {
+  if (!cleanTitle || !isHttpUrl(url)) {
     return null;
   }
 

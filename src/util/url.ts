@@ -12,6 +12,30 @@ const TRACKING_PARAMS = [
   "mc_eid",
 ];
 
+const SAFE_SCHEMES = new Set(["http:", "https:"]);
+
+/**
+ * Beslemeden gelen adresler güvenilmez veridir. `"http"` ile başlıyor mu
+ * kontrolü `httpx://` gibi şemaları da geçirir, bu yüzden şema gerçekten
+ * çözümlenerek kontrol edilir.
+ */
+export function isHttpUrl(rawUrl: string): boolean {
+  try {
+    return SAFE_SCHEMES.has(new URL(rawUrl).protocol);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * href'e konulabilecek bir adres ya da null döner. escapeHtml bir
+ * `javascript:` şemasının tıklandığında çalışmasını engellemez; bağlantıyı
+ * hiç üretmemek tek güvenli davranış.
+ */
+export function safeHref(rawUrl: string): string | null {
+  return isHttpUrl(rawUrl) ? rawUrl : null;
+}
+
 /**
  * Aynı içeriğin farklı adreslerini tek forma indirger; tekilleştirmenin
  * temeli budur.

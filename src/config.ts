@@ -45,7 +45,7 @@ const defaults: Omit<Config, "id" | "name"> = {
   maxPerSource: 12,
   shortlist: 12,
   minScore: 6,
-  models: { scorer: "gpt-4o-mini", writer: "gpt-4o" },
+  models: { scorer: "gpt-5-mini", writer: "gpt-5.1" },
   feeds: [],
   hackerNews: { enabled: false, minPoints: 100, queries: [] },
   webSearch: { enabled: false, queries: [] },
