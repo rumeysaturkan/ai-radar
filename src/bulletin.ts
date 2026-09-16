@@ -12,6 +12,7 @@ import {
   type HubEntry,
 } from "./pipeline/render.js";
 import { scoreCandidates } from "./pipeline/score.js";
+import { sourceStats } from "./pipeline/stats.js";
 import { resolvePreset } from "./preset.js";
 import { ensureKeys } from "./setup.js";
 import { listIssues, readSeen, saveIssue, writeSeen } from "./store.js";
@@ -176,6 +177,10 @@ async function main(): Promise<void> {
       published: items.length,
     },
     usage: usageSoFar(),
+    // Elenen adaylar da saklanır: puanlayıcıyı ölçmenin, "X neden girmedi?"
+    // sorusunu cevaplamanın ve kaynak verimliliğini görmenin tek yolu bu.
+    candidates: scored,
+    sources: sourceStats(collected.candidates, scored, items),
   };
 
   // 6 — Yayınla

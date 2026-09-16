@@ -30,6 +30,14 @@ export type IssueStats = {
   published: number;
 };
 
+/** Bir kaynağın o sayıdaki hunisi: kaç aday verdi, kaçı bültene girdi. */
+export type SourceStat = {
+  name: string;
+  scanned: number;
+  scored: number;
+  published: number;
+};
+
 export type Usage = {
   inputTokens: number;
   outputTokens: number;
@@ -50,4 +58,13 @@ export type Issue = {
   items: Item[];
   stats: IssueStats;
   usage: Usage;
+  /**
+   * Puanlanan adayların tamamı, elenenler dahil. Yalnızca yayınlananları
+   * saklamak "X neden girmedi?" sorusunu cevaplanamaz, puanlayıcıyı
+   * ölçülemez ve kaynak verimliliğini hesaplanamaz yapıyordu.
+   * Eski sayılarda bulunmaz.
+   */
+  candidates?: ScoredCandidate[];
+  /** Kaynak başına huni. Eski sayılarda bulunmaz. */
+  sources?: SourceStat[];
 };
