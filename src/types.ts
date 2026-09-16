@@ -12,17 +12,10 @@ export type Candidate = {
 };
 
 export type ScoredCandidate = Candidate & {
-  /** 0-10; impact + novelty toplamı. */
+  /** 0-10. */
   score: number;
   reason: string;
   category: string;
-  /**
-   * Puanı oluşturan iki eksen, 0-5. Ayrı saklanıyor çünkü tek bir toplam
-   * puan, sıralamanın neden ayırt edemediğini görünmez kılıyor.
-   * Eski sayılarda bulunmaz.
-   */
-  impact?: number;
-  novelty?: number;
 };
 
 export type Item = ScoredCandidate & {
@@ -46,10 +39,26 @@ export type SourceStat = {
   published: number;
 };
 
+export type StageUsage = {
+  stage: string;
+  model: string;
+  calls: number;
+  inputTokens: number;
+  outputTokens: number;
+  estimatedCostUsd: number;
+  priced: boolean;
+};
+
 export type Usage = {
   inputTokens: number;
   outputTokens: number;
   estimatedCostUsd: number;
+  /**
+   * Adım bazlı döküm. Projenin merkezi iddiası "ucuz model yüzlerce adaya,
+   * pahalı model son on ikiye"; tek bir toplam bunu göstermiyordu.
+   * Eski sayılarda bulunmaz.
+   */
+  stages?: StageUsage[];
 };
 
 export type Issue = {

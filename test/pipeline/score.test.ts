@@ -18,8 +18,7 @@ function candidate(id: string, title = `title ${id}`): Candidate {
 
 type Rating = {
   index: number;
-  impact: number;
-  novelty: number;
+  score: number;
   category: string;
   reason: string;
 };
@@ -68,8 +67,7 @@ describe("scoreCandidates", () => {
     const { deps, calls } = fakeModel((payload) =>
       payload.map((p) => ({
         index: p.index,
-        impact: 4,
-        novelty: 4,
+        score: 8,
         category: "Birinci",
         reason: "",
       })),
@@ -82,46 +80,34 @@ describe("scoreCandidates", () => {
     assert.ok(!calls[0]!.user.includes("source"));
   });
 
-  it("adds the two axes into a 0-10 score", async () => {
+  it("clamps a score the model pushes out of range", async () => {
+    // The schema guarantees an integer, not a range.
     const { deps } = fakeModel((payload) =>
       payload.map((p) => ({
         index: p.index,
-        impact: 5,
-        novelty: 3,
-        category: "Birinci",
-        reason: "why",
-      })),
-    );
-
-    const scored = await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
-
-    assert.equal(scored[0]!.score, 8);
-    assert.equal(scored[0]!.impact, 5);
-    assert.equal(scored[0]!.novelty, 3);
-  });
-
-  it("clamps axes the model pushes out of range", async () => {
-    const { deps } = fakeModel((payload) =>
-      payload.map((p) => ({
-        index: p.index,
-        impact: 9,
-        novelty: -2,
+        score: p.title.includes("high") ? 42 : -3,
         category: "Birinci",
         reason: "",
       })),
     );
 
-    const scored = await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
+    const scored = await scoreCandidates(
+      config,
+      [candidate("a", "high one"), candidate("b", "low one")],
+      { seed: "s" },
+      deps,
+    );
 
-    assert.equal(scored[0]!.impact, 5);
-    assert.equal(scored[0]!.novelty, 0);
-    assert.equal(scored[0]!.score, 5);
+    assert.deepEqual(
+      scored.map((s) => s.score).sort((x, y) => y - x),
+      [10, 0],
+    );
   });
 
   it("ignores a rating pointing at an index that does not exist", async () => {
     const { deps } = fakeModel(() => [
-      { index: 0, impact: 4, novelty: 4, category: "Birinci", reason: "" },
-      { index: 99, impact: 5, novelty: 5, category: "Birinci", reason: "" },
+      { index: 0, score: 8, category: "Birinci", reason: "" },
+      { index: 99, score: 10, category: "Birinci", reason: "" },
     ]);
 
     const scored = await scoreCandidates(config, [candidate("a")], { seed: "s" }, deps);
@@ -142,8 +128,7 @@ describe("scoreCandidates", () => {
         return {
           ratings: parsePayload(request.user).map((p) => ({
             index: p.index,
-            impact: 4,
-            novelty: 4,
+            score: 8,
             category: "Birinci",
             reason: "",
           })),
@@ -162,8 +147,7 @@ describe("scoreCandidates", () => {
     const { deps } = fakeModel((payload) =>
       payload.map((p) => ({
         index: p.index,
-        impact: p.title.includes("good") ? 5 : 1,
-        novelty: p.title.includes("good") ? 5 : 1,
+        score: p.title.includes("good") ? 10 : 2,
         category: "Birinci",
         reason: "",
       })),
@@ -185,8 +169,7 @@ describe("scoreCandidates", () => {
       const { deps } = fakeModel((payload) =>
         payload.map((p) => ({
           index: p.index,
-          impact: 4,
-          novelty: 4,
+          score: 8,
           category: "Birinci",
           reason: "",
         })),

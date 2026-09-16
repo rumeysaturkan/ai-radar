@@ -219,6 +219,14 @@ async function main(): Promise<void> {
     `$${issue.usage.estimatedCostUsd.toFixed(3)} (${issue.usage.inputTokens} girdi / ${issue.usage.outputTokens} çıktı token)`,
   );
 
+  for (const stage of issue.usage.stages ?? []) {
+    note(
+      `${stage.stage.padEnd(8)} ${stage.model.padEnd(12)} ` +
+        `$${stage.estimatedCostUsd.toFixed(4).padStart(8)}  ` +
+        `${stage.calls} çağrı, ${stage.inputTokens}/${stage.outputTokens} token`,
+    );
+  }
+
   const unpriced = unpricedModels();
 
   if (unpriced.length > 0) {

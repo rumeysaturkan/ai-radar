@@ -63,6 +63,8 @@ export async function composeIssue(
     user: `Bu haftanın haberleri:\n${JSON.stringify(payload, null, 1)}${previousBlock}`,
     schemaName: "composition",
     schema,
+    stage: "compose",
+    reasoningEffort: config.reasoningEffort,
   });
 
   const present = new Set(items.map((item) => item.category));

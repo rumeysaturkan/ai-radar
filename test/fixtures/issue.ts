@@ -18,6 +18,7 @@ export function makeConfig(overrides: Partial<Config> = {}): Config {
     shortlist: 12,
     minScore: 6,
     models: { scorer: "gpt-5-mini", writer: "gpt-5.1" },
+    reasoningEffort: "low",
     feeds: [],
     hackerNews: { enabled: false, minPoints: 80, queries: [] },
     webSearch: { enabled: false, queries: [] },

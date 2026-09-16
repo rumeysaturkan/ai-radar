@@ -27,6 +27,12 @@ export type Config = {
   shortlist: number;
   minScore: number;
   models: { scorer: string; writer: string };
+  /**
+   * GPT-5 ailesi varsayilan olarak gorunmez akil yurutme token'i uretir ve
+   * bunlar cikti olarak faturalanir. Bu hattaki isler derin akil yurutme
+   * gerektirmiyor; varsayilanla birakmak sayi maliyetini 7 katina cikariyor.
+   */
+  reasoningEffort: "minimal" | "low" | "medium" | "high";
   feeds: Feed[];
   hackerNews: { enabled: boolean; minPoints: number; queries: string[] };
   webSearch: { enabled: boolean; queries: string[] };
@@ -46,6 +52,7 @@ const defaults: Omit<Config, "id" | "name"> = {
   shortlist: 12,
   minScore: 6,
   models: { scorer: "gpt-5-mini", writer: "gpt-5.1" },
+  reasoningEffort: "low",
   feeds: [],
   hackerNews: { enabled: false, minPoints: 100, queries: [] },
   webSearch: { enabled: false, queries: [] },

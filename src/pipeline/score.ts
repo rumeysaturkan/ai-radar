@@ -10,8 +10,7 @@ const BATCH_SIZE = 30;
 
 type Rating = {
   index: number;
-  impact: number;
-  novelty: number;
+  score: number;
   category: string;
   reason: string;
 };
@@ -43,10 +42,16 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * İki dar eksen, tek geniş eksenden daha iyi ayırıyor. Tek bir 0-10 puan
- * istendiğinde model adayların çoğuna 8 veriyordu; 97 adayı 12'ye indirirken
- * bu, sıralamanın ayırt etmemesi demek. 0-5'lik iki eksen modelin rahat
- * olduğu aralıkta kalıyor ve toplama kodda yapılıyor — yani test edilebilir.
+ * Puanlama tek eksende kalıyor. impact/novelty diye iki 0-5 ekseni denendi ve
+ * aynı 84 aday üzerinde ölçüldü: ayrı puan seviyesi 10'dan 9'a düştü, tepe
+ * sıkıştı (en yüksek 9 yerine 8) ve kesimdeki belirsizlik birebir aynı kaldı.
+ * Kazanmadığı için tutulmadı.
+ *
+ * Ölçümün asıl gösterdiği şu: her iki şemada da kısa listenin 12 yerinden 8'i
+ * eşit puanlı adaylar arasından seçiliyor. Yani ayırt etme işini puan değil,
+ * select.ts'teki eşitlik bozma kuralı yapıyor. Bunu puanlayıcı tarafında
+ * çözmenin yolu daha ince bir ölçek değil, en iyi ~25 aday için ikinci bir
+ * *sıralama* çağrısı olurdu — mutlak puanlama yerine göreli karşılaştırma.
  */
 function systemPrompt(config: Config): string {
   return [
@@ -55,27 +60,18 @@ function systemPrompt(config: Config): string {
     "İlgilendiğin konular:",
     ...config.topics.map((topic) => `- ${topic}`),
     "",
-    "Sana bir aday haber listesi verilecek. Her biri için iki ayrı eksende",
-    "puan ver. Eksenleri birbirinden bağımsız değerlendir.",
-    "",
-    "impact (0-5) — bu gelişme okuyucunun işini ne kadar değiştirir?",
-    "  5: kitlenin çalışma biçimini değiştirir",
+    "Sana bir aday haber listesi verilecek. Her biri için 0-10 arası puan ver:",
+    "- 9-10: sektörü gerçekten değiştiren, herkesin bilmesi gereken gelişme",
     '     örn. "X dili artık bellek güvenliğini derleyicide zorunlu kılıyor"',
-    "  3-4: doğrudan kullanabileceği somut bir araç, sürüm ya da kırıcı değişiklik",
+    "- 7-8: okuyucunun işine doğrudan yarayacak somut haber veya araç",
     '     örn. "Y kütüphanesi 3.0 çıktı, eski API kaldırıldı"',
-    "  1-2: bilmesi hoş ama pratikte bir şey değiştirmiyor",
-    '     örn. "Z şirketi yeni bir ofis açtı"',
-    "  0: bu kitleyle ilgisiz",
-    "",
-    "novelty (0-5) — bu gerçekten yeni bir bilgi mi?",
-    "  5: beklenmedik, ilk kez duyuluyor",
-    "  3-4: bilinen bir yönde atılmış somut yeni adım",
-    "  1-2: zaten bilinen bir şeyin tekrarı, derleme ya da yorum",
+    "- 4-6: ilginç ama kritik değil",
+    '     örn. "Z şirketi bir araştırma ekibi kurdu"',
+    "- 0-3: reklam, spekülasyon, içerik pazarlaması, tekrar, alakasız",
     '     örn. "2026\'nın en iyi 10 aracı"',
-    "  0: içerik pazarlaması, reklam, SEO metni",
     "",
     "Kurallar: Başlıktaki abartıya değil somut olguya bak. 'X şirketi bu alana",
-    "yatırım yapacak' türü içi boş haberlerde impact düşüktür. Bir şeyin kim",
+    "yatırım yapacak' türü içi boş haberlere düşük puan ver. Bir şeyin kim",
     "tarafından yayınlandığını bilmiyorsun; yalnızca içeriğe göre karar ver.",
     "Gerekçeyi tek cümlede, Türkçe yaz.",
   ].join("\n");
@@ -101,12 +97,11 @@ export async function scoreCandidates(
           type: "object",
           properties: {
             index: { type: "integer" },
-            impact: { type: "integer" },
-            novelty: { type: "integer" },
+            score: { type: "integer" },
             category: { type: "string", enum: config.categories },
             reason: { type: "string" },
           },
-          required: ["index", "impact", "novelty", "category", "reason"],
+          required: ["index", "score", "category", "reason"],
           additionalProperties: false,
         },
       },
@@ -134,6 +129,8 @@ export async function scoreCandidates(
           user: `Adaylar:\n${JSON.stringify(payload, null, 1)}`,
           schemaName: "ratings",
           schema,
+          stage: "score",
+          reasoningEffort: config.reasoningEffort,
         });
 
         const scored: ScoredCandidate[] = [];
@@ -145,15 +142,10 @@ export async function scoreCandidates(
             continue;
           }
 
-          // Şema tam sayı garantiliyor ama aralığı değil.
-          const impact = clamp(rating.impact, 0, 5);
-          const novelty = clamp(rating.novelty, 0, 5);
-
           scored.push({
             ...candidate,
-            score: impact + novelty,
-            impact,
-            novelty,
+            // Şema tam sayı garantiliyor ama aralığı değil.
+            score: clamp(rating.score, 0, 10),
             reason: rating.reason,
             category: rating.category,
           });

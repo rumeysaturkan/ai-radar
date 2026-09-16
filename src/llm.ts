@@ -1,5 +1,7 @@
 import "dotenv/config";
 import OpenAI from "openai";
+import type { StageUsage, Usage } from "./types.js";
+import { warn } from "./util/log.js";
 
 let cachedClient: OpenAI | null = null;
 
@@ -28,47 +30,134 @@ function priceOf(model: string): { input: number; output: number } | undefined {
   return PRICING[model] ?? PRICING[model.replace(/-\d{4}-\d{2}-\d{2}$/, "")];
 }
 
-let inputTokens = 0;
-let outputTokens = 0;
-let costUsd = 0;
+/**
+ * Maliyetin hangi adımda oluştuğu, projenin merkezi iddiasının kanıtı:
+ * ucuz model yüzlerce adaya, pahalı model yalnızca son on ikiye dokunuyor.
+ * Tek bir toplam rakam bunu göstermiyordu.
+ */
+export type Stage = "score" | "enrich" | "compose" | "discovery" | "research";
 
-/** Fiyat tablosunda karşılığı olmayan modeller; maliyet bunlar için eksik. */
-const unpriced = new Set<string>();
+export type UsageLedger = {
+  record(
+    stage: Stage,
+    model: string,
+    usage: OpenAI.CompletionUsage | undefined,
+  ): void;
+  byStage(): StageUsage[];
+  totals(): Usage;
+  unpricedModels(): string[];
+};
 
-export function unpricedModels(): string[] {
-  return [...unpriced].sort();
-}
+/**
+ * Her çalıştırma kendi defterini tutabilir. Modül seviyesinde tek bir sayaç,
+ * aynı süreçte iki bültenin birbirinin maliyetini raporlamasına yol açardı —
+ * sunucu bunu yapacak.
+ */
+export function createLedger(): UsageLedger {
+  const rows = new Map<string, StageUsage>();
 
-export function usageSoFar(): {
-  inputTokens: number;
-  outputTokens: number;
-  estimatedCostUsd: number;
-} {
   return {
-    inputTokens,
-    outputTokens,
-    estimatedCostUsd: Number(costUsd.toFixed(4)),
+    record(stage, model, usage) {
+      if (!usage) {
+        return;
+      }
+
+      const key = `${stage}:${model}`;
+      const price = priceOf(model);
+
+      let row = rows.get(key);
+
+      if (!row) {
+        row = {
+          stage,
+          model,
+          calls: 0,
+          inputTokens: 0,
+          outputTokens: 0,
+          estimatedCostUsd: 0,
+          priced: price !== undefined,
+        };
+        rows.set(key, row);
+      }
+
+      row.calls += 1;
+      row.inputTokens += usage.prompt_tokens;
+      row.outputTokens += usage.completion_tokens;
+
+      if (price) {
+        row.estimatedCostUsd +=
+          (usage.prompt_tokens / 1_000_000) * price.input +
+          (usage.completion_tokens / 1_000_000) * price.output;
+      }
+    },
+
+    byStage() {
+      return [...rows.values()]
+        .map((row) => ({
+          ...row,
+          estimatedCostUsd: Number(row.estimatedCostUsd.toFixed(4)),
+        }))
+        .sort((a, b) => b.estimatedCostUsd - a.estimatedCostUsd);
+    },
+
+    totals() {
+      let inputTokens = 0;
+      let outputTokens = 0;
+      let costUsd = 0;
+
+      for (const row of rows.values()) {
+        inputTokens += row.inputTokens;
+        outputTokens += row.outputTokens;
+        costUsd += row.estimatedCostUsd;
+      }
+
+      return {
+        inputTokens,
+        outputTokens,
+        estimatedCostUsd: Number(costUsd.toFixed(4)),
+        stages: this.byStage(),
+      };
+    },
+
+    unpricedModels() {
+      return [
+        ...new Set(
+          [...rows.values()].filter((row) => !row.priced).map((row) => row.model),
+        ),
+      ].sort();
+    },
   };
 }
 
-function track(model: string, usage: OpenAI.CompletionUsage | undefined): void {
-  if (!usage) {
-    return;
-  }
+const defaultLedger = createLedger();
 
-  inputTokens += usage.prompt_tokens;
-  outputTokens += usage.completion_tokens;
+export function usageSoFar(): Usage {
+  return defaultLedger.totals();
+}
 
-  const price = priceOf(model);
+export function unpricedModels(): string[] {
+  return defaultLedger.unpricedModels();
+}
 
-  if (price) {
-    costUsd +=
-      (usage.prompt_tokens / 1_000_000) * price.input +
-      (usage.completion_tokens / 1_000_000) * price.output;
-  } else {
-    // Sessizce 0 eklemek, bültenin altındaki maliyeti yanlış gösteriyordu.
-    unpriced.add(model);
-  }
+/**
+ * Akıl yürütme bütçesi. GPT-5 ailesi varsayılan olarak görünmez "reasoning"
+ * token'ı üretiyor ve bunlar çıktı token'ı olarak faturalanıyor. Bu hattaki
+ * işler — bir başlığı puanlamak, bir yazıyı iki cümleye indirmek — derin akıl
+ * yürütme gerektirmiyor.
+ *
+ * Desteklenen değerler modele göre değişiyor: gpt-5.1 "none" kabul edip
+ * "minimal" reddediyor, gpt-5-mini tam tersi. "low" ikisinde de çalışıyor,
+ * varsayılan o. Desteklenmeyen bir değer verilirse ayar düşürülüp çağrı
+ * tekrarlanır — yanlış bir ayar bütün bülteni düşürmesin.
+ */
+export type ReasoningEffort = "none" | "minimal" | "low" | "medium" | "high";
+
+function rejectsReasoningEffort(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    /reasoning_effort/.test(error.message) &&
+    /[Uu]nsupported|invalid/.test(error.message)
+  );
 }
 
 export type StructuredRequest = {
@@ -77,6 +166,11 @@ export type StructuredRequest = {
   user: string;
   schemaName: string;
   schema: Record<string, unknown>;
+  /** Maliyetin hangi adımda oluştuğunu kaydetmek için zorunlu. */
+  stage: Stage;
+  reasoningEffort?: ReasoningEffort;
+  /** Verilmezse süreç geneli defter kullanılır. */
+  ledger?: UsageLedger;
 };
 
 /**
@@ -84,6 +178,8 @@ export type StructuredRequest = {
  * şekilli çıktı vermesinin sebebi bu: serbest metin yerine sözleşme.
  */
 export async function structured<T>(request: StructuredRequest): Promise<T> {
+  const ledger = request.ledger ?? defaultLedger;
+  let effort = request.reasoningEffort;
   let lastError: unknown;
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -94,6 +190,7 @@ export async function structured<T>(request: StructuredRequest): Promise<T> {
           { role: "system", content: request.system },
           { role: "user", content: request.user },
         ],
+        ...(effort ? { reasoning_effort: effort } : {}),
         response_format: {
           type: "json_schema",
           json_schema: {
@@ -104,7 +201,7 @@ export async function structured<T>(request: StructuredRequest): Promise<T> {
         },
       });
 
-      track(request.model, response.usage);
+      ledger.record(request.stage, request.model, response.usage);
 
       const content = response.choices[0]?.message.content;
 
@@ -115,6 +212,16 @@ export async function structured<T>(request: StructuredRequest): Promise<T> {
       return JSON.parse(content) as T;
     } catch (error) {
       lastError = error;
+
+      // Bu model bu akıl yürütme ayarını kabul etmiyor. Ayarı düşürüp bir kez
+      // daha dene; yanlış bir yapılandırma değeri bülteni komple düşürmesin.
+      if (effort && rejectsReasoningEffort(error)) {
+        warn(
+          `${request.model} "reasoningEffort: ${effort}" değerini kabul etmedi; ` +
+            "ayar yok sayılıyor.",
+        );
+        effort = undefined;
+      }
     }
   }
 

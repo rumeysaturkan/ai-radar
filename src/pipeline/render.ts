@@ -109,6 +109,11 @@ footer.colophon {
 .stats { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 16px; }
 .stat strong { display: block; color: var(--ink); font-size: 19px; line-height: 1.2; }
 .stat span { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+.cost {
+  margin: 0 0 14px; font-size: 12px; color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 4px 10px;
+}
+.cost em { font-style: normal; opacity: 0.75; }
 .archive-row {
   display: block; text-decoration: none; padding: 18px 0;
   border-bottom: 1px solid var(--line);
@@ -221,6 +226,35 @@ function renderHighlight(item: Item, language: string): string {
 </section>`;
 }
 
+const STAGE_LABELS: Record<string, string> = {
+  score: "eleme",
+  enrich: "yazım",
+  compose: "editör",
+  discovery: "kaynak keşfi",
+};
+
+/**
+ * Hattın asıl iddiası burada görünür hale geliyor: ucuz model yüzlerce adayı
+ * eliyor, pahalı model yalnızca yayına giren haberlere dokunuyor. Tek bir
+ * toplam rakam bunu kanıtlamıyordu.
+ */
+function renderCostBreakdown(issue: Issue): string {
+  const stages = issue.usage.stages ?? [];
+
+  if (stages.length === 0) {
+    return "";
+  }
+
+  const parts = stages.map(
+    (stage) =>
+      `<span class="cost-stage">${escapeHtml(
+        STAGE_LABELS[stage.stage] ?? stage.stage,
+      )} <em>${escapeHtml(stage.model)}</em> $${stage.estimatedCostUsd.toFixed(3)}</span>`,
+  );
+
+  return `<p class="cost">${parts.join(" &middot; ")}</p>`;
+}
+
 export function renderIssueHtml(config: Config, issue: Issue): string {
   const highlight = issue.items.find((item) => item.id === issue.highlightId);
   const rest = issue.items.filter((item) => item.id !== issue.highlightId);
@@ -270,6 +304,7 @@ export function renderIssueHtml(config: Config, issue: Issue): string {
         <div class="stat"><strong>${issue.stats.published}</strong><span>bültene girdi</span></div>
         <div class="stat"><strong>$${issue.usage.estimatedCostUsd.toFixed(3)}</strong><span>üretim maliyeti</span></div>
       </div>
+      ${renderCostBreakdown(issue)}
       <p>${escapeHtml(config.title)} tarafından ${escapeHtml(
         formatDate(issue.generatedAt, config.language),
       )} tarihinde otomatik derlendi.

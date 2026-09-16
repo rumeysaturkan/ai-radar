@@ -81,6 +81,8 @@ export async function enrichItems(
           ].join("\n"),
           schemaName: "summary",
           schema,
+          stage: "enrich",
+          reasoningEffort: config.reasoningEffort,
         });
 
         return { ...candidate, ...summary };
