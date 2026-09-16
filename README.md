@@ -19,7 +19,12 @@ The first run asks which domain you want, takes your API key, writes it to
 `.env`, produces the issue and opens it in your browser. There is no other
 setup step.
 
-<!-- Add a screenshot of dist/<domain>/<issue>.html here. -->
+<!--
+Screenshot: open dist/ai/2026-W38.html in a browser, capture it, save it as
+docs/screenshot.png, then replace this comment with the line below.
+
+![A generated issue](docs/screenshot.png)
+-->
 
 ## Who this is for
 
