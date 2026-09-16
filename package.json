@@ -22,6 +22,7 @@
     "bulletin": "tsx src/bulletin.ts",
     "research": "tsx src/index.ts",
     "inspect": "tsx src/inspect.ts",
+    "render": "tsx src/render.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test --test-reporter=spec \"test/**/*.test.ts\"",
     "check": "npm run typecheck && npm test"

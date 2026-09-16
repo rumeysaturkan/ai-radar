@@ -1,0 +1,53 @@
+name: pages
+
+# Rendering is a pure function of the archived issues, which are committed, so
+# the published site is rebuilt without an API key and without a model call.
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - "data/**"
+      - "presets/**"
+      - "src/pipeline/render.ts"
+      - "src/i18n.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - uses: actions/configure-pages@v5
+        id: pages
+      # RADAR_SITE_URL has to be set for the RSS feeds to carry absolute
+      # links; without it the feeds are skipped rather than written broken.
+      - run: npm run render
+        env:
+          RADAR_SITE_URL: ${{ steps.pages.outputs.base_url }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

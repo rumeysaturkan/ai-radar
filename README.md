@@ -1,195 +1,222 @@
 # AI Radar
 
-Tek komutla **haftalık bülten** üreten açık kaynak araç. Bir alan seçersiniz;
-onlarca kaynağı tarar, tekrarları eler, kalanları puanlar ve elinizde yayına
-hazır bir HTML sayfası bırakır.
+**A curation pipeline that doesn't know what it's about.** Point it at a topic,
+get a weekly briefing — scanned, deduplicated, scored and rendered as a page
+you can publish. About six cents an issue.
+
+The word "AI" appears in no prompt in this repository. The domain lives
+entirely in a JSON file, so `presets/coffee.json` gives you a coffee briefing
+with no code change.
+
+*[Türkçe README](README.tr.md)*
 
 ```bash
 npm install
 npm start
 ```
 
-İlk çalıştırmada hangi alanda bülten istediğinizi sorar, API anahtarınızı alıp
-`.env` dosyasına kaydeder ve bülteni üretip tarayıcınızda açar. Başka kurulum
-adımı yok.
+The first run asks which domain you want, takes your API key, writes it to
+`.env`, produces the issue and opens it in your browser. There is no other
+setup step.
 
-## Alanlar
+<!-- Add a screenshot of dist/<domain>/<issue>.html here. -->
 
-Kutudan çıkan dört alan var, her biri kendi kaynak listesi, konuları ve
-kategorileriyle gelir:
+## Who this is for
 
-| Kimlik           | Alan                | Kaynak | Örnek besleme                     |
-| ---------------- | ------------------- | ------ | --------------------------------- |
-| `ai`             | Yapay Zeka          | 13     | OpenAI, DeepMind, arXiv, HF       |
-| `siber-guvenlik` | Siber Güvenlik      | 10     | Krebs, Project Zero, CISA         |
-| `yazilim`        | Yazılım Geliştirme  | 14     | GitHub, Go, Rust, V8, InfoQ       |
-| `veri-altyapi`   | Veri & Altyapı      | 15     | AWS, Kubernetes, PostgreSQL       |
+Not people who want to *read* a briefing — they can subscribe to one. This is
+for people who have to **publish** one: an engineer sending a weekly internal
+radar, someone covering a niche or a language where no good briefing exists,
+a writer who wants a draft to edit rather than a blank page.
 
-Alanı seçmenin iki yolu var:
+## What comes out
 
-```bash
-npm start              # listeden seç (son seçim hatırlanır)
-npm start siber-guvenlik   # doğrudan üret
-```
+Running `npm start yazilim` writes:
 
-Her alan **kendi hafızasını ve arşivini** tutar — birinde yayınlanan haber
-diğerini etkilemez.
+| File | What it is |
+| --- | --- |
+| `dist/yazilim/2026-W38.html` | The issue — one file, dark mode included |
+| `dist/yazilim/2026-W38.md` | Markdown to paste into LinkedIn, Slack or Medium |
+| `dist/yazilim/index.html` | That domain's archive |
+| `dist/yazilim/feed.xml` | An RSS feed (needs `siteUrl`; see below) |
+| `dist/index.html` | A cover page listing every domain |
 
-## Ne üretiyor?
+## How it works
 
-`npm start yazilim` çalıştırdığınızda:
-
-| Dosya                       | İçerik                                            |
-| --------------------------- | ------------------------------------------------- |
-| `dist/yazilim/2026-W38.html` | Bültenin kendisi — tek dosya, karanlık mod destekli |
-| `dist/yazilim/2026-W38.md`   | LinkedIn/Slack/Medium'a yapıştırılabilir Markdown  |
-| `dist/yazilim/index.html`    | O alanın tüm sayılarının arşivi                    |
-| `dist/yazilim/feed.xml`      | Abone olunabilir RSS akışı                         |
-| `dist/index.html`            | Kapak: üretilmiş tüm alanların listesi             |
-
-## Nasıl çalışıyor?
-
-Serbest bir "ajan döngüsü" yerine **altı adımlı bir hat** var. Her adımda modele
-tek bir dar iş veriliyor; bu yüzden çıktı her hafta aynı şekilde geliyor ve
-maliyet öngörülebilir kalıyor.
+There is no free-running agent loop here. There are six steps, each giving the
+model one narrow job, which is why the output has the same shape every week
+and the cost is predictable.
 
 ```
-1. TOPLA          RSS + Hacker News + web araması        → ~1000 aday
-      │           (kaynak başına kota: tek bir besleme
-      │            havuzu dolduramaz)
-      ▼
-2. TEKİLLEŞTİR    Kanonik URL + başlık benzerliği         → kopyalar gider
-      │           data/<alan>/seen.json ile geçmiş sayılar → tekrar gitmez
-      ▼
-3. PUANLA         Ucuz model, 30'luk gruplar, 0-10 puan   → ~160 içerik
-      │           JSON şemasıyla zorunlu format
-      ▼
-4. ZENGİNLEŞTİR   Sadece seçilenlerin sayfası indirilir   → 12 haber
-      │           Her biri için: tldr, neden önemli, etiket
-      ▼
-5. DERLE          Editör geçişi: giriş yazısı, haftanın
-      │           öne çıkanı, kategori sıralaması
-      ▼
-6. YAYINLA        HTML + Markdown + arşiv + RSS + kapak
+1. COLLECT      RSS + Hacker News + web search           → ~940 candidates
+2. DEDUPLICATE  canonical URL + title similarity         → repeats dropped
+   │            data/<domain>/seen.json                  → past issues excluded
+3. SCORE        cheap model, batches of 30, 0-10         → ~90 rated
+4. ENRICH       only the shortlist gets fetched          → 12 stories
+   │            each gets a tldr, a why-it-matters, tags
+5. COMPOSE      an editor pass: intro, lead story, order
+6. PUBLISH      HTML + Markdown + archive + RSS + cover
 ```
 
-Pahalı iş (tam sayfa indirme, güçlü model) yalnızca son 12 habere uygulanıyor;
-eleme işini ucuz model ve düz kod yapıyor. Bülten başına maliyet birkaç senttir
-ve her sayının altında gerçek rakam yazar.
+The expensive work — fetching full pages, running the strong model — touches
+only the final twelve. The filtering is done by plain code and a cheap model.
+Every issue prints where the money went:
 
-Hattın kendisi konuyu bilmez — hangi alanda çalıştığı tamamen preset
-dosyasından gelir. "Yapay zeka" kelimesi hiçbir prompt'a gömülü değildir.
-
-### Hafıza neden önemli?
-
-`data/<alan>/seen.json` yalnızca **yayınlanmış** haberleri tutar. Sonuç:
-
-- Aynı haber iki hafta üst üste bültene giremez.
-- Bu hafta elenen bir haber, gelecek hafta olgunlaşırsa tekrar değerlendirilir.
-- Editör adımına geçen sayının başlıkları verilir, böylece "geçen hafta
-  duyurulan X bu hafta yayınlandı" gibi devamlılık kurabilir.
-
-## Kendi alanını kurmak
-
-`presets/` altına bir JSON dosyası ekleyin — dosya adı alanın kimliği olur.
-Kod değişikliği gerekmez:
-
-```jsonc
-// presets/oyun.json  →  npm start oyun
-{
-  "id": "oyun",                    // dosya adıyla aynı olmalı
-  "name": "Oyun Sektörü",          // seçim ekranında görünen ad
-  "title": "Oyun Radar",           // bülten başlığı
-  "tagline": "Haftalık oyun bülteni",
-  "audience": "Oyun geliştiriciler ve sektör takipçileri",
-  "topics": ["motor sürümleri", "stüdyo haberleri", "..."],  // puanlama bunlara göre
-  "categories": ["Motor & Araçlar", "Çıkışlar", "Sektör"],   // bülten bölümleri
-  "shortlist": 12,        // bültene kaç haber girsin
-  "minScore": 6,          // altındakiler elenir
-  "maxPerSource": 12,     // tek kaynağın havuzu doldurmasını engeller
-  "models": { "scorer": "gpt-4o-mini", "writer": "gpt-4o" },
-  "feeds": [{ "name": "Game Developer", "url": "https://..." }],
-  "hackerNews": { "enabled": false, "minPoints": 100, "queries": [] },
-  "webSearch": { "enabled": true, "queries": ["game industry news this week"] }
-}
+```
+enrich   gpt-5.1     $0.0592   12 calls
+score    gpt-5-mini  $0.0182    3 calls
+compose  gpt-5.1     $0.0083    1 call
 ```
 
-Dikkat edilecek üç şey:
+That is the architecture as a number: the expensive model is 69% of the spend
+across twelve items, the cheap one 21% across ninety candidates.
 
-- **`feeds` içindeki bir kaynağa `"max": 8`** verirseniz o besleme için ayrı
-  kota uygulanır (arXiv veya CISA gibi günde yüzlerce kayıt üreten kaynaklarda
-  gerekli).
-- **Hacker News teknoloji dışı alanlarda işe yaramaz** — `enabled: false` yapın,
-  web araması ana kaynak olsun.
-- **`topics` dar ve net olsun.** "Her şey" yazarsanız puanlama adımı neyi
-  eleyeceğini bilemez; motor dar konuda iyi çalışır.
+### Why the memory matters
 
-## Anahtarlar
+`data/<domain>/seen.json` records only what was **published**. So:
 
-| Değişken         | Zorunlu mu? | Nereden                              |
-| ---------------- | ----------- | ------------------------------------ |
-| `OPENAI_API_KEY` | Evet        | https://platform.openai.com/api-keys |
-| `TAVILY_API_KEY` | Hayır       | https://app.tavily.com/              |
+- the same story cannot appear two weeks running;
+- a story cut this week is reconsidered next week if it grows legs;
+- the composer is shown last week's headlines, so it can say "the X announced
+  last week shipped today".
 
-Tavily anahtarı yoksa web araması atlanır, bülten yalnızca RSS ve Hacker News
-ile üretilir. Anahtarlar `.env` dosyasında tutulur ve `.gitignore` ile depodan
-uzak tutulur.
+## Agent or pipeline?
 
-## Bonus: araştırma ajanı
+Both, in the places each belongs. That split is the point of this repository:
 
-Bülten hattı deterministik; ama tek bir konuyu derinlemesine araştırmak için
-proje içinde bir **tool-calling ajanı** da var. Model hangi aracı ne zaman
-çağıracağına kendisi karar verir:
+> **Open-ended work that runs once → an agent. Repeated work that has to be
+> predictable → a pipeline.**
+
+Source discovery is open-ended: you type a topic and something has to go look
+for sources. That is an agent's job, it runs once, and an unpredictable number
+of steps is fine.
+
+Producing the weekly issue is not open-ended. It is the same six steps every
+time, and it needs a stable shape and a known cost. An agent loop takes a
+different number of steps on every run, costs what it costs, and guarantees
+nothing about the shape of its output.
+
+The preset file is the contract between the two halves.
+
+`src/agent/research-agent.ts` is a tool-calling loop kept as the exhibit for
+that argument. It works, and it is deliberately not used to build the issue:
 
 ```bash
 npm run research -- "AI agent memory"
 ```
 
-Araçları: `searchWeb`, `readSource`, `readKnowledge`, `updateKnowledge`.
-Öğrendiklerini `knowledge/` altındaki Markdown dosyalarına yazar.
+## Defining your own domain
 
-Ajan döngüsü keşif için iyidir, üretim hattı için değil: her çalıştırmada farklı
-sayıda adım atar, maliyeti tahmin edilemez ve çıktısının şekli garanti değildir.
-Bu yüzden bülten hattında kullanılmıyor.
+Drop a JSON file into `presets/`. The filename becomes the domain id, and it
+is validated on load with per-field messages rather than failing forty seconds
+later inside a model call.
 
-## Proje yapısı
+```jsonc
+// presets/coffee.json  →  npm start coffee
+{
+  "name": "Coffee",                  // shown in the picker
+  "title": "Coffee Radar",           // the briefing's masthead
+  "tagline": "A weekly coffee briefing",
+  "language": "en",                  // output language; prompts follow it
+  "audience": "Roasters and café owners",
+  "topics": ["green coffee prices", "roasting equipment", "..."],
+  "categories": ["Market", "Equipment", "Trade"],  // rendered as headings
+  "shortlist": 12,
+  "minScore": 6,
+  "feeds": [{ "name": "Perfect Daily Grind", "url": "https://..." }],
+  "hackerNews": { "enabled": false, "minPoints": 100, "queries": [] },
+  "webSearch": { "enabled": true, "queries": ["coffee industry news"] }
+}
+```
+
+Three things worth knowing:
+
+- **`language` drives the prompts**, not just the date format. Prompt bodies
+  are English and only the output language varies, so a preset can target a
+  language this README does not speak.
+- **Give a noisy feed its own `"max": 8`.** arXiv publishes hundreds a day and
+  will otherwise crowd out everything else.
+- **Keep `topics` narrow.** "Everything" gives the scorer nothing to cut on.
+
+## Inspecting an issue
+
+```bash
+npm run inspect ai 2026-W38
+```
+
+Prints the score distribution, the per-source funnel (scanned → scored →
+published) and the domain spread. Every scored candidate is kept in the
+archive, including the ones that were cut, so you can ask why something did
+not make it — and evaluate a change to the scorer offline, for free, instead
+of paying for a live run each time.
+
+```bash
+npm run render          # rebuild every page from the archives, no API calls
+```
+
+Useful for publishing in CI, and for editing: fix a summary in
+`data/<domain>/archive/<issue>.json`, re-render, done.
+
+## Keys
+
+| Variable | Required | Where from |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | yes | https://platform.openai.com/api-keys |
+| `TAVILY_API_KEY` | no | https://app.tavily.com/ |
+| `RADAR_SITE_URL` | no | where the site is published; needed for valid RSS |
+
+Without a Tavily key, web search is skipped and the issue is built from RSS
+and Hacker News alone.
+
+## Layout
 
 ```
 src/
-  bulletin.ts              # Ana komut: hattı sırayla çalıştırır
-  preset.ts                # Alan seçimi (argüman → liste → son seçim)
-  setup.ts                 # İlk çalıştırmada anahtar sorar
-  config.ts                # Preset yükleyici ve listeleyici
-  llm.ts                   # Şema zorunlu LLM çağrıları + maliyet takibi
-  store.ts                 # Alan başına seen.json ve arşiv
+  bulletin.ts            # the weekly run
+  render.ts              # rebuild pages from archives (no model calls)
+  inspect.ts             # score histogram and source funnel
+  config.ts              # preset loading
+  config-validate.ts     # preset contract, checked on load
+  llm.ts                 # schema-bound calls + per-stage cost ledger
+  i18n.ts                # content language vs interface language
+  store.ts               # per-domain memory and archive
   pipeline/
-    collect.ts             # RSS, Hacker News, web araması
-    dedupe.ts              # Tekilleştirme + kaynak dengeleme
-    score.ts               # Toplu puanlama
-    enrich.ts              # Sayfa okuma + özet yazımı
-    compose.ts             # Editör geçişi
-    render.ts              # HTML, Markdown, arşiv, RSS, kapak
-  agent/research-agent.ts  # Bonus: tool-calling ajanı
-  tools/                   # Arama, sayfa okuma, bilgi tabanı araçları
-presets/                   # Alan tanımları — tüm ayarlar burada
-data/<alan>/               # seen.json + arşivlenmiş sayılar
-dist/<alan>/               # Üretilen sayfalar
+    collect.ts  dedupe.ts  score.ts  select.ts
+    enrich.ts   compose.ts render.ts stats.ts
+  discovery/             # topic → sources → preset (deterministic half)
+    feed-links.ts  feed-health.ts  find-feed.ts
+    language.ts    decode.ts       net.ts
+  agent/research-agent.ts
+  tools/                 # web search, page reading, knowledge notes
+  util/                  # http, concurrency, urls, dates, seeded shuffle
+presets/                 # domain definitions
+data/<domain>/           # seen.json + archived issues
+test/                    # node:test, no extra dependencies
 ```
 
-## Bilinen sınırlar
+```bash
+npm run check            # typecheck + tests
+```
 
-- `readSource` sayfaları basit regex ile metne indirger; JavaScript ile
-  render edilen sitelerde içerik eksik gelebilir, o durumda arama özetiyle
-  devam edilir.
-- Yanıt vermeyen bir kaynak bülteni durdurmaz; uyarı basılıp atlanır.
-- Puanlama rubriği (`src/pipeline/score.ts`) teknoloji/haber diline göre
-  yazılmıştır. Çok farklı bir alan için (sağlık, hukuk) rubriği de preset'e
-  taşımak gerekebilir.
-- Maliyet tahmini `gpt-4o` ve `gpt-4o-mini` fiyatlarına göre yapılır; başka bir
-  model seçerseniz `src/llm.ts` içindeki fiyat tablosuna eklemeniz gerekir.
-- Etkileşimli olmayan ortamda (CI, pipe) alan sorulamaz; son kullanılan alana
-  düşer. Böyle yerlerde alanı argümanla verin.
+## Known limits
 
-## Lisans
+- `readSource` reduces pages to text with regular expressions. On
+  JavaScript-rendered sites the content comes back thin and the summary falls
+  back to the search snippet.
+- A source that does not answer prints a warning and is skipped; it does not
+  stop the issue.
+- **Scoring does not separate the shortlist on its own.** Measured over 84
+  real candidates, 8 of the 12 published slots were filled from items sharing
+  a score — so the tie-break in `select.ts` is doing the work, not the score.
+  Two 0-5 axes were tried instead of one 0-10 and measured no better. The real
+  fix is a second, comparative ranking pass over the top ~25; it is not built.
+- Source discovery is half done: feed finding, validation and language
+  detection work and are measured at 16/20 on real sites. The layer that turns
+  a topic into candidate sites is not written yet.
+- The cost table in `src/llm.ts` knows a handful of models. Others still run,
+  but the reported cost is short and a warning says so.
+- The per-publisher diversity cap groups by registrable domain using a small
+  table of multi-part suffixes, not the full public suffix list.
+
+## Licence
 
 MIT
