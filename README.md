@@ -5,8 +5,8 @@ get a weekly briefing — scanned, deduplicated, scored and rendered as a page
 you can publish. About six cents an issue.
 
 The word "AI" appears in no prompt in this repository. The domain lives
-entirely in a JSON file, so `presets/coffee.json` gives you a coffee briefing
-with no code change.
+entirely in a JSON file, so `presets/cycling.json` gives you a cycling
+briefing with no code change.
 
 *[Türkçe README](README.tr.md)*
 
@@ -45,19 +45,13 @@ a writer who wants a draft to edit rather than a blank page.
 You do not have to assemble the feed list yourself.
 
 ```bash
-npm run discover -- "kahve sektörü" --lang tr
+npm run discover -- "road cycling" --lang en
 npm run ui            # the same thing with a browser, on localhost:3000
 ```
 
 It works out what to search for, collects candidate sites, finds and validates
 each one's feed, ranks them on their real headlines, shows you the list, and
 writes the preset from what you approve.
-
-Measured on a coffee topic: **$0.018 and 95 seconds** to a preset, then $0.063
-for the first issue. The sources it picked were Daily Coffee News, Perfect
-Daily Grind, World Coffee Portal, Barista Magazine and Sprudge — the trade
-press a person would have spent an afternoon assembling. `presets/kahve.json`
-and its first issue are in this repository as the worked example.
 
 The rule that makes this safe: **a model never produces a URL that reaches the
 preset.** Model output is a hint; every address is fetched and parsed, and only
@@ -150,20 +144,20 @@ is validated on load with per-field messages rather than failing forty seconds
 later inside a model call.
 
 ```jsonc
-// presets/coffee.json  →  npm start coffee
+// presets/cycling.json  →  npm start cycling
 {
-  "name": "Coffee",                  // shown in the picker
-  "title": "Coffee Radar",           // the briefing's masthead
-  "tagline": "A weekly coffee briefing",
+  "name": "Cycling",                 // shown in the picker
+  "title": "Cycling Radar",          // the briefing's masthead
+  "tagline": "A weekly cycling briefing",
   "language": "en",                  // output language; prompts follow it
-  "audience": "Roasters and café owners",
-  "topics": ["green coffee prices", "roasting equipment", "..."],
-  "categories": ["Market", "Equipment", "Trade"],  // rendered as headings
+  "audience": "Racers and bike shop owners",
+  "topics": ["frame and groupset releases", "race results", "..."],
+  "categories": ["Racing", "Kit", "Industry"],  // rendered as headings
   "shortlist": 12,
   "minScore": 6,
-  "feeds": [{ "name": "Perfect Daily Grind", "url": "https://..." }],
+  "feeds": [{ "name": "CyclingTips", "url": "https://..." }],
   "hackerNews": { "enabled": false, "minPoints": 100, "queries": [] },
-  "webSearch": { "enabled": true, "queries": ["coffee industry news"] }
+  "webSearch": { "enabled": true, "queries": ["cycling industry news"] }
 }
 ```
 

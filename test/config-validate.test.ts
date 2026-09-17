@@ -130,7 +130,7 @@ describe("validateConfig", () => {
     assert.deepEqual(
       problemsOf({
         feeds: [],
-        webSearch: { enabled: true, queries: ["kahve sektörü haberleri"] },
+        webSearch: { enabled: true, queries: ["bisiklet sektörü haberleri"] },
       }),
       [],
     );

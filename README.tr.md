@@ -5,8 +5,8 @@ alırsınız — taranmış, tekrarları elenmiş, puanlanmış ve yayına hazı
 olarak. Sayı başına yaklaşık altı sent.
 
 Bu depodaki hiçbir prompt'ta "yapay zeka" geçmiyor. Alan tamamen bir JSON
-dosyasında yaşıyor; `presets/kahve.json` yazarsanız kod değişmeden kahve
-bülteni çıkar.
+dosyasında yaşıyor; `presets/bisiklet.json` yazarsanız kod değişmeden
+bisiklet bülteni çıkar.
 
 *[English README](README.md)*
 
@@ -38,19 +38,13 @@ boş sayfa yerine düzeltilecek bir taslak isteyen bir yazar.
 Kaynak listesini kendin kurmak zorunda değilsin.
 
 ```bash
-npm run discover -- "kahve sektörü" --lang tr
+npm run discover -- "bisiklet sektörü" --lang tr
 npm run ui            # aynısının tarayıcılı hali, localhost:3000
 ```
 
 Ne arayacağını çıkarır, aday siteleri toplar, her birinin feed'ini bulup
 doğrular, gerçek başlıklarına bakarak sıralar, listeyi sana gösterir ve
 onayladıklarından preset'i yazar.
-
-Kahve konusunda ölçüldü: **$0.018 ve 95 saniyede** preset, ardından ilk sayı
-için $0.063. Seçtiği kaynaklar Daily Coffee News, Perfect Daily Grind, World
-Coffee Portal, Barista Magazine ve Sprudge oldu — bir insanın bir öğleden
-sonrasını vereceği meslek basını. `presets/kahve.json` ve ilk sayısı örnek
-olarak depoda duruyor.
 
 Bunu güvenli kılan kural: **model asla preset'e ulaşan bir adres üretmez.**
 Model çıktısı bir ipucudur; her adres indirilip parse edilir ve yalnızca
@@ -143,20 +137,20 @@ dosya yüklenirken alan alan doğrulanır — kırk saniye sonra bir model
 çağrısının içinde patlamak yerine.
 
 ```jsonc
-// presets/kahve.json  →  npm start kahve
+// presets/bisiklet.json  →  npm start bisiklet
 {
-  "name": "Kahve",                   // seçim ekranında görünen ad
-  "title": "Kahve Radar",            // bültenin başlığı
-  "tagline": "Haftalık kahve bülteni",
+  "name": "Bisiklet",                // seçim ekranında görünen ad
+  "title": "Bisiklet Radar",         // bültenin başlığı
+  "tagline": "Haftalık bisiklet bülteni",
   "language": "tr",                  // çıktı dili; prompt'lar buna uyar
-  "audience": "Kavurmacılar ve kafe işletmecileri",
-  "topics": ["yeşil kahve fiyatları", "kavurma ekipmanı", "..."],
-  "categories": ["Piyasa", "Ekipman", "Ticaret"],  // başlık olarak basılır
+  "audience": "Yarışçılar ve bisikletçi esnafı",
+  "topics": ["kadro ve aktarma organı çıkışları", "yarış sonuçları", "..."],
+  "categories": ["Yarış", "Ekipman", "Sektör"],  // başlık olarak basılır
   "shortlist": 12,
   "minScore": 6,
-  "feeds": [{ "name": "Perfect Daily Grind", "url": "https://..." }],
+  "feeds": [{ "name": "CyclingTips", "url": "https://..." }],
   "hackerNews": { "enabled": false, "minPoints": 100, "queries": [] },
-  "webSearch": { "enabled": true, "queries": ["kahve sektörü haberleri"] }
+  "webSearch": { "enabled": true, "queries": ["bisiklet sektörü haberleri"] }
 }
 ```
 

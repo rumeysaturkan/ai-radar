@@ -8,7 +8,7 @@ describe("isBlockedSource", () => {
       "https://www.linkedin.com/posts/someone_something",
       "https://twitter.com/x/status/1",
       "https://x.com/x/status/1",
-      "https://www.reddit.com/r/coffee/comments/1",
+      "https://www.reddit.com/r/cycling/comments/1",
       "https://youtube.com/watch?v=1",
     ]) {
       assert.equal(isBlockedSource(url), true, `${url} should be blocked`);
@@ -17,13 +17,13 @@ describe("isBlockedSource", () => {
 
   it("blocks subdomains of a blocked host", () => {
     assert.equal(isBlockedSource("https://uk.linkedin.com/in/x"), true);
-    assert.equal(isBlockedSource("https://en.wikipedia.org/wiki/Coffee"), true);
+    assert.equal(isBlockedSource("https://en.wikipedia.org/wiki/Cycling"), true);
   });
 
   it("lets real publications through", () => {
     for (const url of [
-      "https://perfectdailygrind.com/2026/09/article",
-      "https://dailycoffeenews.com/x",
+      "https://cyclingtips.com/2026/09/article",
+      "https://velo.outsideonline.com/x",
       "https://arstechnica.com/feed",
       "https://news.ycombinator.com/item?id=1",
     ]) {

@@ -54,7 +54,7 @@ function ranked(domain: string, name = domain): RankedFeed {
 }
 
 const request: DiscoveryRequest = {
-  topic: "kahve sektörü",
+  topic: "bisiklet sektörü",
   language: "tr",
   windowDays: 7,
   maxFeeds: 12,
@@ -63,21 +63,21 @@ const request: DiscoveryRequest = {
 
 describe("slugifyId", () => {
   it("folds Turkish letters to ASCII", () => {
-    assert.equal(slugifyId("kahve sektörü"), "kahve-sektoru");
+    assert.equal(slugifyId("bisiklet sektörü"), "bisiklet-sektoru");
     assert.equal(slugifyId("Yazılım Geliştirme"), "yazilim-gelistirme");
     assert.equal(slugifyId("Güvenlik & Şifreleme"), "guvenlik-sifreleme");
   });
 
   it("handles the dotted capital I", () => {
-    const slug = slugifyId("İSTANBUL Kahve");
+    const slug = slugifyId("İSTANBUL Bisiklet");
 
-    assert.equal(slug, "istanbul-kahve");
+    assert.equal(slug, "istanbul-bisiklet");
     assert.ok(!slug.includes("̇"), "combining dot leaked into the id");
   });
 
   it("always produces something the config loader will accept", () => {
     for (const input of [
-      "kahve sektörü",
+      "bisiklet sektörü",
       "Game Industry!",
       "  spaced  out  ",
       "2026 trends",
@@ -131,19 +131,19 @@ describe("uniquifyNames", () => {
 
 describe("buildPreset", () => {
   const profile = {
-    name: "Kahve",
-    title: "Kahve Radar",
-    tagline: "Haftalık kahve bülteni",
-    audience: "Kavurmacılar",
-    topics: ["yeşil kahve fiyatları", "kavurma ekipmanı"],
+    name: "Bisiklet",
+    title: "Bisiklet Radar",
+    tagline: "Haftalık bisiklet bülteni",
+    audience: "Yarışçılar",
+    topics: ["kadro ve aktarma fiyatları", "yarış takvimi"],
     categories: ["Piyasa", "Ekipman", "Ticaret"],
     hackerNewsQueries: [],
-    webSearchQueries: ["kahve sektörü haberleri"],
+    webSearchQueries: ["bisiklet sektörü haberleri"],
   };
 
   it("produces a preset the loader accepts", () => {
     const config = buildPreset({
-      id: "kahve",
+      id: "bisiklet",
       language: "tr",
       profile,
       accepted: [ranked("a.com", "A"), ranked("b.com", "B")],
@@ -154,7 +154,7 @@ describe("buildPreset", () => {
 
   it("survives a round trip through JSON", () => {
     const config = buildPreset({
-      id: "kahve",
+      id: "bisiklet",
       language: "tr",
       profile,
       accepted: [ranked("a.com", "A")],
@@ -182,7 +182,7 @@ describe("buildPreset", () => {
 
   it("turns Hacker News off when the profile asks for no queries", () => {
     const config = buildPreset({
-      id: "kahve",
+      id: "bisiklet",
       language: "tr",
       profile,
       accepted: [ranked("a.com")],
@@ -295,15 +295,15 @@ describe("applyRatings", () => {
 
 describe("truncateWords", () => {
   it("leaves short text alone", () => {
-    assert.equal(truncateWords("Kahve Üretimi", 28), "Kahve Üretimi");
+    assert.equal(truncateWords("Bisiklet Üretimi", 28), "Bisiklet Üretimi");
   });
 
   it("stops at a word boundary instead of mid-word", () => {
-    const cut = truncateWords("Küresel Kahve Ticareti ve Piyasalar", 28);
+    const cut = truncateWords("Küresel Bisiklet Ticareti Piyasalar", 28);
 
     assert.ok(cut.length <= 28);
     assert.ok(!cut.endsWith("Pi"), `cut mid-word: ${cut}`);
-    assert.equal(cut, "Küresel Kahve Ticareti ve");
+    assert.equal(cut, "Küresel Bisiklet Ticareti");
   });
 
   it("drops a trailing conjunction's punctuation", () => {
