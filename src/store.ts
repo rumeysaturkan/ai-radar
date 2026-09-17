@@ -6,10 +6,6 @@ import type { Issue } from "./types.js";
 
 const dataDir = fileURLToPath(new URL("../data/", import.meta.url));
 
-/**
- * Her alan kendi klasorunde tutulur: bir alanda yayinlanan haber baska bir
- * alanin hafizasini kirletmesin, arsivler karismasin.
- */
 function presetDir(presetId: string): string {
   return path.join(dataDir, presetId);
 }
@@ -22,7 +18,6 @@ function seenPathOf(presetId: string): string {
   return path.join(presetDir(presetId), "seen.json");
 }
 
-/** Bülteni tekrar etmemek için tutulan URL hafızası. */
 export type SeenEntry = {
   url: string;
   title: string;
@@ -43,7 +38,6 @@ export async function readSeen(presetId: string): Promise<SeenIndex> {
     const parsed = JSON.parse(raw) as SeenIndex;
     const cutoff = Date.now() - SEEN_RETENTION_DAYS * 86_400_000;
 
-    // Hafızayı süresiz büyütmemek için eski kayıtları düşür.
     return Object.fromEntries(
       Object.entries(parsed).filter(
         ([, entry]) => new Date(entry.firstSeen).getTime() >= cutoff,
@@ -79,7 +73,6 @@ export async function saveIssue(
   );
 }
 
-/** Arşivdeki tüm sayıları en yeniden eskiye döndürür. */
 export async function listIssues(presetId: string): Promise<Issue[]> {
   const dir = archiveDirOf(presetId);
   let files: string[];
@@ -101,7 +94,6 @@ export async function listIssues(presetId: string): Promise<Issue[]> {
       const raw = await readFile(path.join(dir, file), "utf8");
       issues.push(JSON.parse(raw) as Issue);
     } catch {
-      // Bozuk arşiv dosyası bülten üretimini durdurmasın.
     }
   }
 

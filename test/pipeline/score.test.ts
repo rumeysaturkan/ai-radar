@@ -29,11 +29,6 @@ function parsePayload(user: string): Payload[] {
   return JSON.parse(user.replace(/^Adaylar:\n/, "")) as Payload[];
 }
 
-/**
- * Stands in for the model. Records what it was asked and returns what we say,
- * so the branches where bugs actually live are testable without a network
- * call. The cast is needed because `structured` is generic over its result.
- */
 function fakeStructured(
   handler: (request: { system: string; user: string }) => unknown,
 ): ScoreDeps["structured"] {
@@ -62,8 +57,6 @@ const config = makeConfig();
 
 describe("scoreCandidates", () => {
   it("never tells the model which source an item came from", async () => {
-    // Otherwise the model judges the brand before it judges the item, which is
-    // how one publisher's blog came to dominate a real issue.
     const { deps, calls } = fakeModel((payload) =>
       payload.map((p) => ({
         index: p.index,
@@ -81,7 +74,6 @@ describe("scoreCandidates", () => {
   });
 
   it("clamps a score the model pushes out of range", async () => {
-    // The schema guarantees an integer, not a range.
     const { deps } = fakeModel((payload) =>
       payload.map((p) => ({
         index: p.index,
@@ -136,7 +128,6 @@ describe("scoreCandidates", () => {
       }),
     };
 
-    // 45 candidates spans two batches; one fails, the other should survive.
     const candidates = Array.from({ length: 45 }, (_, i) => candidate(`c${i}`));
     const scored = await scoreCandidates(config, candidates, { seed: "s" }, deps);
 

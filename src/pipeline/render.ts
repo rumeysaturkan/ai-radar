@@ -9,7 +9,6 @@ import { domainOf, isHttpUrl, safeHref } from "../util/url.js";
 
 const distDir = fileURLToPath(new URL("../../dist/", import.meta.url));
 
-/** Her alan kendi klasorune yazar; sayfalar ve RSS akislari karismaz. */
 function presetDistDir(presetId: string): string {
   return path.join(distDir, presetId);
 }
@@ -155,11 +154,6 @@ function masthead(config: Config, href: string): string {
 </header>`;
 }
 
-/**
- * Başlığı bağlantıya çevirir; adres güvenli değilse bağlantı üretmeden düz
- * metin döner. Besleme içeriği güvenilmez veri, ve kaynaklar otomatik
- * keşfedilmeye başladığında bu sınır daha da genişliyor.
- */
 function titleLink(item: Item, extraAttrs = ""): string {
   const href = safeHref(item.url);
   const title = escapeHtml(item.title);
@@ -169,10 +163,8 @@ function titleLink(item: Item, extraAttrs = ""): string {
     : title;
 }
 
-/** Markdown karşılığı: aynı şema kontrolü, artı köşeli parantez temizliği. */
 function markdownLink(item: Item): string {
   const href = safeHref(item.url);
-  // Başlıktaki köşeli parantez bağlantı metninden kaçar ve biçimi bozar.
   const title = item.title.replace(/[[\]]/g, "");
 
   return href ? `**[${title}](${href})**` : `**${title}**`;
@@ -234,11 +226,6 @@ const STAGE_LABELS: Record<string, string> = {
   discovery: "kaynak keşfi",
 };
 
-/**
- * Hattın asıl iddiası burada görünür hale geliyor: ucuz model yüzlerce adayı
- * eliyor, pahalı model yalnızca yayına giren haberlere dokunuyor. Tek bir
- * toplam rakam bunu kanıtlamıyordu.
- */
 function renderCostBreakdown(issue: Issue): string {
   const stages = issue.usage.stages ?? [];
 
@@ -359,7 +346,6 @@ export function renderIndexHtml(
   return page(`${config.title} — Arşiv`, body, config.language);
 }
 
-/** Kapak sayfasinda bir alani temsil eden satir. */
 export type HubEntry = {
   id: string;
   name: string;
@@ -368,10 +354,6 @@ export type HubEntry = {
   latest: { id: string; number: number; periodEnd: string } | null;
 };
 
-/**
- * dist/index.html: uretilmis tum alanlari listeler. Her satir o alanin
- * kendi arsivine gider.
- */
 export function renderHubHtml(
   entries: readonly HubEntry[],
   language: string,
@@ -388,7 +370,6 @@ export function renderHubHtml(
   <h3>${escapeHtml(entry.name)}</h3>
   <p>${escapeHtml(entry.tagline)}</p>`;
 
-      // Arsivi olmayan alan icin link uretme; sayfa henuz yok.
       return entry.latest
         ? `<a class="archive-row" href="${escapeHtml(entry.id)}/index.html">\n${inner}\n</a>`
         : `<div class="archive-row pending">\n${inner}\n</div>`;
@@ -477,8 +458,6 @@ export function renderFeed(
   issues: readonly Issue[],
   siteUrl: string,
 ): string {
-  // Sayfalar dist/<alan>/ altinda durdugu icin akis adresleri de alan
-  // klasorunu icermeli.
   const base = `${siteUrl.replace(/\/+$/, "")}/${config.id}`;
 
   const items = issues
@@ -511,15 +490,9 @@ export type RenderedPaths = {
   html: string;
   markdown: string;
   index: string;
-  /** siteUrl tanımlı değilse akış üretilmez. */
   feed: string | null;
 };
 
-/**
- * RSS mutlak adres ister. siteUrl boşken üretilen akış hiçbir okuyucunun
- * kabul etmeyeceği göreli bağlantılar içeriyordu; hiç akış olmaması
- * bozuk bir akıştan iyidir.
- */
 export function resolveSiteUrl(config: Config): string | null {
   const candidate = (config.siteUrl || process.env.RADAR_SITE_URL || "").trim();
   return isHttpUrl(candidate) ? candidate.replace(/\/+$/, "") : null;

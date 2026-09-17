@@ -12,8 +12,6 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
 
 describe("mapWithConcurrency", () => {
   it("returns results in input order, not completion order", () => {
-    // The pipeline indexes into these results, so out-of-order output would
-    // silently attach the wrong summary to the wrong story.
     const items = [30, 10, 20, 0];
 
     return mapWithConcurrency(items, 2, async (ms) => {
@@ -47,7 +45,6 @@ describe("mapWithConcurrency", () => {
   });
 
   it("actually runs work in parallel", async () => {
-    // Guards against the pool degenerating into a sequential loop.
     const gate = deferred<void>();
     let started = 0;
 

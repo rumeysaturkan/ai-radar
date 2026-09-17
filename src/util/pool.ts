@@ -1,4 +1,3 @@
-/** Görevleri sınırlı eşzamanlılıkla çalıştırır; sıra korunur. */
 export async function mapWithConcurrency<T, R>(
   items: readonly T[],
   limit: number,

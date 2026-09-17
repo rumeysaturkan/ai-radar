@@ -5,7 +5,6 @@ import type { DiscoveryRequest } from "./types.js";
 export type TopicBrief = {
   canonicalTopic: string;
   searchQueries: string[];
-  /** Modelin hatırladığı alan adları — ipucu; hiçbiri doğrulanmadan kullanılmaz. */
   seedDomains: string[];
 };
 
@@ -20,13 +19,6 @@ const schema = {
   additionalProperties: false,
 };
 
-/**
- * Serbest bir konuyu aranabilir hale getirir.
- *
- * Dil ifadesi kasten iki yönlü: hedef dildeki kaynakları öne çıkarıyor ama
- * İngilizce uzun kuyruğu kesmiyor. "kahve sektörü" için doğru sonuç yalnızca
- * Türkçe siteler değil — ama yalnızca İngilizce siteler hiç değil.
- */
 export async function makeTopicBrief(
   request: DiscoveryRequest,
   model: string,

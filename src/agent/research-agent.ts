@@ -7,16 +7,10 @@ import { updateKnowledge } from "../tools/update-knowledge.js";
 
 const client = new OpenAI();
 
-// Cap how much page text is fed back to the model to stay within token limits.
 const MAX_SOURCE_CHARS = 6000;
 
 const MODEL = "gpt-5.1";
 
-/**
- * Bir ajan döngüsünün kaç adım atacağı baştan bilinmez — üretim hattında
- * ajan yerine sabit bir hat kullanılmasının sebebi de bu. Döngünün sınırsız
- * olması harcamayı da sınırsız yapardı.
- */
 const MAX_TURNS = 12;
 
 const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [
@@ -110,7 +104,6 @@ async function callTool(name: string, args: string): Promise<string> {
   if (name === "readSource") {
     const { url } = JSON.parse(args) as { url: string };
     const source = await readSource(url);
-    // Keep the model input small: cap page content to avoid TPM limits.
     return JSON.stringify({
       ...source,
       content: source.content.slice(0, MAX_SOURCE_CHARS),
@@ -163,12 +156,10 @@ export async function runResearchAgent(query: string): Promise<string> {
 
     messages.push(message);
 
-    // Model final cevabı verdiyse döngüyü sonlandır.
     if (!message.tool_calls || message.tool_calls.length === 0) {
       return message.content ?? "";
     }
 
-    // Model bir veya birden fazla tool çağırdıysa hepsini çalıştırıp sonucu geri ver.
     for (const toolCall of message.tool_calls) {
       if (toolCall.type !== "function") {
         continue;

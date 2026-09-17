@@ -1,15 +1,6 @@
 import type { Config, Feed } from "./config.js";
 import { isHttpUrl } from "./util/url.js";
 
-/**
- * Preset dosyası, keşif ile üretim hattı arasındaki sözleşme. Doğrulayıcısı
- * olmayan bir sözleşme temennidir: bugün `categories` içindeki bir yazım
- * hatası 40 saniye sonra, puanlama adımında OpenAI API'sinden dönüyor.
- *
- * Saf tutuldu — dosya okuma config.ts'te, doğrulama burada — ki keşfin
- * ürettiği JSON da aynı kapıdan geçebilsin.
- */
-
 const REASONING_EFFORTS = ["none", "minimal", "low", "medium", "high"];
 
 const KNOWN_KEYS = new Set([
@@ -23,7 +14,6 @@ export const SAFE_ID = /^[a-z0-9][a-z0-9-]*$/;
 
 export type ValidationResult = {
   problems: string[];
-  /** Hatayla ilgisi olmayan, yine de söylenmesi gereken şeyler. */
   warnings: string[];
 };
 
@@ -57,7 +47,6 @@ function checkInteger(
   }
 
   if (typeof value !== "number" || !Number.isInteger(value)) {
-    // JSON'da tırnak içinde yazılan sayı en sık yapılan hata.
     problems.push(
       `"${field}" bir tam sayı olmalı` +
         (typeof value === "string" ? " — tırnak içinde yazılmış." : "."),
@@ -133,9 +122,6 @@ function checkFeeds(value: unknown, problems: string[]): void {
     }
   });
 
-  // Kaynak adı kota anahtarı: collect.ts candidate.source = feed.name yapıyor,
-  // dedupe.ts kotayı bu adla eşliyor. Aynı adlı iki besleme sessizce tek
-  // kotayı paylaşır ve biri diğerini yutar.
   for (const [name, count] of names) {
     if (count > 1) {
       problems.push(
@@ -206,7 +192,6 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
       const key = category.toLocaleLowerCase("tr");
 
       if (seen.has(key)) {
-        // score.ts bunu JSON şemasında enum olarak kullanıyor.
         problems.push(`"categories" içinde tekrar eden başlık: "${category}".`);
       }
 
@@ -272,8 +257,6 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
     }
   }
 
-  // Tek bir kaynağı olmayan preset çalışabilir ama yalnızca web araması ve
-  // Hacker News'e kalır; sessizce boş bülten üretmesin.
   const hasFeeds = Array.isArray(raw.feeds) && raw.feeds.length > 0;
   const hasHn = isRecord(raw.hackerNews) && raw.hackerNews.enabled === true;
   const hasSearch = isRecord(raw.webSearch) && raw.webSearch.enabled === true;

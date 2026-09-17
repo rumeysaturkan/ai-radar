@@ -56,8 +56,6 @@ describe("rank", () => {
   });
 
   it("ignores sub-day timestamp differences", () => {
-    // arXiv drops a whole day of preprints on one timestamp. Second-level
-    // precision would let that batch sweep an entire score level.
     const sameDay = [
       cand({
         id: "zzzz",
@@ -71,7 +69,6 @@ describe("rank", () => {
       }),
     ];
 
-    // Same day bucket, so the id decides - not the later timestamp.
     assert.deepEqual(
       rank(sameDay, NOW).map((r) => r.id),
       ["aaaa", "zzzz"],
@@ -103,9 +100,6 @@ describe("rank", () => {
   });
 
   it("resolves remaining ties by content id, not input order", () => {
-    // The id is a hash of the canonical URL, so it is uniform and uncorrelated
-    // with a feed's position in the preset. Previously a stable sort sent every
-    // tie to whichever feed was listed first.
     const items = [
       cand({ id: "ffff", url: "https://a.com/1" }),
       cand({ id: "0000", url: "https://b.com/1" }),
@@ -113,7 +107,6 @@ describe("rank", () => {
     ];
 
     assert.deepEqual(rank(items, NOW).map((r) => r.id), ["0000", "7777", "ffff"]);
-    // Same set, different input order, same result.
     assert.deepEqual(
       rank([...items].reverse(), NOW).map((r) => r.id),
       ["0000", "7777", "ffff"],
@@ -135,8 +128,6 @@ describe("rank", () => {
 
 describe("select", () => {
   it("caps how many items one publisher can contribute", () => {
-    // The real 2026-W38 issue took 5 of 12 items from openai.com because ties
-    // fell to the first feed in the preset. With shortlist 12 the cap is 3.
     const items = [
       ...Array.from({ length: 8 }, (_, i) =>
         cand({ url: `https://openai.com/${i}` }),
@@ -154,8 +145,6 @@ describe("select", () => {
   });
 
   it("groups subdomains of one publisher into a single bucket", () => {
-    // finance.yahoo.com and sg.finance.yahoo.com are the same publisher; a cap
-    // on the full hostname would let them through twice over.
     const items = [
       ...Array.from({ length: 6 }, (_, i) =>
         cand({ url: `https://finance.yahoo.com/${i}` }),
@@ -174,7 +163,6 @@ describe("select", () => {
   });
 
   it("fills the shortlist from capped publishers rather than running short", () => {
-    // Diversity must not shrink the newsletter when there is nothing else.
     const items = Array.from({ length: 10 }, (_, i) =>
       cand({ url: `https://only.com/${i}` }),
     );
@@ -185,9 +173,6 @@ describe("select", () => {
   });
 
   it("spreads the overflow evenly when diversity runs out", () => {
-    // Two publishers, six slots of headroom between them. Raising the cap a
-    // step at a time shares that headroom; a plain backfill would have given
-    // all of it to whichever publisher ranked highest.
     const items = [
       ...Array.from({ length: 8 }, (_, i) => cand({ url: `https://one.com/${i}` })),
       ...Array.from({ length: 8 }, (_, i) => cand({ url: `https://two.com/${i}` })),
@@ -229,7 +214,6 @@ describe("select", () => {
 
     const picked = select(items, { minScore: 6, shortlist: 12, now: NOW });
 
-    // Only 2 clear the bar, so it falls back to the top 5 overall.
     assert.equal(picked.length, 5);
     assert.deepEqual(picked.slice(0, 2).map((p) => p.score), [9, 8]);
   });
@@ -279,7 +263,6 @@ describe("select", () => {
       now: NOW,
     });
 
-    // One per domain, then backfill to reach the shortlist.
     assert.equal(picked.length, 12);
   });
 });

@@ -1,9 +1,3 @@
-/**
- * Kaba dil tespiti. Amaç kesinlik değil sıralama: "kahve sektörü" konusunda
- * Türkçe kaynaklar öne çıksın. Bu yüzden sonuç bir filtre değil, bir sinyal —
- * `("quantum computing", tr)` için doğru cevap "iyi kaynakların neredeyse
- * hepsi İngilizce" ve sert bir filtre boş preset üretirdi.
- */
 
 const TR_STOPWORDS = new Set([
   "ve", "ile", "bir", "bu", "için", "olarak", "daha", "gibi", "ama", "olan",
@@ -19,10 +13,8 @@ const EN_STOPWORDS = new Set([
   "more", "than", "after", "over", "about", "when", "which", "they", "would",
 ]);
 
-/** Türkçeye özgü harfler; aksansız yazılmış metinde bunlar çıkmaz. */
 const TR_LETTERS = /[ıİğĞşŞçÇöÖüÜ]/g;
 
-/** Aksansız Türkçe için ek desenleri — "guvenlik acigi tespit edildi". */
 const TR_SUFFIXES =
   /\b\w+(ler|lar|dir|dır|nin|nın|den|dan|ile|için|lik|lık|siz|sız)\b/gi;
 
@@ -34,8 +26,6 @@ export function detectLanguage(text: string): LanguageGuess {
   const clean = text.replace(/\s+/g, " ").trim();
 
   if (clean.length < MIN_CHARS) {
-    // Birkaç başlık dil tespiti için yeterli değil; özel adlar ve ödünç
-    // kelimeler kısa metinde sonucu kolayca çeviriyor.
     return { language: "unknown", confidence: 0 };
   }
 
@@ -57,7 +47,6 @@ export function detectLanguage(text: string): LanguageGuess {
     }
   }
 
-  // Aksan yoğunluğu güçlü bir sinyal, ama tek başına karar verdirmiyor.
   tr += (clean.match(TR_LETTERS)?.length ?? 0) / 8;
   tr += (clean.match(TR_SUFFIXES)?.length ?? 0) / 2;
 
@@ -70,7 +59,6 @@ export function detectLanguage(text: string): LanguageGuess {
   const [language, top, other] = tr >= en ? ["tr", tr, en] : ["en", en, tr];
   const confidence = Number(((top - other) / total).toFixed(2));
 
-  // İki dil birbirine çok yakınsa karar verme.
   if (confidence < 0.2) {
     return { language: "unknown", confidence };
   }

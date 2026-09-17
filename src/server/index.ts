@@ -12,11 +12,6 @@ import { openStream } from "./sse.js";
 
 const uiPath = fileURLToPath(new URL("./ui.html", import.meta.url));
 
-/**
- * Keşif sonuçları onay adımına kadar bellekte tutuluyor. Süreç ömrüyle
- * sınırlı ve kasten öyle: tek kullanıcılık yerel bir araç, oturum deposu
- * çözülmesi gereken bir problem değil.
- */
 type Session = {
   request: DiscoveryRequest;
   outcome: DiscoveryOutcome;
@@ -60,7 +55,6 @@ async function readJson(request: IncomingMessage): Promise<unknown> {
   for await (const chunk of request) {
     size += (chunk as Buffer).length;
 
-    // Yerel bir araç ama sınırsız gövde kabul etmek yine de yanlış.
     if (size > 1_000_000) {
       throw new Error("İstek gövdesi çok büyük");
     }
@@ -80,7 +74,6 @@ function sendJson(response: ServerResponse, status: number, body: unknown): void
   response.end(payload);
 }
 
-/** GET /api/discover — keşfi çalıştırır, ilerlemeyi SSE ile akıtır. */
 async function handleDiscover(
   url: URL,
   response: ServerResponse,
@@ -134,7 +127,6 @@ async function handleDiscover(
   }
 }
 
-/** POST /api/preset — onaylananlardan preset yazar. */
 async function handlePreset(
   request: IncomingMessage,
   response: ServerResponse,
@@ -219,8 +211,6 @@ const server = createServer((request, response) => {
 });
 
 server.on("error", (error: NodeJS.ErrnoException) => {
-  // Varsayılan davranış yığın izi basıp çıkmak; port çakışması sık ve
-  // kullanıcının yapabileceği bir şey var.
   if (error.code === "EADDRINUSE") {
     console.error(
       `\n  ${port} portu kullanımda. Başka bir port dene:\n` +
@@ -235,7 +225,6 @@ server.on("error", (error: NodeJS.ErrnoException) => {
   process.exitCode = 1;
 });
 
-// Yerel bir araç; dışarıya açılmasın.
 server.listen(port, "127.0.0.1", () => {
   console.log("");
   console.log(`  ${color.bold(color.cyan("Radar"))}  ${color.dim("kaynak keşfi")}`);

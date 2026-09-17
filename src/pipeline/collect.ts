@@ -44,7 +44,6 @@ function toCandidate(
 
 function withinWindow(publishedAt: string | null, cutoff: Date): boolean {
   if (!publishedAt) {
-    // Tarihsiz kayıtları elemiyoruz; tekrar kontrolünü seen.json yapıyor.
     return true;
   }
 
@@ -160,8 +159,6 @@ async function collectWebSearch(config: Config): Promise<Candidate[]> {
       const results = await searchNews(query, config.windowDays);
 
       for (const item of results) {
-        // RSS kaynakları zaten seçilmiş yayınlar; arama açık uçlu ve bir
-        // sosyal medya gönderisini haber diye getirebiliyor.
         if (isBlockedSource(item.url)) {
           continue;
         }

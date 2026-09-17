@@ -15,7 +15,6 @@ import type { DiscoveryRequest, FeedFinding, RankedFeed } from "./types.js";
 
 const MODELS = { cheap: "gpt-5-mini", strong: "gpt-5.1" };
 
-/** Google News, hiçbir kaynak bulunamadığında son çare. */
 function googleNewsFeed(topic: string, language: string): string {
   const region = language === "tr" ? "TR" : "US";
   const params = new URLSearchParams({
@@ -46,7 +45,6 @@ export type DiscoverOptions = {
   assumeYes: boolean;
   force: boolean;
   id?: string;
-  /** Verilmezse ilerleme terminale basılır. */
   onEvent?: (event: DiscoveryEvent) => void;
 };
 
@@ -56,10 +54,6 @@ export type DiscoveryOutcome = {
   deps: FindFeedDeps;
 };
 
-/**
- * Keşfin insan onayına kadarki kısmı. Ayrı durmasının sebebi, onayın nerede
- * alındığının değişmesi: terminalde readline, tarayıcıda bir form.
- */
 export async function discoverSources(
   request: DiscoveryRequest,
   options: { onEvent?: (event: DiscoveryEvent) => void } = {},
@@ -70,18 +64,15 @@ export async function discoverSources(
     now: () => new Date(),
   };
 
-  // Sunucu aynı akışı SSE'ye aktarabilsin diye ilerleme olay olarak çıkıyor.
   const emit = options.onEvent;
   const emitStep = (label: string) => (emit ? emit({ kind: "step", label }) : step(label));
   const emitNote = (label: string) => (emit ? emit({ kind: "note", label }) : note(label));
   const emitDone = (label: string) => (emit ? emit({ kind: "done", label }) : done(label));
 
-  // 1 — Konuyu aranabilir hale getir.
   emitStep("Konu çözümleniyor...");
   const brief = await makeTopicBrief(request, MODELS.cheap);
   emitDone(`${brief.searchQueries.length} sorgu, ${brief.seedDomains.length} tohum alan`);
 
-  // 2 — Aday siteler. Buradan çıkan hiçbir adres doğrulanmadan kullanılmıyor.
   emitStep("Aday kaynaklar aranıyor...");
   const sites = await findCandidateSites(brief, emitNote);
   emitDone(`${sites.length} aday site`);
@@ -91,7 +82,6 @@ export async function discoverSources(
     return null;
   }
 
-  // 3 — Feed bulma ve doğrulama. Tamamen deterministik.
   emitStep(`${sites.length} sitede feed aranıyor...`);
   const findings = await findFeeds(sites, deps);
   const usable = findings.filter((finding) => finding.feed !== null);
@@ -108,7 +98,6 @@ export async function discoverSources(
     return null;
   }
 
-  // 4 — Güvenilirlik sıralaması, tek toplu çağrı.
   emitStep("Kaynaklar değerlendiriliyor...");
   const ranked = await rankFeeds(usable, request, MODELS.cheap);
   emitDone(`${ranked.filter((feed) => feed.verdict === "keep").length} kaynak öneriliyor`);
@@ -116,10 +105,6 @@ export async function discoverSources(
   return { ranked, rejected, deps };
 }
 
-/**
- * Onaylanmış kaynaklardan preset üretip yazar. Profil çağrısı burada:
- * yarıda bırakılan bir çalıştırma pahalı çağrıyı ödemiyor.
- */
 export async function finalizePreset(
   request: DiscoveryRequest,
   accepted: readonly RankedFeed[],
@@ -130,8 +115,6 @@ export async function finalizePreset(
   const emitNote = (label: string) => (emit ? emit({ kind: "note", label }) : note(label));
   const emitDone = (label: string) => (emit ? emit({ kind: "done", label }) : done(label));
 
-  // 6 — Profil, KABUL EDİLEN feed'lerin gerçek başlıklarından. Onaydan sonra
-  // çalışıyor: yarıda bırakılan çalıştırmada pahalı çağrı ödenmiyor.
   emitStep("Alan profili çıkarılıyor...");
   const profile = await buildProfile(request, accepted, MODELS.strong);
   emitDone(`${profile.categories.length} kategori, ${profile.topics.length} konu`);
@@ -206,7 +189,6 @@ export async function finalizePreset(
 }
 
 
-/** CLI yolu: keşif, terminalde onay, preset. */
 export async function runDiscovery(
   request: DiscoveryRequest,
   options: DiscoverOptions,

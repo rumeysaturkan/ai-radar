@@ -7,8 +7,6 @@ function bytes(text: string, encoding: "utf-8" | "windows-1254" = "utf-8"): Arra
     return new TextEncoder().encode(text).buffer as ArrayBuffer;
   }
 
-  // windows-1254 is Latin-5: identical to latin1 apart from the Turkish
-  // letters, which is enough to build a fixture by hand.
   const map: Record<string, number> = {
     ı: 0xfd, İ: 0xdd, ğ: 0xf0, Ğ: 0xd0, ş: 0xfe, Ş: 0xde,
     ç: 0xe7, Ç: 0xc7, ö: 0xf6, Ö: 0xd6, ü: 0xfc, Ü: 0xdc,
@@ -63,8 +61,6 @@ describe("sniffCharset", () => {
 
 describe("decodeBody", () => {
   it("decodes a legacy Turkish encoding correctly", () => {
-    // response.text() would assume UTF-8 here and produce mojibake, which
-    // then poisons both language detection and the titles sent to the model.
     const raw = bytes("Guvenlik zafiyeti: ş ğ ı ç ö ü", "windows-1254");
 
     assert.equal(

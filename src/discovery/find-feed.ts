@@ -16,10 +16,6 @@ import type {
   ParsedFeed,
 } from "./types.js";
 
-/**
- * Nezaket ve maliyet sınırı. Bir site için en fazla bu kadar istek atılır;
- * merdiven erken çıkışlı olduğu için tipik site 2-3 istekte çözülüyor.
- */
 const MAX_REQUESTS_PER_SITE = 12;
 
 const SITE_CONCURRENCY = 5;
@@ -36,15 +32,9 @@ function describe(error: unknown): string {
 
 type Attempt =
   | { kind: "feed"; parsed: ParsedFeed }
-  /** Feed değil ama HTML; içinde feed adresleri olabilir. */
   | { kind: "html"; body: string; finalUrl: string }
   | { kind: "miss" };
 
-/**
- * Bir adresin gerçekten okunabilir bir feed olup olmadığını, parse ederek
- * kanıtlar. LLM'in ürettiği hiçbir adres bu kapıdan geçmeden preset'e
- * giremez — "model halüsinasyon gördü" hata sınıfını çökerten kural bu.
- */
 async function tryFeed(url: string, deps: FindFeedDeps): Promise<Attempt> {
   const page = await deps.fetchPage(url);
 
@@ -59,7 +49,6 @@ async function tryFeed(url: string, deps: FindFeedDeps): Promise<Attempt> {
   try {
     return { kind: "feed", parsed: await deps.parseFeed(page.body) };
   } catch {
-    // Çıplak & karakteri gerçek feed'lerde yaygın ve xml2js buna hata veriyor.
     try {
       return { kind: "feed", parsed: await deps.parseFeed(repairXml(page.body)) };
     } catch {
@@ -77,16 +66,12 @@ export async function findFeedForSite(
   let homepageReachable = false;
   const candidates: FeedLink[] = [];
 
-  // 1 — Ana sayfayı çek. Başarısız olsa bile yoklamaya devam edilir:
-  // Cloudflare arkasındaki siteler HTML'de 403 verip /feed'i açık bırakıyor.
   try {
     requestCount += 1;
     const page = await deps.fetchPage(site.origin);
 
     if (page.status < 400) {
       homepageReachable = true;
-      // finalUrl, istenen adres değil: yönlendirme varsa göreli href'ler
-      // yanlış çözümlenir.
       candidates.push(...extractFeedLinks(page.body, page.finalUrl));
     } else {
       error = `ana sayfa ${page.status}`;
@@ -95,7 +80,6 @@ export async function findFeedForSite(
     error = describe(cause);
   }
 
-  // 2 — Bulunan linkler, sonra bilinen yollar. Sırayla, ilk geçerliyle çık.
   const probes: FeedLink[] = probePaths(site.origin).map((url) => ({
     url,
     title: null,
@@ -114,10 +98,6 @@ export async function findFeedForSite(
     }
   }
 
-  // Merdiven ilerledikçe büyüyebilir: /rss adresi çoğu zaman bir feed değil,
-  // feed'leri listeleyen bir HTML sayfası oluyor (ölçümde NTV ve Evrensel tam
-  // olarak böyle kaçmıştı). O sayfadaki adresleri toplamak ek istek
-  // gerektirmiyor, o yüzden atmak yerine okunuyor.
   let harvestsLeft = 2;
 
   for (let index = 0; index < ladder.length; index += 1) {
@@ -151,7 +131,6 @@ export async function findFeedForSite(
 
           if (!seen.has(key)) {
             seen.add(key);
-            // Sıradaki denemeye koy: bu sayfa özellikle feed listeliyor.
             ladder.splice(index + 1, 0, found);
           }
         }
@@ -167,7 +146,6 @@ export async function findFeedForSite(
     const health = analyzeFeed(attempt.parsed, deps.now());
     const status = classify(health);
 
-    // Boş bir feed işe yaramaz; merdivenin geri kalanını denemeye devam et.
     if (status === "empty") {
       continue;
     }

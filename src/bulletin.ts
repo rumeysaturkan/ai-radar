@@ -32,11 +32,9 @@ function openInBrowser(filePath: string): void {
   try {
     spawn(command.cmd, command.args, { detached: true, stdio: "ignore" }).unref();
   } catch {
-    // Tarayıcı açılamazsa dosya yolu zaten ekrana yazılıyor.
   }
 }
 
-/** Kapak sayfasi icin her alanin arsiv durumunu toplar. */
 async function hubEntries(): Promise<HubEntry[]> {
   const presets = await listPresets();
   const entries: HubEntry[] = [];
@@ -67,7 +65,6 @@ async function main(): Promise<void> {
 
   await ensureKeys();
 
-  // 1 — Topla
   step("Kaynaklar taranıyor...");
   const collected = await collectCandidates(config);
   done(
@@ -83,7 +80,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 2 — Tekilleştir
   step("Tekrarlar eleniyor...");
   const seen = await readSeen(config.id);
   const deduped = dedupe(collected.candidates, seen, config);
@@ -99,10 +95,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 3 — Puanla
   step("İçerikler puanlanıyor...");
-  // Sayı kimliği puanlamadaki karıştırmanın tohumu: aynı hafta içindeki
-  // tekrar çalıştırmalar aynı sonucu versin.
   const issueId = isoWeekId(new Date());
   const scored = await scoreCandidates(config, deduped.fresh, { seed: issueId });
   done(`${scored.length} içerik değerlendirildi`);
@@ -118,7 +111,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 4 — Zenginleştir
   step(`${selected.length} haber okunup özetleniyor...`);
   const items = await enrichItems(config, selected);
   done(`${items.length} haber yazıldı`);
@@ -129,7 +121,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  // 5 — Derle
   step("Sayı derleniyor...");
   const archive = await listIssues(config.id);
   const previous = archive[0];
@@ -139,9 +130,6 @@ async function main(): Promise<void> {
   const now = new Date();
   const highlight = items[composition.highlightIndex] ?? items[0];
 
-  // Aynı hafta içinde ikinci kez çalıştırıldığında arşivde zaten bu hafta
-  // var; numarayı artırmak sayıyı "Sayı 2" yapıp aynı dosyanın üzerine
-  // yazıyordu. Var olan sayının numarası korunur.
   const existing = archive.find((entry) => entry.id === issueId);
 
   const issue: Issue = {
@@ -166,17 +154,12 @@ async function main(): Promise<void> {
       published: items.length,
     },
     usage: usageSoFar(),
-    // Elenen adaylar da saklanır: puanlayıcıyı ölçmenin, "X neden girmedi?"
-    // sorusunu cevaplamanın ve kaynak verimliliğini görmenin tek yolu bu.
     candidates: scored,
     sources: sourceStats(collected.candidates, scored, items),
   };
 
-  // 6 — Yayınla
   step("Sayfa üretiliyor...");
 
-  // Yalnızca yayınlananlar hafızaya yazılır; elenenler gelecek hafta
-  // olgunlaşırsa tekrar değerlendirilebilsin.
   for (const item of issue.items) {
     seen[item.id] = {
       url: item.url,

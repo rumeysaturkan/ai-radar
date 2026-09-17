@@ -6,7 +6,6 @@ const items = Array.from({ length: 60 }, (_, i) => i);
 
 describe("shuffle", () => {
   it("is deterministic for a given seed", () => {
-    // The pipeline must produce the same issue when rerun in the same week.
     assert.deepEqual(shuffle(items, "2026-W38"), shuffle(items, "2026-W38"));
   });
 
@@ -22,8 +21,6 @@ describe("shuffle", () => {
   });
 
   it("actually reorders", () => {
-    // Guards against a seed that happens to be a no-op, and against the
-    // Fisher-Yates loop being skipped entirely.
     assert.notDeepEqual(shuffle(items, "2026-W38"), items);
   });
 
@@ -39,9 +36,6 @@ describe("shuffle", () => {
   });
 
   it("spreads early elements across the list", () => {
-    // The point of shuffling is that batch position stops correlating with
-    // feed position. If the first ten inputs stayed in the first batch, the
-    // calibration drift we are trying to break would survive.
     const shuffled = shuffle(items, "2026-W38");
     const firstTen = new Set(items.slice(0, 10));
     const landedInFirstBatch = shuffled

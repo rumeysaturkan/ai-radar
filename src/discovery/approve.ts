@@ -51,10 +51,6 @@ export type ApprovalResult = {
   aborted: boolean;
 };
 
-/**
- * Keşif sonucu doğrudan üretime gitmiyor. Ajan çöp de buluyor; onay adımını
- * atlamak ilk bültenin çöp olması ve kullanıcının bir daha gelmemesi demek.
- */
 export async function approveFeeds(
   feeds: readonly RankedFeed[],
   rejected: readonly FeedFinding[],
@@ -64,7 +60,6 @@ export async function approveFeeds(
 ): Promise<ApprovalResult> {
   const pool = [...feeds];
 
-  // Ön seçim: "keep" verdikleri, üst sınıra kadar.
   const chosen = new Set<number>();
 
   pool.forEach((feed, index) => {
@@ -77,8 +72,6 @@ export async function approveFeeds(
 
   if (!interactive) {
     if (!options.assumeYes) {
-      // Sessiz otomatik onay, kimsenin gözden geçirmediği bir SEO-çiftliği
-      // preset'iyle bittiğin yerdir.
       console.error(
         "\n  Etkileşimli olmayan ortamda onay alınamıyor. Gözden geçirmeden\n" +
           "  devam etmek için --yes ver.\n",

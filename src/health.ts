@@ -54,7 +54,6 @@ async function main(): Promise<void> {
     );
   }
 
-  // Preset'te tanımlı ama hiç aday üretmemiş beslemeler: muhtemelen ölü.
   const silent = config.feeds
     .map((feed) => feed.name)
     .filter((name) => !health.some((entry) => entry.name === name));

@@ -1,10 +1,5 @@
 import type { Candidate, Item, ScoredCandidate, SourceStat } from "../types.js";
 
-/**
- * Kaynak başına huniyi çıkarır: kaç aday taranmış, kaçı puanlanmaya kalmış,
- * kaçı bültene girmiş. Kaynak sağlığı raporunun ve "hangi besleme işe
- * yarıyor" sorusunun tek veri kaynağı bu.
- */
 export function sourceStats(
   collected: readonly Candidate[],
   scored: readonly ScoredCandidate[],
@@ -35,7 +30,6 @@ export function sourceStats(
     bucket(item.source).published += 1;
   }
 
-  // Verimli kaynaklar üstte; eşitlikte çok tarayan önce, sonra ada göre.
   return [...byName.values()].sort(
     (a, b) =>
       b.published - a.published ||
@@ -45,7 +39,6 @@ export function sourceStats(
   );
 }
 
-/** Puan -> o puanı alan aday sayısı. Sıralamanın ne kadar ayırt ettiğini gösterir. */
 export function scoreHistogram(
   scored: readonly ScoredCandidate[],
 ): { score: number; count: number }[] {

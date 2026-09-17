@@ -5,16 +5,11 @@ import { warn } from "./util/log.js";
 
 let cachedClient: OpenAI | null = null;
 
-/** Anahtar kurulum adiminda girilebildigi icin istemci tembel kurulur. */
 function client(): OpenAI {
   cachedClient ??= new OpenAI();
   return cachedClient;
 }
 
-/**
- * 1M token başına USD. Başka bir model seçersen buraya bir satır ekle;
- * eklemezsen maliyet eksik raporlanır ve çalışma sonunda uyarı basılır.
- */
 const PRICING: Record<string, { input: number; output: number }> = {
   "gpt-5.2": { input: 1.75, output: 14 },
   "gpt-5.1": { input: 1.25, output: 10 },
@@ -25,16 +20,10 @@ const PRICING: Record<string, { input: number; output: number }> = {
   "gpt-4o-mini": { input: 0.15, output: 0.6 },
 };
 
-/** Sürüm sabitlenmiş model adları (gpt-5-mini-2025-08-07) taban fiyata düşer. */
 function priceOf(model: string): { input: number; output: number } | undefined {
   return PRICING[model] ?? PRICING[model.replace(/-\d{4}-\d{2}-\d{2}$/, "")];
 }
 
-/**
- * Maliyetin hangi adımda oluştuğu, projenin merkezi iddiasının kanıtı:
- * ucuz model yüzlerce adaya, pahalı model yalnızca son on ikiye dokunuyor.
- * Tek bir toplam rakam bunu göstermiyordu.
- */
 export type Stage = "score" | "enrich" | "compose" | "discovery" | "research";
 
 export type UsageLedger = {
@@ -48,11 +37,6 @@ export type UsageLedger = {
   unpricedModels(): string[];
 };
 
-/**
- * Her çalıştırma kendi defterini tutabilir. Modül seviyesinde tek bir sayaç,
- * aynı süreçte iki bültenin birbirinin maliyetini raporlamasına yol açardı —
- * sunucu bunu yapacak.
- */
 export function createLedger(): UsageLedger {
   const rows = new Map<string, StageUsage>();
 
@@ -139,17 +123,6 @@ export function unpricedModels(): string[] {
   return defaultLedger.unpricedModels();
 }
 
-/**
- * Akıl yürütme bütçesi. GPT-5 ailesi varsayılan olarak görünmez "reasoning"
- * token'ı üretiyor ve bunlar çıktı token'ı olarak faturalanıyor. Bu hattaki
- * işler — bir başlığı puanlamak, bir yazıyı iki cümleye indirmek — derin akıl
- * yürütme gerektirmiyor.
- *
- * Desteklenen değerler modele göre değişiyor: gpt-5.1 "none" kabul edip
- * "minimal" reddediyor, gpt-5-mini tam tersi. "low" ikisinde de çalışıyor,
- * varsayılan o. Desteklenmeyen bir değer verilirse ayar düşürülüp çağrı
- * tekrarlanır — yanlış bir ayar bütün bülteni düşürmesin.
- */
 export type ReasoningEffort = "none" | "minimal" | "low" | "medium" | "high";
 
 function rejectsReasoningEffort(error: unknown): boolean {
@@ -166,17 +139,11 @@ export type StructuredRequest = {
   user: string;
   schemaName: string;
   schema: Record<string, unknown>;
-  /** Maliyetin hangi adımda oluştuğunu kaydetmek için zorunlu. */
   stage: Stage;
   reasoningEffort?: ReasoningEffort;
-  /** Verilmezse süreç geneli defter kullanılır. */
   ledger?: UsageLedger;
 };
 
-/**
- * Modelden JSON şemasına birebir uyan bir cevap ister. Ürünün her hafta aynı
- * şekilli çıktı vermesinin sebebi bu: serbest metin yerine sözleşme.
- */
 export async function structured<T>(request: StructuredRequest): Promise<T> {
   const ledger = request.ledger ?? defaultLedger;
   let effort = request.reasoningEffort;
@@ -213,8 +180,6 @@ export async function structured<T>(request: StructuredRequest): Promise<T> {
     } catch (error) {
       lastError = error;
 
-      // Bu model bu akıl yürütme ayarını kabul etmiyor. Ayarı düşürüp bir kez
-      // daha dene; yanlış bir yapılandırma değeri bülteni komple düşürmesin.
       if (effort && rejectsReasoningEffort(error)) {
         warn(
           `${request.model} "reasoningEffort: ${effort}" değerini kabul etmedi; ` +

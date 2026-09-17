@@ -3,18 +3,6 @@ import { resolveSiteUrl, writeHub, writeOutputs, type HubEntry } from "./pipelin
 import { listIssues } from "./store.js";
 import { color } from "./util/log.js";
 
-/**
- * Arşivlenmiş sayıları sayfalara yeniden dönüştürür. Model çağrısı yok,
- * anahtar gerekmez — render zaten Issue'nun saf bir fonksiyonu.
- *
- * İki işe yarıyor:
- * - Yayınlanmış bir sayıyı elle düzeltmek. data/<alan>/archive/<id>.json
- *   dosyasından bir haberi siler ya da bir tldr'ı düzeltir, bunu çalıştırırsın.
- *   Yayınlanmış bir sayıyı mutasyona uğratan bir düzenleme arayüzü yazmaya
- *   göre otuz satır ve sıfır yeni kavram.
- * - Siteyi CI'da yayına almak. Arşivler depoda durduğu için sayfalar hiçbir
- *   API anahtarı olmadan yeniden üretilebiliyor.
- */
 async function renderPreset(id: string): Promise<number> {
   const config = await loadConfig(id);
   const issues = await listIssues(id);

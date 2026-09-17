@@ -38,10 +38,6 @@ function render(presets: readonly PresetSummary[], defaultIndex: number): void {
   console.log("");
 }
 
-/**
- * Alan secimi: once komut satiri argumani, sonra etkilesimli secim.
- * Etkilesimli olmayan bir ortamda (CI, pipe) son kullanilan alana duser.
- */
 export async function resolvePreset(argv: readonly string[]): Promise<string> {
   const presets = await listPresets();
 
@@ -72,7 +68,6 @@ export async function resolvePreset(argv: readonly string[]): Promise<string> {
   const defaultIndex = lastIndex >= 0 ? lastIndex : 0;
   const fallback = presets[defaultIndex]!;
 
-  // Etkilesimli olmayan ortamda soru sorulamaz; son secim tekrarlanir.
   if (!process.stdin.isTTY) {
     return fallback.id;
   }

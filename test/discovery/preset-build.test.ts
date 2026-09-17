@@ -69,8 +69,6 @@ describe("slugifyId", () => {
   });
 
   it("handles the dotted capital I", () => {
-    // "İ".toLowerCase() in JavaScript is "i" plus a combining dot, which does
-    // not match the safe-id pattern. Folding has to happen first.
     const slug = slugifyId("İSTANBUL Kahve");
 
     assert.equal(slug, "istanbul-kahve");
@@ -109,8 +107,6 @@ describe("uniquifyNames", () => {
   });
 
   it("disambiguates a collision with the domain", () => {
-    // The name is the per-source quota key in dedupe, so two feeds called
-    // "Blog" would silently share one quota.
     assert.deepEqual(
       uniquifyNames(["Blog", "Blog"], ["https://a.com/f", "https://b.com/f"]),
       ["Blog", "Blog (b.com)"],
@@ -157,7 +153,6 @@ describe("buildPreset", () => {
   });
 
   it("survives a round trip through JSON", () => {
-    // It is written to disk and read back by loadConfig.
     const config = buildPreset({
       id: "kahve",
       language: "tr",
@@ -186,7 +181,6 @@ describe("buildPreset", () => {
   });
 
   it("turns Hacker News off when the profile asks for no queries", () => {
-    // Hacker News is pure noise outside software topics.
     const config = buildPreset({
       id: "kahve",
       language: "tr",
@@ -223,9 +217,6 @@ describe("sanitizeProfile", () => {
   };
 
   it("caps and deduplicates categories", () => {
-    // Strict JSON schema ignores minItems/maxItems, so the bound has to be
-    // applied in code. A duplicate makes the scoring enum invalid and every
-    // batch fails.
     const profile = sanitizeProfile(
       {
         ...base,
@@ -308,8 +299,6 @@ describe("truncateWords", () => {
   });
 
   it("stops at a word boundary instead of mid-word", () => {
-    // A plain slice produced headings like "Küresel Kahve Ticareti ve Pi",
-    // and these are printed verbatim as section headings.
     const cut = truncateWords("Küresel Kahve Ticareti ve Piyasalar", 28);
 
     assert.ok(cut.length <= 28);

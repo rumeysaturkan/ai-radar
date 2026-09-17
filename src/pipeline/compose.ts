@@ -36,7 +36,6 @@ export async function composeIssue(
     tldr: item.tldr,
   }));
 
-  // Önceki sayıyı vermek bülteni "canlı" yapıyor: editör süreklilik kurabiliyor.
   const previousBlock = previous
     ? [
         "",
@@ -76,7 +75,6 @@ export async function composeIssue(
     present.has(category),
   );
 
-  // Editörün atladığı kategoriler yine de bültende yer alsın.
   for (const category of present) {
     if (!ordered.includes(category)) {
       ordered.push(category);

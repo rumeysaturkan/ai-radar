@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { validateConfig } from "../src/config-validate.js";
 
-/** A minimal preset that should pass, so each test can break one thing. */
 function preset(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
     name: "Test",
@@ -39,8 +38,6 @@ describe("validateConfig", () => {
   });
 
   it("catches a number written as a string", () => {
-    // The single most common hand-editing mistake, and previously it flowed
-    // through as a string into slice() and comparisons.
     const problems = problemsOf({ shortlist: "12" });
 
     assert.equal(problems.length, 1);
@@ -60,8 +57,6 @@ describe("validateConfig", () => {
     });
 
     it("rejects duplicates, case-insensitively", () => {
-      // score.ts turns these into a JSON-schema enum; a duplicate makes the
-      // schema invalid and every scoring batch fails.
       const problems = problemsOf({ categories: ["Model", "model"] });
 
       assert.equal(problems.length, 1);
@@ -89,8 +84,6 @@ describe("validateConfig", () => {
     });
 
     it("rejects duplicate feed names", () => {
-      // The name is the per-source quota key in dedupe; two feeds sharing a
-      // name silently share one quota.
       const problems = problemsOf({
         feeds: [
           { name: "Blog", url: "https://a.com/feed" },
@@ -124,7 +117,6 @@ describe("validateConfig", () => {
   });
 
   it("requires at least one way of finding content", () => {
-    // Otherwise the run reaches step 1 and exits with a confusing message.
     const problems = problemsOf({ feeds: [] });
 
     assert.equal(problems.length, 1);
@@ -153,7 +145,6 @@ describe("validateConfig", () => {
   });
 
   it("collects every problem instead of stopping at the first", () => {
-    // A contributor editing a preset should see the whole list at once.
     const problems = problemsOf({
       shortlist: "12",
       minScore: 99,

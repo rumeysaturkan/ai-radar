@@ -3,13 +3,6 @@ import { validateConfig } from "../config-validate.js";
 import { domainOf } from "../util/url.js";
 import type { RankedFeed } from "./types.js";
 
-/**
- * Türkçe harfleri ASCII karşılıklarına indirger.
- *
- * Katlama toLowerCase'den ÖNCE yapılmak zorunda: JavaScript'te
- * "İ".toLowerCase() birleştirici noktalı "i̇" üretiyor ve bu, config.ts'teki
- * ^[a-z0-9][a-z0-9-]*$ kontrolünü geçmeyen bir kimlik demek.
- */
 const FOLD: Record<string, string> = {
   İ: "i", I: "i", ı: "i",
   Ğ: "g", ğ: "g",
@@ -31,15 +24,9 @@ export function slugifyId(input: string): string {
     .slice(0, 40)
     .replace(/-+$/, "");
 
-  // Kimlik rakamla başlayamaz; klasör adı olarak da kullanılıyor.
   return /^[0-9]/.test(slug) ? `x-${slug}` : slug;
 }
 
-/**
- * Feed adları kozmetik değil: collect.ts candidate.source = feed.name yapıyor
- * ve dedupe.ts kaynak başına kotayı bu adla tutuyor. Aynı adı taşıyan iki
- * besleme sessizce tek kotayı paylaşır ve biri diğerini yutar.
- */
 export function uniquifyNames(names: readonly string[], urls: readonly string[]): string[] {
   const used = new Set<string>();
 
@@ -102,7 +89,6 @@ export function buildPreset(input: BuildInput): Config {
       url: entry.feed?.url ?? "",
     };
 
-    // Hacimli kaynaklara kendi kotası verilir; yoksa havuzu doldururlar.
     const suggested = entry.health?.suggestedMax;
 
     if (suggested !== undefined && suggested < 12) {
@@ -142,7 +128,6 @@ export function buildPreset(input: BuildInput): Config {
   };
 }
 
-/** Yazmadan önceki son kapı; loadConfig'in kullandığı doğrulayıcının aynısı. */
 export function checkPreset(config: Config): string[] {
   return validateConfig(
     JSON.parse(JSON.stringify(config)) as unknown,

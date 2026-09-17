@@ -23,7 +23,6 @@ describe("resolveLang", () => {
 
 describe("languageName", () => {
   it("names a language from its tag", () => {
-    // Comes from Node's own data, so there is no table to keep in sync.
     assert.equal(languageName("tr"), "Turkish");
     assert.equal(languageName("en"), "English");
     assert.equal(languageName("de"), "German");
@@ -41,8 +40,6 @@ describe("outputLanguageRule", () => {
   });
 
   it("works for a language with no UI strings", () => {
-    // Prompt bodies are English and only the output language varies, so a
-    // preset can target a language the interface does not speak.
     assert.match(outputLanguageRule("ja"), /in Japanese/);
   });
 
@@ -78,8 +75,6 @@ describe("t", () => {
   });
 
   it("has no untranslated placeholders left in any string", () => {
-    // Record<Lang, Record<Key, string>> catches a missing key at compile time;
-    // this catches a variable someone forgot to pass.
     for (const lang of ["tr", "en"] as const) {
       const rendered = t(lang, "html.compiledBy", { title: "X", date: "Y" });
       assert.ok(!rendered.includes("{"), `${lang} left a placeholder`);

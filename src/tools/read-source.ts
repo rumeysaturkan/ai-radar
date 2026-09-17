@@ -45,7 +45,6 @@ export async function readSource(url: string): Promise<SourceContent> {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   const title = decodeEntities(titleMatch?.[1]?.trim() ?? url);
 
-  // <article> varsa gövdeyi oradan al; yoksa tüm sayfayı temizle.
   const articleMatch = html.match(/<article[\s\S]*?<\/article>/i);
   const body = articleMatch?.[0] ?? html;
 

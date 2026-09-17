@@ -4,9 +4,6 @@ import { isBlockedSource } from "../../src/util/blocklist.js";
 
 describe("isBlockedSource", () => {
   it("blocks social platforms", () => {
-    // A LinkedIn post reached a real issue through web search before this
-    // existed. RSS feeds do not have the problem - they are already a chosen
-    // publication - but search results are open-ended.
     for (const url of [
       "https://www.linkedin.com/posts/someone_something",
       "https://twitter.com/x/status/1",

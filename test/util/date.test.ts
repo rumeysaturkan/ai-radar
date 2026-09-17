@@ -2,11 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { daysAgo, formatDate, isoWeekId } from "../../src/util/date.js";
 
-/**
- * Midday local time, so the local date components isoWeekId reads are the same
- * in every timezone. A bare "2026-01-01" would be parsed as UTC midnight and
- * land on the previous day west of Greenwich.
- */
 function localNoon(day: string): Date {
   return new Date(`${day}T12:00:00`);
 }
@@ -20,23 +15,15 @@ describe("isoWeekId", () => {
     assert.equal(isoWeekId(localNoon("2026-01-05")), "2026-W02");
   });
 
-  // The Thursday of the week decides which year the week belongs to, so a week
-  // straddling New Year is named after the year holding most of it. These are
-  // the cases a naive implementation gets wrong.
   describe("year boundaries", () => {
     it("counts late December into the next ISO year", () => {
-      // Monday 2025-12-29; its Thursday is 2026-01-01.
       assert.equal(isoWeekId(localNoon("2025-12-29")), "2026-W01");
-      // Monday 2024-12-30; its Thursday is 2025-01-02.
       assert.equal(isoWeekId(localNoon("2024-12-30")), "2025-W01");
-      // Monday 2019-12-30; its Thursday is 2020-01-02.
       assert.equal(isoWeekId(localNoon("2019-12-30")), "2020-W01");
     });
 
     it("counts early January back into the previous ISO year", () => {
-      // Friday 2021-01-01; its Thursday is 2020-12-31.
       assert.equal(isoWeekId(localNoon("2021-01-01")), "2020-W53");
-      // Saturday 2022-01-01; its Thursday is 2021-12-30.
       assert.equal(isoWeekId(localNoon("2022-01-01")), "2021-W52");
     });
 
@@ -52,21 +39,21 @@ describe("isoWeekId", () => {
 
   it("gives every day of one week the same id", () => {
     const week = [
-      "2026-09-14", // Monday
+      "2026-09-14",
       "2026-09-15",
       "2026-09-16",
       "2026-09-17",
       "2026-09-18",
       "2026-09-19",
-      "2026-09-20", // Sunday
+      "2026-09-20",
     ].map((day) => isoWeekId(localNoon(day)));
 
     assert.deepEqual(new Set(week), new Set(["2026-W38"]));
   });
 
   it("rolls over on Monday, not Sunday", () => {
-    assert.equal(isoWeekId(localNoon("2026-09-20")), "2026-W38"); // Sunday
-    assert.equal(isoWeekId(localNoon("2026-09-21")), "2026-W39"); // Monday
+    assert.equal(isoWeekId(localNoon("2026-09-20")), "2026-W38");
+    assert.equal(isoWeekId(localNoon("2026-09-21")), "2026-W39");
   });
 });
 
@@ -79,8 +66,6 @@ describe("formatDate", () => {
   });
 
   it("returns the input unchanged when it is not a date", () => {
-    // Callers pass through feed data; an unparseable value must not become
-    // "Invalid Date" in the rendered newsletter.
     assert.equal(formatDate("not a date", "tr"), "not a date");
     assert.equal(formatDate("", "en"), "");
   });

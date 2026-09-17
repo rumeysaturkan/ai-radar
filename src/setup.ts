@@ -18,7 +18,6 @@ async function readEnvFile(): Promise<string> {
   }
 }
 
-/** Var olan satırı günceller, yoksa dosyanın sonuna ekler. */
 function upsertEnvLine(content: string, key: string, value: string): string {
   const line = `${key}=${value}`;
   const pattern = new RegExp(`^${key}=.*$`, "m");

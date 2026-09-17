@@ -9,9 +9,6 @@ import {
 } from "../../src/pipeline/render.js";
 import { makeConfig, makeIssue, makeItem } from "../fixtures/issue.js";
 
-// These assert invariants rather than exact markup. A golden-file snapshot of a
-// 480-line document that embeds a full stylesheet breaks on every CSS tweak,
-// and a test nobody trusts gets deleted.
 describe("renderIssueHtml", () => {
   it("declares the configured language, not a hardcoded one", () => {
     const items = [makeItem()];
@@ -62,7 +59,6 @@ describe("renderIssueHtml", () => {
     );
 
     assert.ok(!html.includes("javascript:"), "must not emit a javascript: href");
-    // The story is still reported, just without a clickable link.
     assert.match(html, /Zararlı/);
   });
 
@@ -105,7 +101,6 @@ describe("renderMarkdown", () => {
 
 describe("resolveSiteUrl", () => {
   it("returns null for an unset or unusable site url", () => {
-    // RSS needs absolute links; a relative one produces a feed no reader accepts.
     assert.equal(resolveSiteUrl(makeConfig({ siteUrl: "" })), null);
     assert.equal(resolveSiteUrl(makeConfig({ siteUrl: "   " })), null);
     assert.equal(resolveSiteUrl(makeConfig({ siteUrl: "example.com" })), null);
@@ -155,8 +150,6 @@ describe("renderIndexHtml", () => {
 
 describe("language switching", () => {
   it("renders the chrome in the configured language", () => {
-    // config.language used to control only the date format and <html lang>;
-    // every visible label was hardcoded Turkish.
     const items = [makeItem()];
     const tr = renderIssueHtml(makeConfig({ language: "tr" }), makeIssue(items));
     const en = renderIssueHtml(

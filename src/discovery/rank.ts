@@ -39,10 +39,6 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-/**
- * Modelin cevabını kullanılabilir hale getirir. Saf, çünkü hataların yaşadığı
- * yer burası: aralık dışı index, uydurulmuş verdict, boş isim.
- */
 export function applyRatings(
   findings: readonly FeedFinding[],
   ratings: readonly Rating[],
@@ -53,7 +49,6 @@ export function applyRatings(
     const finding = findings[rating.index];
 
     if (!finding) {
-      // score.ts'te olduğu gibi: aralık dışı index sessizce atlanır.
       continue;
     }
 
@@ -83,11 +78,6 @@ const VERDICT_ORDER: Record<RankedFeed["verdict"], number> = {
   drop: 2,
 };
 
-/**
- * Dil bir sıralama sinyali, filtre değil. ("quantum computing", tr) için doğru
- * cevap "iyi kaynakların neredeyse hepsi İngilizce" — sert bir filtre boş bir
- * preset üretirdi.
- */
 function languageBonus(feed: RankedFeed, wanted: string): number {
   const declared = feed.health?.declaredLanguage;
   const detected = feed.health?.detectedLanguage;
@@ -122,7 +112,6 @@ export function sortFeeds(
       return b.credibility - a.credibility;
     }
 
-    // Bayat kaynak elenmez, sadece arkaya düşer.
     const freshA = a.health?.daysSinceLastPost ?? Number.MAX_SAFE_INTEGER;
     const freshB = b.health?.daysSinceLastPost ?? Number.MAX_SAFE_INTEGER;
 
@@ -130,11 +119,6 @@ export function sortFeeds(
   });
 }
 
-/**
- * Tek bir toplu çağrıyla güvenilirlik değerlendirmesi. Alan adı tek başına
- * tahmin yürütmek demek; asıl ayırt edici sinyal örnek başlıklar — bir meslek
- * yayınını SEO çiftliğinden ayıran şey o.
- */
 export async function rankFeeds(
   findings: readonly FeedFinding[],
   request: DiscoveryRequest,

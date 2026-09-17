@@ -41,14 +41,10 @@ describe("detectLanguage", () => {
   });
 
   it("still recognises Turkish written without diacritics", () => {
-    // Common on older sites and in comment-heavy sources. Leaning only on
-    // the special letters would call this English.
     assert.equal(detectLanguage(TURKISH_NO_DIACRITICS).language, "tr");
   });
 
   it("declines to guess from a handful of words", () => {
-    // Proper nouns and loanwords flip the result on short input, so the
-    // honest answer is no answer.
     assert.equal(detectLanguage("OpenAI GPT-5").language, "unknown");
     assert.equal(detectLanguage("").language, "unknown");
     assert.equal(detectLanguage("Kısa bir başlık").language, "unknown");

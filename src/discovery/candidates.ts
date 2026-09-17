@@ -16,14 +16,6 @@ function toOrigin(rawUrl: string): string | null {
   }
 }
 
-/**
- * Aday siteleri iki kaynaktan toplar: modelin hatırladığı alan adları
- * (anında, bedava, tanınmış yayınlar için şaşırtıcı derecede iyi) ve arama
- * sonuçları.
- *
- * Hiçbiri güvenilmiyor — buradan çıkan her adres findFeedForSite'tan geçmek
- * zorunda. "Model olmayan bir adres uydurdu" hata sınıfını çökerten kural bu.
- */
 export async function findCandidateSites(
   brief: TopicBrief,
   onProgress?: (message: string) => void,

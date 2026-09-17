@@ -1,15 +1,5 @@
-/**
- * Tohumlanabilir karıştırma. Puanlama 30'luk gruplara bölünüp her grup
- * birbirinden bağımsız puanlandığı için gruplar arası kalibrasyon kayması
- * oluyor; adaylar besleme sırasında geldiğinde bu kayma doğrudan kaynak
- * sırasıyla hizalanıyor. Karıştırma bu hizalanmayı bozar.
- *
- * Tohum sayının kimliği olduğu için sonuç aynı hafta içinde tekrar
- * çalıştırıldığında değişmez — hat deterministik kalır.
- */
 
 function hashSeed(text: string): number {
-  // FNV-1a; kriptografik değil, sadece dağılımı düzgün bir başlangıç değeri.
   let hash = 2166136261;
 
   for (let index = 0; index < text.length; index += 1) {

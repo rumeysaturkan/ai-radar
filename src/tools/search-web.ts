@@ -46,7 +46,6 @@ async function tavily(body: Record<string, unknown>): Promise<TavilyResponse> {
   return (await response.json()) as TavilyResponse;
 }
 
-/** Serbest web araması — research agent tarafından kullanılır. */
 export async function searchWeb(query: string): Promise<SearchResult[]> {
   const data = await tavily({
     query,
@@ -61,7 +60,6 @@ export async function searchWeb(query: string): Promise<SearchResult[]> {
   }));
 }
 
-/** Son N güne sınırlı haber araması — bülten toplayıcısı tarafından kullanılır. */
 export async function searchNews(
   query: string,
   days: number,

@@ -3,19 +3,12 @@ import { fetchWithTimeout } from "../util/http.js";
 import { decodeBody } from "./decode.js";
 import type { ParsedFeed } from "./types.js";
 
-/**
- * Keşfin tek ağ yüzeyi. Geri kalan her şey saf tutuluyor ve bu arayüz
- * enjekte edilerek test ediliyor.
- */
-
-/** Parse edilemeyecek kadar büyük gövdeyi indirmeye devam etme. */
 const MAX_BYTES = 3_000_000;
 
 const parser = new Parser({ timeout: 15_000 });
 
 export type FetchedPage = {
   requestedUrl: string;
-  /** Yönlendirmeden sonraki adres; göreli çözümleme buna göre yapılmalı. */
   finalUrl: string;
   status: number;
   contentType: string;
@@ -48,12 +41,6 @@ export const fetchPage: PageFetcher = async (url, timeoutMs = 15_000) => {
   };
 };
 
-/**
- * parseURL değil parseString kullanılıyor: parseURL kendi fetch'ini, kendi
- * User-Agent'ını ve AbortController'sız kendi yönlendirme politikasını
- * getiriyor. Keşif zaten yanıt başlıklarına (charset, content-type) ve bayt
- * sınırına ihtiyaç duyuyor; tek bir HTTP yığını olsun.
- */
 export async function parseFeedXml(xml: string): Promise<ParsedFeed> {
   const parsed = await parser.parseString(xml);
 

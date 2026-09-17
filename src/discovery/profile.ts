@@ -25,11 +25,6 @@ const schema = {
 const MAX_CATEGORIES = 6;
 const MIN_CATEGORIES = 3;
 
-/**
- * Kelime ortasından kesmez. Bu değerler sayfada başlık olarak birebir
- * basılıyor; düz bir slice() "Küresel Kahve Ticareti ve Pi" gibi çıktılar
- * üretiyordu.
- */
 export function truncateWords(text: string, maxLength: number): string {
   const clean = text.replace(/\s+/g, " ").trim();
 
@@ -40,7 +35,6 @@ export function truncateWords(text: string, maxLength: number): string {
   const cut = clean.slice(0, maxLength);
   const lastSpace = cut.lastIndexOf(" ");
 
-  // Tek uzun kelimeyse kesmekten başka çare yok; değilse son tam kelimede dur.
   const trimmed = lastSpace > maxLength * 0.5 ? cut.slice(0, lastSpace) : cut;
 
   return trimmed.replace(/[\s,;:–—-]+$/, "");
@@ -63,20 +57,12 @@ function clean(values: readonly string[], maxLength: number): string[] {
   return out;
 }
 
-/**
- * Bu fonksiyon yük taşıyor, kozmetik değil.
- *
- * OpenAI'nin strict json_schema'sı minItems/maxItems'ı yok sayıyor — dizi
- * uzunluğu şemada kısıtlanamıyor. Kategoriler tekrarlı ya da boş gelirse
- * score.ts geçersiz bir enum kuruyor ve HER puanlama grubu patlıyor.
- */
 export function sanitizeProfile(
   raw: DomainProfile,
   request: DiscoveryRequest,
 ): DomainProfile {
   const categories = clean(raw.categories, 28).slice(0, MAX_CATEGORIES);
 
-  // Kategori sayısı taban altına düşerse doldur: boş enum hattı durdurur.
   const filler = ["Genel", "Öne Çıkanlar", "Diğer"];
 
   while (categories.length < MIN_CATEGORIES) {
@@ -103,14 +89,6 @@ export function sanitizeProfile(
   };
 }
 
-/**
- * Bülteni tarif eden alanları üretir.
- *
- * Girdisi kabul edilen feed'lerden gelen GERÇEK başlıklar. Ham konu
- * dizesinden üretilseydi kulağa hoş gelen ama hiçbir kaynağın üretmediği
- * kategoriler çıkardı ve puanlayıcı her haberi yanlış etiketlemek zorunda
- * kalırdı.
- */
 export async function buildProfile(
   request: DiscoveryRequest,
   accepted: readonly RankedFeed[],

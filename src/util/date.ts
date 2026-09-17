@@ -1,13 +1,10 @@
-/** ISO-8601 hafta kimliği üretir, ör. "2026-W38". */
 export function isoWeekId(date: Date): string {
   const target = new Date(
     Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
   );
 
-  // ISO haftasında gün 1=Pazartesi ... 7=Pazar.
   const dayNumber = target.getUTCDay() === 0 ? 7 : target.getUTCDay();
 
-  // Haftanın perşembesi, o haftanın hangi yıla ait olduğunu belirler.
   target.setUTCDate(target.getUTCDate() + 4 - dayNumber);
 
   const year = target.getUTCFullYear();

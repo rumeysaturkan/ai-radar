@@ -38,8 +38,6 @@ describe("sourceStats", () => {
   });
 
   it("keeps a source that was scanned but never published", () => {
-    // This row is the whole point: a feed producing volume and no results is
-    // exactly what the health report needs to surface.
     const stats = sourceStats([candidate("Noisy", "1")], [], []);
 
     assert.deepEqual(stats, [
@@ -89,8 +87,6 @@ describe("scoreHistogram", () => {
   });
 
   it("exposes the clustering that makes ranking arbitrary", () => {
-    // 30 candidates, 28 of them tied at 8: whichever 12 reach the newsletter
-    // are chosen by the tie-break, not by the score.
     const scored = [
       ...Array.from({ length: 28 }, (_, i) => scoredCandidate("A", `t${i}`, 8)),
       scoredCandidate("B", "hi", 9),

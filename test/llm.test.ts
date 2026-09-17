@@ -12,9 +12,6 @@ function usage(prompt: number, completion: number) {
 
 describe("createLedger", () => {
   it("attributes cost to the stage that spent it", () => {
-    // The project's central claim is that the cheap model touches hundreds of
-    // candidates while the expensive one touches twelve. One aggregate number
-    // could not show that.
     const ledger = createLedger();
 
     ledger.record("score", "gpt-5-mini", usage(20_000, 4_000));
@@ -23,9 +20,7 @@ describe("createLedger", () => {
     const stages = ledger.byStage();
 
     assert.equal(stages.length, 2);
-    // gpt-5-mini: 20000/1M*0.25 + 4000/1M*2 = 0.005 + 0.008
     assert.equal(stages.find((s) => s.stage === "score")!.estimatedCostUsd, 0.013);
-    // gpt-5.1: 30000/1M*1.25 + 3000/1M*10 = 0.0375 + 0.03
     assert.equal(stages.find((s) => s.stage === "enrich")!.estimatedCostUsd, 0.0675);
   });
 
@@ -71,15 +66,12 @@ describe("createLedger", () => {
   });
 
   it("flags a model it has no price for instead of charging zero", () => {
-    // Silently adding zero is what made the figure printed in the newsletter
-    // footer wrong with no indication.
     const ledger = createLedger();
 
     ledger.record("score", "some-new-model", usage(1_000_000, 1_000_000));
 
     assert.deepEqual(ledger.unpricedModels(), ["some-new-model"]);
     assert.equal(ledger.byStage()[0]!.priced, false);
-    // Tokens are still counted, so the reader sees something is off.
     assert.equal(ledger.totals().inputTokens, 1_000_000);
   });
 
@@ -111,7 +103,6 @@ describe("createLedger", () => {
   });
 
   it("keeps two ledgers independent", () => {
-    // Two concurrent runs in the web UI must not report each other's spend.
     const a = createLedger();
     const b = createLedger();
 

@@ -2,8 +2,6 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { canonicalUrl, domainOf, isHttpUrl, safeHref } from "../../src/util/url.js";
 
-// Feed content is untrusted input, and becomes more so once sources are
-// discovered automatically rather than hand-curated.
 describe("isHttpUrl", () => {
   it("accepts http and https", () => {
     assert.equal(isHttpUrl("https://example.com/a"), true);
@@ -11,7 +9,6 @@ describe("isHttpUrl", () => {
   });
 
   it("rejects schemes that only look like http", () => {
-    // The previous check was url.startsWith("http"), which let these through.
     assert.equal(isHttpUrl("httpx://example.com"), false);
     assert.equal(isHttpUrl("http-evil://example.com"), false);
   });
@@ -42,17 +39,12 @@ describe("safeHref", () => {
   });
 
   it("returns null rather than an unsafe href", () => {
-    // Escaping does not stop a javascript: scheme from running on click, so
-    // the only safe answer is to not build the link at all.
     assert.equal(safeHref("javascript:alert(1)"), null);
     assert.equal(safeHref("data:text/html,x"), null);
     assert.equal(safeHref(""), null);
   });
 });
 
-// canonicalUrl is the basis of deduplication: two addresses for the same story
-// must collapse to one string, because that string is hashed into the candidate
-// id and looked up in seen.json.
 describe("canonicalUrl", () => {
   it("collapses the many addresses of one article", () => {
     const variants = [
@@ -77,7 +69,6 @@ describe("canonicalUrl", () => {
   });
 
   it("keeps parameters that identify the content", () => {
-    // Dropping these would merge genuinely different pages into one id.
     assert.equal(canonicalUrl("https://example.com/p?id=5"), "https://example.com/p?id=5");
     assert.equal(
       canonicalUrl("https://example.com/feed?utm_source=x&format=rss"),
@@ -113,8 +104,6 @@ describe("domainOf", () => {
   });
 
   it("keeps meaningful subdomains", () => {
-    // The diversity cap groups by domain, so arxiv.org and blog.arxiv.org
-    // should not silently merge.
     assert.equal(domainOf("https://blog.example.com/x"), "blog.example.com");
   });
 

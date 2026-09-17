@@ -8,14 +8,11 @@ import { warn } from "./util/log.js";
 export type Feed = {
   name: string;
   url: string;
-  /** Bu kaynaktan bir sayida degerlendirilecek azami aday. */
   max?: number;
 };
 
 export type Config = {
-  /** Dosya adiyla ayni olan kararli kimlik; cikti klasorlerini ayirir. */
   id: string;
-  /** Alan secim ekraninda gorunen ad. */
   name: string;
   title: string;
   tagline: string;
@@ -30,12 +27,6 @@ export type Config = {
   shortlist: number;
   minScore: number;
   models: { scorer: string; writer: string };
-  /**
-   * GPT-5 ailesi varsayilan olarak gorunmez akil yurutme token'i uretir ve
-   * bunlar cikti olarak faturalanir. Bu hattaki isler derin akil yurutme
-   * gerektirmiyor; varsayilanla birakmak sayi maliyetini 7 katina cikariyor.
-   * Desteklenen degerler modele gore degisir, "low" hepsinde calisir.
-   */
   reasoningEffort: ReasoningEffort;
   feeds: Feed[];
   hackerNews: { enabled: boolean; minPoints: number; queries: string[] };
@@ -75,10 +66,6 @@ export function presetPath(id: string): string {
   return path.join(presetsDir, `${id}.json`);
 }
 
-/**
- * Dosya adi kimlik olarak kullanildigi icin disaridan gelen deger yol
- * ayiricisi veya ".." icermemeli.
- */
 function assertSafeId(id: string): void {
   if (!SAFE_ID.test(id)) {
     throw new Error(
@@ -87,7 +74,6 @@ function assertSafeId(id: string): void {
   }
 }
 
-/** presets/ altindaki tum alanlari ada gore siralayarak dondurur. */
 export async function listPresets(): Promise<PresetSummary[]> {
   let files: string[];
 
@@ -118,7 +104,6 @@ export async function listPresets(): Promise<PresetSummary[]> {
         feedCount: parsed.feeds?.length ?? 0,
       });
     } catch {
-      // Bozuk bir preset diger alanlarin listelenmesini engellemesin.
     }
   }
 
@@ -161,12 +146,9 @@ export async function loadConfig(id: string): Promise<Config> {
 
   const parsed = parsedJson as Partial<Config>;
 
-  // Preset dosyasinda sadece degistirilmek istenen alan yazilabilsin.
   return {
     ...defaults,
     ...parsed,
-    // Kimlik her zaman dosya adindan gelir; icerideki yazim hatasi
-    // cikti klasoru ile preset dosyasini ayirmasin.
     id,
     name: parsed.name ?? id,
     models: { ...defaults.models, ...parsed.models },

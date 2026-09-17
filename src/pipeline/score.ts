@@ -17,10 +17,6 @@ type Rating = {
 };
 
 export type ScoreOptions = {
-  /**
-   * Grup karıştırmasının tohumu. Sayının kimliği veriliyor: aynı hafta
-   * tekrar çalıştırıldığında sonuç değişmez.
-   */
   seed?: string;
 };
 
@@ -42,18 +38,6 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
 }
 
-/**
- * Puanlama tek eksende kalıyor. impact/novelty diye iki 0-5 ekseni denendi ve
- * aynı 84 aday üzerinde ölçüldü: ayrı puan seviyesi 10'dan 9'a düştü, tepe
- * sıkıştı (en yüksek 9 yerine 8) ve kesimdeki belirsizlik birebir aynı kaldı.
- * Kazanmadığı için tutulmadı.
- *
- * Ölçümün asıl gösterdiği şu: her iki şemada da kısa listenin 12 yerinden 8'i
- * eşit puanlı adaylar arasından seçiliyor. Yani ayırt etme işini puan değil,
- * select.ts'teki eşitlik bozma kuralı yapıyor. Bunu puanlayıcı tarafında
- * çözmenin yolu daha ince bir ölçek değil, en iyi ~25 aday için ikinci bir
- * *sıralama* çağrısı olurdu — mutlak puanlama yerine göreli karşılaştırma.
- */
 function systemPrompt(config: Config): string {
   return [
     `You are the editor of a weekly briefing called "${config.title}".`,
@@ -85,8 +69,6 @@ export async function scoreCandidates(
   options: ScoreOptions = {},
   deps: ScoreDeps = { structured },
 ): Promise<ScoredCandidate[]> {
-  // Adaylar kaynak sırasında geliyor. Karıştırmadan gruplara bölünürse
-  // gruplar arası kalibrasyon farkı doğrudan besleme sırasıyla hizalanır.
   const seed = options.seed ?? isoWeekId(new Date());
   const batches = chunk(shuffle(candidates, seed), BATCH_SIZE);
 
@@ -116,8 +98,6 @@ export async function scoreCandidates(
     batches,
     3,
     async (batch): Promise<ScoredCandidate[]> => {
-      // Kaynak adı kasıtlı olarak verilmiyor: model içeriği yargılamadan
-      // önce markayı öğrenmesin.
       const payload = batch.map((candidate, index) => ({
         index,
         title: candidate.title,
@@ -146,7 +126,6 @@ export async function scoreCandidates(
 
           scored.push({
             ...candidate,
-            // Şema tam sayı garantiliyor ama aralığı değil.
             score: clamp(rating.score, 0, 10),
             reason: rating.reason,
             category: rating.category,

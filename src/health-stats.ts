@@ -1,20 +1,11 @@
 import type { SourceStat } from "./types.js";
 
-/**
- * Bir kaynağın tüm sayılar boyunca verimliliği.
- *
- * Bu rapor yeni veri toplamıyor — Faz 2'de arşive yazmaya başladığımız
- * kaynak hunisini okuyor. Birkaç sayı sonra sistem hangi beslemenin yayına
- * giren haber ürettiğini, hangisinin sadece gürültü bastığını biliyor.
- */
 export type SourceHealth = {
   name: string;
   scanned: number;
   scored: number;
   published: number;
-  /** Yayınlanan / puanlanan. Kaynağın "isabet" oranı. */
   hitRate: number;
-  /** Kaç sayıda bu kaynaktan haber yayınlandı. */
   issuesWithPublication: number;
   issuesSeen: number;
 };
@@ -61,12 +52,7 @@ export function aggregate(
   );
 }
 
-/**
- * Bir kaynağın çıkarılmayı hak edip etmediği. Yalnızca öneri: kullanıcının
- * preset'ini arkasından yeniden yazmak kötü bir varsayılan olurdu.
- */
 export function verdictFor(entry: SourceHealth, issueCount: number): string | null {
-  // Tek sayıdan sonuç çıkarmak erken; en az üç sayı görmüş olsun.
   if (issueCount < 3 || entry.issuesSeen < 3) {
     return null;
   }

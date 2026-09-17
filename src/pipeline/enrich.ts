@@ -6,7 +6,6 @@ import type { Item, ScoredCandidate } from "../types.js";
 import { mapWithConcurrency } from "../util/pool.js";
 import { warn } from "../util/log.js";
 
-/** Model girdisini token limitleri içinde tutmak için sayfa metni kırpılır. */
 const MAX_SOURCE_CHARS = 6000;
 
 type Summary = {
@@ -53,7 +52,6 @@ async function sourceText(item: ScoredCandidate): Promise<string> {
       return source.content.slice(0, MAX_SOURCE_CHARS);
     }
   } catch {
-    // Sayfa okunamadıysa arama özetiyle devam et.
   }
 
   return item.snippet;

@@ -35,7 +35,6 @@ function similarity(a: Set<string>, b: Set<string>): number {
   return shared / Math.min(a.size, b.size);
 }
 
-/** Aynı haberin farklı kaynaklardan gelen kopyalarını eler. */
 const TITLE_MATCH_THRESHOLD = 0.72;
 
 export type DedupeResult = {
@@ -48,11 +47,6 @@ function freshness(candidate: Candidate): number {
   return candidate.publishedAt ? new Date(candidate.publishedAt).getTime() : 0;
 }
 
-/**
- * Tek bir kaynagin (ornegin gunde yuzlerce preprint ureten arXiv) havuzu
- * doldurmasini engeller: her kaynaktan kotasi kadar alinir, sonra kaynaklar
- * sirayla dolasilarak liste kurulur.
- */
 function balanceBySource(
   candidates: readonly Candidate[],
   quotaFor: (source: string) => number,
@@ -127,7 +121,6 @@ export function dedupe(
 
     duplicatesDropped += 1;
 
-    // Ayni URL birden fazla kaynaktan geldiyse daha zengin olani tut.
     const better =
       (candidate.points ?? 0) > (existing.points ?? 0) ||
       candidate.snippet.length > existing.snippet.length;
@@ -139,7 +132,6 @@ export function dedupe(
 
   const unique = [...byId.values()];
 
-  // Farkli yayin organlarinin ayni haberi: baslik benzerligiyle topla.
   const kept: { candidate: Candidate; tokens: Set<string> }[] = [];
 
   for (const candidate of unique) {

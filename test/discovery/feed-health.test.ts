@@ -21,7 +21,6 @@ function daily(count: number, startDay = 15): ParsedFeed["items"] {
 
 describe("analyzeFeed", () => {
   it("measures volume across the span the items actually cover", () => {
-    // 8 items, one per day: seven days of span, so about 7-8 a week.
     const health = analyzeFeed(feed(daily(8)), NOW);
 
     assert.equal(health.itemCount, 8);
@@ -46,8 +45,6 @@ describe("analyzeFeed", () => {
   });
 
   it("falls back to the item count when nothing is dated", () => {
-    // Real and common. collect.ts keeps undated items, so such a feed is
-    // usable - it just cannot be ranked on freshness.
     const health = analyzeFeed(
       feed([{ title: "A" }, { title: "B" }, { title: "C" }]),
       NOW,
@@ -77,7 +74,6 @@ describe("analyzeFeed", () => {
   });
 
   it("caps the sample titles it hands on", () => {
-    // These go to the ranking prompt, so they need a bound.
     assert.equal(analyzeFeed(feed(daily(30)), NOW).sampleTitles.length, 8);
   });
 
@@ -91,7 +87,6 @@ describe("analyzeFeed", () => {
 
 describe("suggestMax", () => {
   it("clamps the per-feed quota into a usable range", () => {
-    // Lands in preset feed.max, which dedupe applies as the source quota.
     assert.equal(suggestMax(0), 3);
     assert.equal(suggestMax(1), 3);
     assert.equal(suggestMax(7), 7);
@@ -105,7 +100,6 @@ describe("classify", () => {
   });
 
   it("calls a long-silent feed stale rather than dropping it", () => {
-    // A monthly but excellent source is worth keeping, just not preselected.
     const old = analyzeFeed(
       feed([{ title: "Old", isoDate: "2026-01-01T00:00:00.000Z" }]),
       NOW,

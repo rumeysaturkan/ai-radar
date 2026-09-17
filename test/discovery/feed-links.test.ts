@@ -23,7 +23,6 @@ describe("extractFeedLinks", () => {
   });
 
   it("does not care about attribute order", () => {
-    // Real pages put type before rel as often as not.
     assert.deepEqual(
       urls('<link type="application/rss+xml" rel="alternate" href="/feed">'),
       ["https://example.com/feed"],
@@ -42,8 +41,6 @@ describe("extractFeedLinks", () => {
   });
 
   it("ignores an hreflang alternate, which is not a feed", () => {
-    // This is the trap. A large share of real sites carry these, and matching
-    // rel="alternate" alone turns every localised page into a "feed".
     assert.deepEqual(
       urls('<link rel="alternate" hreflang="de" type="text/html" href="/de/">'),
       [],
@@ -51,7 +48,6 @@ describe("extractFeedLinks", () => {
   });
 
   it("accepts a multi-token rel", () => {
-    // WordPress emits rel="alternate home".
     assert.deepEqual(
       urls('<link rel="alternate home" type="application/rss+xml" href="/feed">'),
       ["https://example.com/feed"],
@@ -124,8 +120,6 @@ describe("extractFeedLinks", () => {
   });
 
   it("puts a comments feed last", () => {
-    // The first <link> is nearly always the main feed, but comment feeds are
-    // often declared alongside and are never what we want.
     const html = [
       '<link rel="alternate" type="application/rss+xml" href="/comments/feed" title="Comments Feed">',
       '<link rel="alternate" type="application/rss+xml" href="/feed">',
@@ -198,7 +192,6 @@ describe("looksLikeFeedXml", () => {
   });
 
   it("rejects an HTML page returned with a 200", () => {
-    // The most common probe failure by far: a soft 404 serving the homepage.
     assert.equal(looksLikeFeedXml("<!doctype html><html><body>Not found"), false);
     assert.equal(looksLikeFeedXml('{"version":"https://jsonfeed.org/v1"}'), false);
     assert.equal(looksLikeFeedXml(""), false);

@@ -30,9 +30,6 @@ function printHistogram(candidates: readonly ScoredCandidate[]): void {
     );
   }
 
-  // Seçimin gerçekte neye göre yapıldığını gösteren satır: eğer en kalabalık
-  // puan kovası bültenden büyükse, o kovanın içinden kimin geçtiğine puan
-  // değil, eşitlik bozma kuralı karar veriyor demektir.
   const top = histogram[0];
 
   if (top) {

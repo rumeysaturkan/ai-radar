@@ -77,8 +77,6 @@ describe("verdictFor", () => {
   };
 
   it("stays quiet until there is enough history", () => {
-    // One bad week is not evidence. Recommending a removal from a single
-    // issue would be worse than saying nothing.
     assert.equal(
       verdictFor({ ...base, scanned: 200, issuesSeen: 1 }, 1),
       null,
@@ -112,7 +110,6 @@ describe("verdictFor", () => {
   });
 
   it("does not flag a low-volume source for being quiet", () => {
-    // A source that offers five candidates a week and lands one is fine.
     assert.equal(
       verdictFor({ ...base, scanned: 20, scored: 10, published: 0 }, 5),
       null,

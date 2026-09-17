@@ -1,12 +1,3 @@
-/**
- * İki ayrı dil var ve karıştırılmamaları gerekiyor:
- *
- * - contentLang (config.language): bültenin dili. Prompt'ların çıktı dili,
- *   tarih biçimi, <html lang>, öğe içi başlıklar, RSS <language>.
- * - uiLang (RADAR_LANG env → sistem yerel ayarı → "en"): terminalin ve
- *   alanlar arası kapak sayfasının dili. Kapak tek bir alana ait olmadığı
- *   için bülten diliyle damgalanamaz.
- */
 
 export type Lang = "tr" | "en";
 
@@ -27,10 +18,6 @@ export function uiLang(): Lang {
   return cachedUiLang;
 }
 
-/**
- * Dil adını Node'un kendi verisinden alır — elde tutulacak bir tablo yok ve
- * her BCP-47 etiketi için çalışır.
- */
 export function languageName(tag: string): string {
   try {
     return new Intl.DisplayNames(["en"], { type: "language" }).of(tag) ?? tag;
@@ -39,11 +26,6 @@ export function languageName(tag: string): string {
   }
 }
 
-/**
- * Prompt gövdeleri İngilizce kalıyor; yalnızca çıktı dili parametreleniyor.
- * Dil başına ayrı bir rubrik tutmak, yalnızca modelin okuduğu bir metni
- * bakıma mahkûm eder ve her prompt düzenlemesini ikiye katlardı.
- */
 export function outputLanguageRule(tag: string): string {
   return (
     `Write every output field in ${languageName(tag)}. ` +
@@ -77,10 +59,6 @@ type Key =
   | "md.whyItMatters"
   | "md.footer";
 
-/**
- * Record<Lang, Record<Key, string>> olduğu için eksik bir çeviri derleme
- * hatası veriyor. "i18n altyapısı" bundan ibaret.
- */
 const STRINGS: Record<Lang, Record<Key, string>> = {
   tr: {
     "html.whyItMatters": "Neden önemli:",

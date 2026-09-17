@@ -37,7 +37,6 @@ function page(body: string, status = 200, url = ""): FetchedPage {
   };
 }
 
-/** Records every URL asked for, so request count can be asserted. */
 function fakeDeps(
   routes: Record<string, FetchedPage | (() => FetchedPage)>,
   fallback: FetchedPage = page("not found", 404),
@@ -82,7 +81,6 @@ describe("findFeedForSite", () => {
       assert.equal(finding.status, "ok");
       assert.equal(finding.feed?.url, "https://example.com/feed");
       assert.equal(finding.feed?.via, "link-tag");
-      // Exactly two requests: the homepage and the feed.
       assert.equal(finding.requestCount, 2);
       assert.deepEqual(requested, ["https://example.com", "https://example.com/feed"]);
     });
@@ -102,7 +100,6 @@ describe("findFeedForSite", () => {
   });
 
   it("probes anyway when the homepage blocks us", async () => {
-    // Cloudflare-fronted sites commonly 403 the HTML and serve /feed happily.
     const { deps } = fakeDeps({
       "https://example.com": page("blocked", 403),
       "https://example.com/feed": page(RSS),
@@ -138,7 +135,6 @@ describe("findFeedForSite", () => {
   it("rejects a soft 404 that returns HTML with a 200", async () => {
     const { deps } = fakeDeps({
       "https://example.com": page(HTML_NO_LINK),
-      // /feed answers 200 with the homepage - the classic probe trap.
       "https://example.com/feed": page("<!doctype html><html>homepage</html>"),
       "https://example.com/rss": page(RSS),
     });
@@ -197,7 +193,6 @@ describe("findFeedForSite", () => {
   });
 
   it("gives up with a bounded number of requests", async () => {
-    // This is the cost and politeness regression test.
     const { deps, requested } = fakeDeps({
       "https://example.com": page(HTML_NO_LINK),
     });
@@ -226,7 +221,6 @@ describe("findFeedForSite", () => {
   });
 
   it("resolves relative links against the redirect target", async () => {
-    // Otherwise a redirect silently breaks every relative href on the page.
     const { deps } = fakeDeps({
       "https://example.com": {
         ...page('<link rel="alternate" type="application/rss+xml" href="feed.xml">'),

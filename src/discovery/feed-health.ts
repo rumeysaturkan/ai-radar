@@ -3,7 +3,6 @@ import type { FeedHealth, FeedStatus, ParsedFeed } from "./types.js";
 
 const DAY_MS = 86_400_000;
 
-/** Bu kadar gün yayın yapmamış bir feed "bayat"; elenmez, ön seçili gelmez. */
 const STALE_DAYS = 90;
 
 const SAMPLE_LIMIT = 8;
@@ -29,7 +28,6 @@ function itemDate(item: ParsedFeed["items"][number]): number | null {
 }
 
 export function suggestMax(itemsPerWeek: number): number {
-  // Preset'teki feed.max'a gider; dedupe kotayı bununla uyguluyor.
   return Math.min(12, Math.max(3, Math.ceil(itemsPerWeek)));
 }
 
@@ -49,9 +47,6 @@ export function analyzeFeed(feed: ParsedFeed, now: Date): FeedHealth {
     const spanDays = Math.max((newest - oldest) / DAY_MS, 1);
     itemsPerWeek = (dated.length / spanDays) * 7;
   } else {
-    // Hiçbir öğe tarihli değilse — gerçek ve yaygın — sayıyı haftalık tahmin
-    // olarak kullan. collect.ts tarihsiz kayıtları zaten tutuyor, yani böyle
-    // bir feed kullanılabilir, sadece tazelikle sıralanamaz.
     itemsPerWeek = items.length;
   }
 
@@ -93,7 +88,6 @@ export function classify(health: FeedHealth): FeedStatus {
   }
 
   if (health.daysSinceLastPost !== null && health.daysSinceLastPost > STALE_DAYS) {
-    // Ayda bir yazan ama iyi bir kaynak atılmaya değmez; max: 3 ile tutulur.
     return "stale";
   }
 
