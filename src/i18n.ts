@@ -18,6 +18,25 @@ export function uiLang(): Lang {
   return cachedUiLang;
 }
 
+export type UiText = { tr: string; en: string };
+
+function fill(text: string, vars: Record<string, string | number>): string {
+  let out = text;
+
+  for (const [name, value] of Object.entries(vars)) {
+    out = out.replaceAll(`{${name}}`, String(value));
+  }
+
+  return out;
+}
+
+export function ui(
+  text: UiText,
+  vars: Record<string, string | number> = {},
+): string {
+  return fill(text[uiLang()], vars);
+}
+
 export function languageName(tag: string): string {
   try {
     return new Intl.DisplayNames(["en"], { type: "language" }).of(tag) ?? tag;
@@ -57,7 +76,13 @@ type Key =
   | "index.lede"
   | "md.highlight"
   | "md.whyItMatters"
-  | "md.footer";
+  | "md.footer"
+  | "stage.score"
+  | "stage.enrich"
+  | "stage.compose"
+  | "stage.discovery"
+  | "source.webSearch"
+  | "archive.title";
 
 const STRINGS: Record<Lang, Record<Key, string>> = {
   tr: {
@@ -88,6 +113,12 @@ const STRINGS: Record<Lang, Record<Key, string>> = {
     "md.whyItMatters": "Neden önemli:",
     "md.footer":
       "{collected} aday tarandı, {published} haber seçildi. {title} ile otomatik derlendi.",
+    "stage.score": "eleme",
+    "stage.enrich": "yazım",
+    "stage.compose": "editör",
+    "stage.discovery": "kaynak keşfi",
+    "source.webSearch": "Web araması",
+    "archive.title": "Arşiv",
   },
   en: {
     "html.whyItMatters": "Why it matters:",
@@ -117,6 +148,12 @@ const STRINGS: Record<Lang, Record<Key, string>> = {
     "md.whyItMatters": "Why it matters:",
     "md.footer":
       "{collected} candidates scanned, {published} stories selected. Compiled automatically with {title}.",
+    "stage.score": "filtering",
+    "stage.enrich": "writing",
+    "stage.compose": "editing",
+    "stage.discovery": "source discovery",
+    "source.webSearch": "Web search",
+    "archive.title": "Archive",
   },
 };
 
@@ -125,12 +162,5 @@ export function t(
   key: Key,
   vars: Record<string, string | number> = {},
 ): string {
-  const table = STRINGS[resolveLang(lang)];
-  let text = table[key];
-
-  for (const [name, value] of Object.entries(vars)) {
-    text = text.replaceAll(`{${name}}`, String(value));
-  }
-
-  return text;
+  return fill(STRINGS[resolveLang(lang)][key], vars);
 }

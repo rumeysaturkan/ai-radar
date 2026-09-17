@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { validateConfig } from "../src/config-validate.js";
+
+process.env.RADAR_LANG = "en";
+
+const { validateConfig } = await import("../src/config-validate.js");
 
 function preset(overrides: Record<string, unknown> = {}): Record<string, unknown> {
   return {
@@ -41,8 +44,8 @@ describe("validateConfig", () => {
     const problems = problemsOf({ shortlist: "12" });
 
     assert.equal(problems.length, 1);
-    assert.match(problems[0]!, /shortlist.*tam sayı/);
-    assert.match(problems[0]!, /tırnak/);
+    assert.match(problems[0]!, /shortlist.*whole number/);
+    assert.match(problems[0]!, /quotes/);
   });
 
   it("bounds the numeric fields", () => {
@@ -60,12 +63,12 @@ describe("validateConfig", () => {
       const problems = problemsOf({ categories: ["Model", "model"] });
 
       assert.equal(problems.length, 1);
-      assert.match(problems[0]!, /tekrar eden/);
+      assert.match(problems[0]!, /repeats a heading/);
     });
 
     it("rejects an unusably long list", () => {
       const many = Array.from({ length: 12 }, (_, i) => `Kategori ${i}`);
-      assert.match(problemsOf({ categories: many })[0]!, /en fazla 8/);
+      assert.match(problemsOf({ categories: many })[0]!, /at most 8/);
     });
 
     it("rejects empty strings inside the list", () => {
@@ -92,7 +95,7 @@ describe("validateConfig", () => {
       });
 
       assert.equal(problems.length, 1);
-      assert.match(problems[0]!, /benzersiz/);
+      assert.match(problems[0]!, /unique/);
     });
 
     it("reports the index of the offending feed", () => {
@@ -120,7 +123,7 @@ describe("validateConfig", () => {
     const problems = problemsOf({ feeds: [] });
 
     assert.equal(problems.length, 1);
-    assert.match(problems[0]!, /Hiç kaynak yok/);
+    assert.match(problems[0]!, /No sources at all/);
   });
 
   it("accepts a feed-less preset that searches instead", () => {

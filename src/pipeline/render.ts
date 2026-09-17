@@ -219,14 +219,19 @@ function renderHighlight(item: Item, language: string): string {
 </section>`;
 }
 
-const STAGE_LABELS: Record<string, string> = {
-  score: "eleme",
-  enrich: "yazım",
-  compose: "editör",
-  discovery: "kaynak keşfi",
-};
+const STAGE_KEYS = {
+  score: "stage.score",
+  enrich: "stage.enrich",
+  compose: "stage.compose",
+  discovery: "stage.discovery",
+} as const;
 
-function renderCostBreakdown(issue: Issue): string {
+function stageLabel(stage: string, language: string): string {
+  const key = STAGE_KEYS[stage as keyof typeof STAGE_KEYS];
+  return key ? t(language, key) : stage;
+}
+
+function renderCostBreakdown(issue: Issue, language: string): string {
   const stages = issue.usage.stages ?? [];
 
   if (stages.length === 0) {
@@ -236,7 +241,7 @@ function renderCostBreakdown(issue: Issue): string {
   const parts = stages.map(
     (stage) =>
       `<span class="cost-stage">${escapeHtml(
-        STAGE_LABELS[stage.stage] ?? stage.stage,
+        stageLabel(stage.stage, language),
       )} <em>${escapeHtml(stage.model)}</em> $${stage.estimatedCostUsd.toFixed(3)}</span>`,
   );
 
@@ -296,7 +301,7 @@ export function renderIssueHtml(config: Config, issue: Issue): string {
         <div class="stat"><strong>${issue.stats.published}</strong><span>${t(config.language, "html.published")}</span></div>
         <div class="stat"><strong>$${issue.usage.estimatedCostUsd.toFixed(3)}</strong><span>${t(config.language, "html.cost")}</span></div>
       </div>
-      ${renderCostBreakdown(issue)}
+      ${renderCostBreakdown(issue, config.language)}
       <p>${escapeHtml(
         t(config.language, "html.compiledBy", {
           title: config.title,
@@ -343,7 +348,11 @@ export function renderIndexHtml(
     `<p class="lede"><a href="../index.html">← ${t(config.language, "hub.domains")}</a></p>`,
   ].join("\n");
 
-  return page(`${config.title} — Arşiv`, body, config.language);
+  return page(
+    `${config.title} — ${t(config.language, "archive.title")}`,
+    body,
+    config.language,
+  );
 }
 
 export type HubEntry = {

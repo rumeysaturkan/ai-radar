@@ -2,6 +2,7 @@ import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describeProblems, SAFE_ID, validateConfig } from "./config-validate.js";
+import { ui, uiLang } from "./i18n.js";
 import type { ReasoningEffort } from "./llm.js";
 import { warn } from "./util/log.js";
 
@@ -35,12 +36,12 @@ export type Config = {
 
 const defaults: Omit<Config, "id" | "name"> = {
   title: "Radar",
-  tagline: "Haftalık bülten",
-  language: "tr",
+  tagline: ui({ tr: "Haftalık bülten", en: "A weekly briefing" }),
+  language: uiLang(),
   siteUrl: "",
-  audience: "Teknik okuyucular",
+  audience: ui({ tr: "Teknik okuyucular", en: "Technical readers" }),
   topics: [],
-  categories: ["Genel"],
+  categories: [ui({ tr: "Genel", en: "General" })],
   windowDays: 7,
   candidateLimit: 160,
   maxPerSource: 12,
@@ -69,7 +70,13 @@ export function presetPath(id: string): string {
 function assertSafeId(id: string): void {
   if (!SAFE_ID.test(id)) {
     throw new Error(
-      `Geçersiz alan kimliği: "${id}". Yalnızca küçük harf, rakam ve tire kullanılabilir.`,
+      ui(
+        {
+          tr: 'Geçersiz alan kimliği: "{id}". Yalnızca küçük harf, rakam ve tire kullanılabilir.',
+          en: 'Invalid domain id: "{id}". Lowercase, digits and hyphens only.',
+        },
+        { id },
+      ),
     );
   }
 }
@@ -119,7 +126,13 @@ export async function loadConfig(id: string): Promise<Config> {
     raw = await readFile(presetPath(id), "utf8");
   } catch {
     throw new Error(
-      `"${id}" alanı bulunamadı. presets/${id}.json dosyası yok.`,
+      ui(
+        {
+          tr: '"{id}" alanı bulunamadı. presets/{id}.json dosyası yok.',
+          en: 'No domain called "{id}". There is no presets/{id}.json.',
+        },
+        { id },
+      ),
     );
   }
 
@@ -129,7 +142,13 @@ export async function loadConfig(id: string): Promise<Config> {
     parsedJson = JSON.parse(raw);
   } catch (error) {
     throw new Error(
-      `presets/${id}.json okunamadı (geçersiz JSON): ` +
+      ui(
+        {
+          tr: "presets/{id}.json okunamadı (geçersiz JSON): ",
+          en: "presets/{id}.json could not be read (invalid JSON): ",
+        },
+        { id },
+      ) +
         (error instanceof Error ? error.message : String(error)),
     );
   }

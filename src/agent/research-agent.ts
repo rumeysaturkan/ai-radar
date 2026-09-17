@@ -183,6 +183,7 @@ export async function runResearchAgent(query: string): Promise<string> {
   }
 
   throw new Error(
-    `Ajan ${MAX_TURNS} adımda sonuca varamadı. Soruyu daralt ya da MAX_TURNS'ü artır.`,
+    `The agent did not reach an answer in ${MAX_TURNS} steps. ` +
+      "Narrow the question, or raise MAX_TURNS.",
   );
 }

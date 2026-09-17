@@ -1,4 +1,5 @@
 import { createInterface } from "node:readline/promises";
+import { ui } from "../i18n.js";
 import { color } from "../util/log.js";
 import { domainOf } from "../util/url.js";
 import type { FindFeedDeps } from "./find-feed.js";
@@ -10,10 +11,25 @@ function describe(feed: RankedFeed): string {
   const parts: string[] = [domainOf(feed.site.origin)];
 
   if (health) {
-    parts.push(`${health.itemsPerWeek.toFixed(0)}/hafta`);
+    parts.push(
+      ui(
+        { tr: "{count}/hafta", en: "{count}/week" },
+        { count: health.itemsPerWeek.toFixed(0) },
+      ),
+    );
 
     if (health.daysSinceLastPost !== null && health.daysSinceLastPost > 30) {
-      parts.push(color.yellow(`son yazı ${health.daysSinceLastPost} gün önce`));
+      parts.push(
+        color.yellow(
+          ui(
+            {
+              tr: "son yazı {days} gün önce",
+              en: "last post {days} days ago",
+            },
+            { days: health.daysSinceLastPost },
+          ),
+        ),
+      );
     }
 
     const language = health.declaredLanguage ?? health.detectedLanguage;
@@ -73,8 +89,14 @@ export async function approveFeeds(
   if (!interactive) {
     if (!options.assumeYes) {
       console.error(
-        "\n  Etkileşimli olmayan ortamda onay alınamıyor. Gözden geçirmeden\n" +
-          "  devam etmek için --yes ver.\n",
+        ui({
+          tr:
+            "\n  Etkileşimli olmayan ortamda onay alınamıyor. Gözden geçirmeden\n" +
+            "  devam etmek için --yes ver.\n",
+          en:
+            "\n  Approval cannot be collected in a non-interactive environment.\n" +
+            "  Pass --yes to go ahead without reviewing.\n",
+        }),
       );
       return { accepted: [], aborted: true };
     }
@@ -90,8 +112,17 @@ export async function approveFeeds(
 
       console.log(
         color.dim(
-          `  ${chosen.size} kaynak seçili. ` +
-            "[enter] onayla · [numara] aç/kapat · [+ adres] ekle · [-] elenenler · [q] vazgeç",
+          ui(
+            {
+              tr:
+                "  {count} kaynak seçili. [enter] onayla · [numara] aç/kapat · " +
+                "[+ adres] ekle · [-] elenenler · [q] vazgeç",
+              en:
+                "  {count} sources selected. [enter] confirm · [number] toggle · " +
+                "[+ address] add · [-] rejected · [q] quit",
+            },
+            { count: chosen.size },
+          ),
         ),
       );
 
@@ -99,7 +130,10 @@ export async function approveFeeds(
 
       if (answer === "") {
         if (chosen.size === 0) {
-          console.log(`  ${color.yellow("!")} En az bir kaynak seç.`);
+          console.log(
+            `  ${color.yellow("!")} ` +
+              ui({ tr: "En az bir kaynak seç.", en: "Pick at least one source." }),
+          );
           continue;
         }
 
@@ -137,26 +171,48 @@ export async function approveFeeds(
           continue;
         }
 
-        console.log(color.dim(`  ${url} kontrol ediliyor...`));
+        console.log(
+          color.dim(
+            ui({ tr: "  {url} kontrol ediliyor...", en: "  checking {url}..." }, { url }),
+          ),
+        );
 
         let origin: string;
 
         try {
           origin = new URL(url.startsWith("http") ? url : `https://${url}`).origin;
         } catch {
-          console.log(`  ${color.yellow("!")} Adres çözümlenemedi.`);
+          console.log(
+            `  ${color.yellow("!")} ` +
+              ui({
+                tr: "Adres çözümlenemedi.",
+                en: "That address could not be parsed.",
+              }),
+          );
           continue;
         }
 
         const finding = await findFeedForSite(
-          { name: domainOf(origin), url, origin, why: "elle eklendi", via: "search" },
+          {
+            name: domainOf(origin),
+            url,
+            origin,
+            why: ui({ tr: "elle eklendi", en: "added by hand" }),
+            via: "search",
+          },
           deps,
         );
 
         if (!finding.feed) {
           console.log(
-            `  ${color.yellow("!")} Feed bulunamadı (${finding.status}). ` +
-              "Doğrudan feed adresini verebilirsin.",
+            `  ${color.yellow("!")} ` +
+              ui(
+                {
+                  tr: "Feed bulunamadı ({status}). Doğrudan feed adresini verebilirsin.",
+                  en: "No feed found ({status}). You can give the feed address directly.",
+                },
+                { status: finding.status },
+              ),
           );
           continue;
         }
@@ -165,7 +221,7 @@ export async function approveFeeds(
           ...finding,
           credibility: 10,
           verdict: "keep",
-          reason: "elle eklendi",
+          reason: ui({ tr: "elle eklendi", en: "added by hand" }),
           suggestedName: finding.health?.feedTitle ?? domainOf(origin),
         });
         chosen.add(pool.length - 1);
@@ -178,7 +234,10 @@ export async function approveFeeds(
         .filter((value) => Number.isInteger(value) && value >= 1 && value <= pool.length);
 
       if (numbers.length === 0) {
-        console.log(`  ${color.yellow("!")} Anlaşılmadı.`);
+        console.log(
+          `  ${color.yellow("!")} ` +
+            ui({ tr: "Anlaşılmadı.", en: "Did not understand that." }),
+        );
         continue;
       }
 

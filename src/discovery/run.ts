@@ -1,6 +1,7 @@
 import { access, writeFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { presetPath } from "../config.js";
+import { ui } from "../i18n.js";
 import { usageSoFar } from "../llm.js";
 import { color, done, note, step, warn } from "../util/log.js";
 import { approveFeeds } from "./approve.js";
@@ -69,38 +70,90 @@ export async function discoverSources(
   const emitNote = (label: string) => (emit ? emit({ kind: "note", label }) : note(label));
   const emitDone = (label: string) => (emit ? emit({ kind: "done", label }) : done(label));
 
-  emitStep("Konu çözümleniyor...");
+  emitStep(ui({ tr: "Konu çözümleniyor...", en: "Working out the topic..." }));
   const brief = await makeTopicBrief(request, MODELS.cheap);
-  emitDone(`${brief.searchQueries.length} sorgu, ${brief.seedDomains.length} tohum alan`);
+  emitDone(
+    ui(
+      {
+        tr: "{queries} sorgu, {seeds} tohum alan",
+        en: "{queries} queries, {seeds} seed domains",
+      },
+      { queries: brief.searchQueries.length, seeds: brief.seedDomains.length },
+    ),
+  );
 
-  emitStep("Aday kaynaklar aranıyor...");
+  emitStep(
+    ui({ tr: "Aday kaynaklar aranıyor...", en: "Looking for candidate sources..." }),
+  );
   const sites = await findCandidateSites(brief, emitNote);
-  emitDone(`${sites.length} aday site`);
+  emitDone(
+    ui(
+      { tr: "{count} aday site", en: "{count} candidate sites" },
+      { count: sites.length },
+    ),
+  );
 
   if (sites.length === 0) {
-    warn("Hiç aday site bulunamadı. Konuyu biraz daha genel yazmayı dene.");
-    return null;
-  }
-
-  emitStep(`${sites.length} sitede feed aranıyor...`);
-  const findings = await findFeeds(sites, deps);
-  const usable = findings.filter((finding) => finding.feed !== null);
-  const rejected = findings.filter((finding) => finding.feed === null);
-  const requests = findings.reduce((total, finding) => total + finding.requestCount, 0);
-  emitDone(`${usable.length} feed doğrulandı (${requests} istek)`);
-
-  if (usable.length === 0) {
-    warn("Doğrulanabilen hiç feed çıkmadı.");
-    emitNote(
-      "Bu konuda RSS sunan kaynak bulunamadı. Google News akışıyla bir taban " +
-        "preset kurulabilir ama içerik yalnızca arama özetinden gelir.",
+    warn(
+      ui({
+        tr: "Hiç aday site bulunamadı. Konuyu biraz daha genel yazmayı dene.",
+        en: "No candidate sites at all. Try wording the topic more broadly.",
+      }),
     );
     return null;
   }
 
-  emitStep("Kaynaklar değerlendiriliyor...");
+  emitStep(
+    ui(
+      {
+        tr: "{count} sitede feed aranıyor...",
+        en: "Looking for a feed on {count} sites...",
+      },
+      { count: sites.length },
+    ),
+  );
+  const findings = await findFeeds(sites, deps);
+  const usable = findings.filter((finding) => finding.feed !== null);
+  const rejected = findings.filter((finding) => finding.feed === null);
+  const requests = findings.reduce((total, finding) => total + finding.requestCount, 0);
+  emitDone(
+    ui(
+      {
+        tr: "{count} feed doğrulandı ({requests} istek)",
+        en: "{count} feeds verified ({requests} requests)",
+      },
+      { count: usable.length, requests },
+    ),
+  );
+
+  if (usable.length === 0) {
+    warn(
+      ui({
+        tr: "Doğrulanabilen hiç feed çıkmadı.",
+        en: "Not one feed could be verified.",
+      }),
+    );
+    emitNote(
+      ui({
+        tr:
+          "Bu konuda RSS sunan kaynak bulunamadı. Google News akışıyla bir taban " +
+          "preset kurulabilir ama içerik yalnızca arama özetinden gelir.",
+        en:
+          "No source in this topic offers RSS. A baseline preset can be built on a " +
+          "Google News feed, but the content then comes only from search snippets.",
+      }),
+    );
+    return null;
+  }
+
+  emitStep(ui({ tr: "Kaynaklar değerlendiriliyor...", en: "Rating the sources..." }));
   const ranked = await rankFeeds(usable, request, MODELS.cheap);
-  emitDone(`${ranked.filter((feed) => feed.verdict === "keep").length} kaynak öneriliyor`);
+  emitDone(
+    ui(
+      { tr: "{count} kaynak öneriliyor", en: "{count} sources recommended" },
+      { count: ranked.filter((feed) => feed.verdict === "keep").length },
+    ),
+  );
 
   return { ranked, rejected, deps };
 }
@@ -115,14 +168,32 @@ export async function finalizePreset(
   const emitNote = (label: string) => (emit ? emit({ kind: "note", label }) : note(label));
   const emitDone = (label: string) => (emit ? emit({ kind: "done", label }) : done(label));
 
-  emitStep("Alan profili çıkarılıyor...");
+  emitStep(
+    ui({ tr: "Alan profili çıkarılıyor...", en: "Drawing up the domain profile..." }),
+  );
   const profile = await buildProfile(request, accepted, MODELS.strong);
-  emitDone(`${profile.categories.length} kategori, ${profile.topics.length} konu`);
+  emitDone(
+    ui(
+      {
+        tr: "{categories} kategori, {topics} konu",
+        en: "{categories} categories, {topics} topics",
+      },
+      { categories: profile.categories.length, topics: profile.topics.length },
+    ),
+  );
 
   const id = options.id ?? slugifyId(profile.name || request.topic);
 
   if (!id) {
-    warn(`"${request.topic}" bir dosya adına çevrilemedi. --id ile bir kimlik ver.`);
+    warn(
+      ui(
+        {
+          tr: '"{topic}" bir dosya adına çevrilemedi. --id ile bir kimlik ver.',
+          en: '"{topic}" could not be turned into a file name. Pass one with --id.',
+        },
+        { topic: request.topic },
+      ),
+    );
     return null;
   }
 
@@ -136,7 +207,12 @@ export async function finalizePreset(
   const problems = checkPreset(config);
 
   if (problems.length > 0) {
-    warn("Üretilen preset doğrulamadan geçmedi:");
+    warn(
+      ui({
+        tr: "Üretilen preset doğrulamadan geçmedi:",
+        en: "The preset that was produced did not validate:",
+      }),
+    );
 
     for (const problem of problems) {
       emitNote(`- ${problem}`);
@@ -149,7 +225,15 @@ export async function finalizePreset(
 
   if ((await exists(path)) && !options.force) {
     if (!process.stdin.isTTY) {
-      warn(`presets/${id}.json zaten var. Üzerine yazmak için --force ver.`);
+      warn(
+        ui(
+          {
+            tr: "presets/{id}.json zaten var. Üzerine yazmak için --force ver.",
+            en: "presets/{id}.json already exists. Pass --force to overwrite it.",
+          },
+          { id },
+        ),
+      );
       return null;
     }
 
@@ -157,11 +241,19 @@ export async function finalizePreset(
 
     try {
       const answer = (
-        await rl.question(`  presets/${id}.json zaten var. Üzerine yazılsın mı? [e/H] `)
+        await rl.question(
+          ui(
+            {
+              tr: "  presets/{id}.json zaten var. Üzerine yazılsın mı? [e/H] ",
+              en: "  presets/{id}.json already exists. Overwrite it? [y/N] ",
+            },
+            { id },
+          ),
+        )
       ).trim().toLowerCase();
 
       if (answer !== "e" && answer !== "y") {
-        emitNote("Yazılmadı.");
+        emitNote(ui({ tr: "Yazılmadı.", en: "Not written." }));
         return null;
       }
     } finally {
@@ -172,17 +264,38 @@ export async function finalizePreset(
   await writeFile(path, `${JSON.stringify(config, null, 2)}\n`, "utf8");
 
   console.log("");
-  console.log(`  ${color.green("✓")} presets/${id}.json yazıldı`);
+  console.log(
+    `  ${color.green("✓")} ` +
+      ui(
+        { tr: "presets/{id}.json yazıldı", en: "presets/{id}.json written" },
+        { id },
+      ),
+  );
   console.log(
     color.dim(
-      `     ${config.feeds.length} kaynak · ${config.categories.join(", ")}`,
+      "     " +
+        ui(
+          { tr: "{count} kaynak", en: "{count} sources" },
+          { count: config.feeds.length },
+        ) +
+        ` · ${config.categories.join(", ")}`,
     ),
   );
 
   const usage = usageSoFar();
-  console.log(color.dim(`     keşif maliyeti $${usage.estimatedCostUsd.toFixed(4)}`));
+  console.log(
+    color.dim(
+      "     " +
+        ui(
+          { tr: "keşif maliyeti ${cost}", en: "discovery cost ${cost}" },
+          { cost: usage.estimatedCostUsd.toFixed(4) },
+        ),
+    ),
+  );
   console.log("");
-  console.log(`  Şimdi:  ${color.bold(`npm start ${id}`)}`);
+  console.log(
+    `  ${ui({ tr: "Şimdi:", en: "Next:" })}  ${color.bold(`npm start ${id}`)}`,
+  );
   console.log("");
 
   return id;
@@ -208,7 +321,12 @@ export async function runDiscovery(
   );
 
   if (approval.aborted || approval.accepted.length === 0) {
-    note("Vazgeçildi, preset yazılmadı.");
+    note(
+      ui({
+        tr: "Vazgeçildi, preset yazılmadı.",
+        en: "Cancelled; no preset was written.",
+      }),
+    );
     return null;
   }
 

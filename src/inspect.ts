@@ -1,3 +1,5 @@
+import { COLUMNS } from "./columns.js";
+import { ui } from "./i18n.js";
 import { scoreHistogram } from "./pipeline/stats.js";
 import { listIssues } from "./store.js";
 import type { Issue, ScoredCandidate } from "./types.js";
@@ -21,7 +23,9 @@ function printHistogram(candidates: readonly ScoredCandidate[]): void {
   const histogram = scoreHistogram(candidates);
   const max = Math.max(...histogram.map((row) => row.count), 0);
 
-  console.log(color.bold("  Puan dağılımı"));
+  console.log(
+    color.bold(ui({ tr: "  Puan dağılımı", en: "  Score distribution" })),
+  );
   console.log("");
 
   for (const row of histogram) {
@@ -36,7 +40,13 @@ function printHistogram(candidates: readonly ScoredCandidate[]): void {
     console.log("");
     console.log(
       color.dim(
-        `     en yüksek puan ${top.score}, bu puanda ${top.count} aday var.`,
+        ui(
+          {
+            tr: "     en yüksek puan {score}, bu puanda {count} aday var.",
+            en: "     top score {score}, shared by {count} candidates.",
+          },
+          { score: top.score, count: top.count },
+        ),
       ),
     );
   }
@@ -46,14 +56,25 @@ function printSources(issue: Issue): void {
   const sources = issue.sources ?? [];
 
   if (sources.length === 0) {
-    console.log(color.dim("  Bu sayı kaynak istatistiği olmadan üretilmiş."));
+    console.log(
+      color.dim(
+        ui({
+          tr: "  Bu sayı kaynak istatistiği olmadan üretilmiş.",
+          en: "  This issue was produced without per-source statistics.",
+        }),
+      ),
+    );
     return;
   }
 
-  console.log(color.bold("  Kaynak hunisi"));
+  console.log(color.bold(ui({ tr: "  Kaynak hunisi", en: "  Source funnel" })));
   console.log("");
   console.log(
-    color.dim(`  ${pad("kaynak", 26)}${padLeft("taranan", 9)}${padLeft("puanlanan", 11)}${padLeft("yayın", 7)}${padLeft("oran", 8)}`),
+    color.dim(
+      `  ${pad(ui(COLUMNS.source), 26)}${padLeft(ui(COLUMNS.scanned), 9)}` +
+        `${padLeft(ui(COLUMNS.scored), 11)}${padLeft(ui(COLUMNS.published), 11)}` +
+        `${padLeft(ui(COLUMNS.rate), 8)}`,
+    ),
   );
 
   for (const source of sources) {
@@ -63,7 +84,7 @@ function printSources(issue: Issue): void {
         : `${((source.published / source.scored) * 100).toFixed(0)}%`;
 
     console.log(
-      `  ${pad(source.name, 26)}${padLeft(source.scanned, 9)}${padLeft(source.scored, 11)}${padLeft(source.published, 7)}${padLeft(rate, 8)}`,
+      `  ${pad(source.name, 26)}${padLeft(source.scanned, 9)}${padLeft(source.scored, 11)}${padLeft(source.published, 11)}${padLeft(rate, 8)}`,
     );
   }
 }
@@ -78,14 +99,21 @@ function printPublishedDomains(issue: Issue): void {
 
   const rows = [...counts.entries()].sort((a, b) => b[1] - a[1]);
 
-  console.log(color.bold("  Yayınlananların domain dağılımı"));
+  console.log(
+    color.bold(
+      ui({
+        tr: "  Yayınlananların domain dağılımı",
+        en: "  Domain spread of what was published",
+      }),
+    ),
+  );
   console.log("");
 
   for (const [domain, count] of rows) {
     const flag = count > Math.max(2, Math.ceil(issue.items.length / 4));
     console.log(
       `  ${pad(domain, 34)}${padLeft(count, 4)}` +
-        (flag ? color.yellow("   ← baskın") : ""),
+        (flag ? color.yellow(ui({ tr: "   ← baskın", en: "   ← dominant" })) : ""),
     );
   }
 }
@@ -94,7 +122,12 @@ async function main(): Promise<void> {
   const [presetId, issueId] = process.argv.slice(2);
 
   if (!presetId) {
-    console.error("\n  Kullanım: npm run inspect <alan> [sayı]\n");
+    console.error(
+      ui({
+        tr: "\n  Kullanım: npm run inspect <alan> [sayı]\n",
+        en: "\n  Usage: npm run inspect <domain> [issue]\n",
+      }),
+    );
     process.exitCode = 1;
     return;
   }
@@ -102,7 +135,15 @@ async function main(): Promise<void> {
   const issues = await listIssues(presetId);
 
   if (issues.length === 0) {
-    console.error(`\n  "${presetId}" alanında arşivlenmiş sayı yok.\n`);
+    console.error(
+      ui(
+        {
+          tr: '\n  "{id}" alanında arşivlenmiş sayı yok.\n',
+          en: '\n  There are no archived issues for "{id}".\n',
+        },
+        { id: presetId },
+      ),
+    );
     process.exitCode = 1;
     return;
   }
@@ -113,19 +154,45 @@ async function main(): Promise<void> {
 
   if (!issue) {
     const known = issues.map((entry) => entry.id).join(", ");
-    console.error(`\n  "${issueId}" diye bir sayı yok. Arşivdekiler: ${known}\n`);
+    console.error(
+      ui(
+        {
+          tr: '\n  "{id}" diye bir sayı yok. Arşivdekiler: {known}\n',
+          en: '\n  There is no issue "{id}". The archive holds: {known}\n',
+        },
+        { id: issueId ?? "", known },
+      ),
+    );
     process.exitCode = 1;
     return;
   }
 
   console.log("");
   console.log(
-    color.bold(color.cyan(`  ${issue.title} — Sayı ${issue.number} (${issue.id})`)),
+    color.bold(
+      color.cyan(
+        `  ${issue.title} — ` +
+          ui(
+            { tr: "Sayı {number}", en: "Issue {number}" },
+            { number: issue.number },
+          ) +
+          ` (${issue.id})`,
+      ),
+    ),
   );
   console.log(
     color.dim(
-      `  ${issue.stats.collected} aday tarandı · ${issue.stats.fresh} yeni · ` +
-        `${issue.stats.scored} puanlandı · ${issue.stats.published} yayınlandı`,
+      ui(
+        {
+          tr:
+            "  {collected} aday tarandı · {fresh} yeni · " +
+            "{scored} puanlandı · {published} yayınlandı",
+          en:
+            "  {collected} scanned · {fresh} new · " +
+            "{scored} scored · {published} published",
+        },
+        issue.stats,
+      ),
     ),
   );
   console.log("");
@@ -135,7 +202,10 @@ async function main(): Promise<void> {
   } else {
     console.log(
       color.dim(
-        "  Bu sayı aday listesi olmadan üretilmiş; puan dağılımı gösterilemiyor.",
+        ui({
+          tr: "  Bu sayı aday listesi olmadan üretilmiş; puan dağılımı gösterilemiyor.",
+          en: "  This issue kept no candidate list; the score distribution cannot be shown.",
+        }),
       ),
     );
   }
@@ -149,7 +219,8 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   console.error(
-    `\n  Hata: ${error instanceof Error ? error.message : String(error)}\n`,
+    `\n  ${ui({ tr: "Hata", en: "Error" })}: ` +
+      `${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

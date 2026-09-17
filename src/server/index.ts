@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { discoverSources, finalizePreset } from "../discovery/run.js";
 import type { DiscoveryOutcome } from "../discovery/run.js";
 import type { DiscoveryRequest, RankedFeed } from "../discovery/types.js";
-import { resolveLang } from "../i18n.js";
+import { resolveLang, ui, uiLang } from "../i18n.js";
 import { color } from "../util/log.js";
 import { domainOf } from "../util/url.js";
 import { openStream } from "./sse.js";
@@ -56,7 +56,9 @@ async function readJson(request: IncomingMessage): Promise<unknown> {
     size += (chunk as Buffer).length;
 
     if (size > 1_000_000) {
-      throw new Error("İstek gövdesi çok büyük");
+      throw new Error(
+        ui({ tr: "İstek gövdesi çok büyük", en: "The request body is too large" }),
+      );
     }
 
     chunks.push(chunk as Buffer);
@@ -81,13 +83,15 @@ async function handleDiscover(
   const topic = (url.searchParams.get("topic") ?? "").trim();
 
   if (!topic) {
-    sendJson(response, 400, { error: "Konu boş olamaz." });
+    sendJson(response, 400, {
+      error: ui({ tr: "Konu boş olamaz.", en: "The topic cannot be empty." }),
+    });
     return;
   }
 
   const request: DiscoveryRequest = {
     topic,
-    language: resolveLang(url.searchParams.get("lang") ?? "tr"),
+    language: resolveLang(url.searchParams.get("lang") ?? uiLang()),
     windowDays: 7,
     maxFeeds: 12,
     strictLanguage: false,
@@ -101,7 +105,13 @@ async function handleDiscover(
     });
 
     if (!outcome || outcome.ranked.length === 0) {
-      stream.send("failed", "Bu konuda doğrulanabilen kaynak bulunamadı.");
+      stream.send(
+        "failed",
+        ui({
+          tr: "Bu konuda doğrulanabilen kaynak bulunamadı.",
+          en: "No verifiable source was found for this topic.",
+        }),
+      );
       stream.close();
       return;
     }
@@ -141,7 +151,10 @@ async function handlePreset(
 
   if (!session) {
     sendJson(response, 410, {
-      error: "Bu keşif oturumu artık yok. Yeniden çalıştır.",
+      error: ui({
+        tr: "Bu keşif oturumu artık yok. Yeniden çalıştır.",
+        en: "That discovery session is gone. Run it again.",
+      }),
     });
     return;
   }
@@ -151,7 +164,12 @@ async function handlePreset(
     .filter((feed): feed is RankedFeed => feed !== undefined);
 
   if (selected.length === 0) {
-    sendJson(response, 400, { error: "En az bir kaynak seç." });
+    sendJson(response, 400, {
+      error: ui({
+        tr: "En az bir kaynak seç.",
+        en: "Pick at least one source.",
+      }),
+    });
     return;
   }
 
@@ -162,7 +180,12 @@ async function handlePreset(
   });
 
   if (!id) {
-    sendJson(response, 500, { error: "Preset üretilemedi." });
+    sendJson(response, 500, {
+      error: ui({
+        tr: "Preset üretilemedi.",
+        en: "The preset could not be produced.",
+      }),
+    });
     return;
   }
 
@@ -193,7 +216,7 @@ async function handle(
     return;
   }
 
-  sendJson(response, 404, { error: "Yok" });
+  sendJson(response, 404, { error: ui({ tr: "Yok", en: "Not found" }) });
 }
 
 const port = Number(process.env.PORT ?? 3000);
@@ -213,13 +236,34 @@ const server = createServer((request, response) => {
 server.on("error", (error: NodeJS.ErrnoException) => {
   if (error.code === "EADDRINUSE") {
     console.error(
-      `\n  ${port} portu kullanımda. Başka bir port dene:\n` +
-        `    PORT=${port + 1} npm run ui\n`,
+      ui(
+        {
+          tr: "\n  {port} portu kullanımda. Başka bir port dene:\n    PORT={next} npm run ui\n",
+          en: "\n  Port {port} is in use. Try another one:\n    PORT={next} npm run ui\n",
+        },
+        { port, next: port + 1 },
+      ),
     );
   } else if (error.code === "EACCES") {
-    console.error(`\n  ${port} portuna bağlanma izni yok.\n`);
+    console.error(
+      ui(
+        {
+          tr: "\n  {port} portuna bağlanma izni yok.\n",
+          en: "\n  No permission to bind to port {port}.\n",
+        },
+        { port },
+      ),
+    );
   } else {
-    console.error(`\n  Sunucu başlatılamadı: ${error.message}\n`);
+    console.error(
+      ui(
+        {
+          tr: "\n  Sunucu başlatılamadı: {reason}\n",
+          en: "\n  The server could not start: {reason}\n",
+        },
+        { reason: error.message },
+      ),
+    );
   }
 
   process.exitCode = 1;
@@ -227,9 +271,14 @@ server.on("error", (error: NodeJS.ErrnoException) => {
 
 server.listen(port, "127.0.0.1", () => {
   console.log("");
-  console.log(`  ${color.bold(color.cyan("Radar"))}  ${color.dim("kaynak keşfi")}`);
+  console.log(
+    `  ${color.bold(color.cyan("Radar"))}  ` +
+      color.dim(ui({ tr: "kaynak keşfi", en: "source discovery" })),
+  );
   console.log(`  ${color.bold(`http://localhost:${port}`)}`);
   console.log("");
-  console.log(color.dim("  Durdurmak için Ctrl+C."));
+  console.log(
+    color.dim(ui({ tr: "  Durdurmak için Ctrl+C.", en: "  Ctrl+C to stop." })),
+  );
   console.log("");
 });

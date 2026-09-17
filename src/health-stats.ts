@@ -1,3 +1,4 @@
+import { ui } from "./i18n.js";
 import type { SourceStat } from "./types.js";
 
 export type SourceHealth = {
@@ -58,11 +59,17 @@ export function verdictFor(entry: SourceHealth, issueCount: number): string | nu
   }
 
   if (entry.published === 0 && entry.scanned >= 30) {
-    return "hiç yayına girmedi — çıkarmayı düşün";
+    return ui({
+      tr: "hiç yayına girmedi — çıkarmayı düşün",
+      en: "never made an issue — consider dropping it",
+    });
   }
 
   if (entry.scanned >= 100 && entry.hitRate < 0.02) {
-    return "çok tarama, az sonuç — max kotasını düşür";
+    return ui({
+      tr: "çok tarama, az sonuç — max kotasını düşür",
+      en: "high volume, few results — lower its max quota",
+    });
   }
 
   return null;

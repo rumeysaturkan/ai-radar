@@ -1,4 +1,5 @@
 import { listPresets, loadConfig } from "./config.js";
+import { ui, uiLang } from "./i18n.js";
 import { resolveSiteUrl, writeHub, writeOutputs, type HubEntry } from "./pipeline/render.js";
 import { listIssues } from "./store.js";
 import { color } from "./util/log.js";
@@ -16,7 +17,12 @@ async function renderPreset(id: string): Promise<number> {
   const paths = await writeOutputs(config, latest, issues, siteUrl);
 
   console.log(
-    `  ${color.green("✓")} ${id.padEnd(16)} ${issues.length} sayı  ${color.dim(paths.index)}`,
+    `  ${color.green("✓")} ${id.padEnd(16)} ` +
+      ui(
+        { tr: "{count} sayı", en: "{count} issues" },
+        { count: issues.length },
+      ) +
+      `  ${color.dim(paths.index)}`,
   );
 
   return issues.length;
@@ -64,20 +70,29 @@ async function main(): Promise<void> {
 
   if (total === 0) {
     console.log(
-      `  ${color.dim("Arşivde hiç sayı yok. Önce `npm start <alan>` çalıştır.")}`,
+      `  ${color.dim(
+        ui({
+          tr: "Arşivde hiç sayı yok. Önce `npm start <alan>` çalıştır.",
+          en: "The archive is empty. Run `npm start <domain>` first.",
+        }),
+      )}`,
     );
     console.log("");
     return;
   }
 
-  const hub = await writeHub(await hubEntries(), "en");
-  console.log(`  ${color.green("✓")} ${"kapak".padEnd(16)}    ${color.dim(hub)}`);
+  const hub = await writeHub(await hubEntries(), uiLang());
+  console.log(
+    `  ${color.green("✓")} ${ui({ tr: "kapak", en: "cover" }).padEnd(16)}` +
+      `    ${color.dim(hub)}`,
+  );
   console.log("");
 }
 
 main().catch((error: unknown) => {
   console.error(
-    `\n  Hata: ${error instanceof Error ? error.message : String(error)}\n`,
+    `\n  ${ui({ tr: "Hata", en: "Error" })}: ` +
+      `${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

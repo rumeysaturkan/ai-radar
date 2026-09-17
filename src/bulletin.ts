@@ -14,6 +14,7 @@ import {
 import { scoreCandidates } from "./pipeline/score.js";
 import { select } from "./pipeline/select.js";
 import { sourceStats } from "./pipeline/stats.js";
+import { ui } from "./i18n.js";
 import { resolvePreset } from "./preset.js";
 import { ensureKeys } from "./setup.js";
 import { listIssues, readSeen, saveIssue, writeSeen } from "./store.js";
@@ -22,6 +23,10 @@ import { daysAgo, isoWeekId } from "./util/date.js";
 import { banner, done, note, result, step, warn } from "./util/log.js";
 
 function openInBrowser(filePath: string): void {
+  if (process.env.CI || !process.stdout.isTTY) {
+    return;
+  }
+
   const command =
     process.platform === "win32"
       ? { cmd: "cmd", args: ["/c", "start", "", filePath] }
@@ -30,7 +35,13 @@ function openInBrowser(filePath: string): void {
         : { cmd: "xdg-open", args: [filePath] };
 
   try {
-    spawn(command.cmd, command.args, { detached: true, stdio: "ignore" }).unref();
+    const child = spawn(command.cmd, command.args, {
+      detached: true,
+      stdio: "ignore",
+    });
+
+    child.on("error", () => {});
+    child.unref();
   } catch {
   }
 }
@@ -65,40 +76,87 @@ async function main(): Promise<void> {
 
   await ensureKeys();
 
-  step("Kaynaklar taranıyor...");
+  step(ui({ tr: "Kaynaklar taranıyor...", en: "Scanning sources..." }));
   const collected = await collectCandidates(config);
   done(
-    `${collected.candidates.length} aday, ${collected.sourcesOk} kaynak` +
+    ui(
+      {
+        tr: "{candidates} aday, {ok} kaynak",
+        en: "{candidates} candidates from {ok} sources",
+      },
+      { candidates: collected.candidates.length, ok: collected.sourcesOk },
+    ) +
       (collected.sourcesFailed > 0
-        ? `, ${collected.sourcesFailed} kaynak yanıt vermedi`
+        ? ui(
+            {
+              tr: ", {failed} kaynak yanıt vermedi",
+              en: ", {failed} did not answer",
+            },
+            { failed: collected.sourcesFailed },
+          )
         : ""),
   );
 
   if (collected.candidates.length === 0) {
-    warn(`Hiç içerik bulunamadı. presets/${config.id}.json içindeki kaynakları kontrol et.`);
+    warn(
+      ui(
+        {
+          tr: "Hiç içerik bulunamadı. presets/{id}.json içindeki kaynakları kontrol et.",
+          en: "Nothing was found at all. Check the sources in presets/{id}.json.",
+        },
+        { id: config.id },
+      ),
+    );
     process.exitCode = 1;
     return;
   }
 
-  step("Tekrarlar eleniyor...");
+  step(ui({ tr: "Tekrarlar eleniyor...", en: "Dropping repeats..." }));
   const seen = await readSeen(config.id);
   const deduped = dedupe(collected.candidates, seen, config);
-  done(`${deduped.fresh.length} yeni içerik`);
+  done(
+    ui(
+      { tr: "{count} yeni içerik", en: "{count} new items" },
+      { count: deduped.fresh.length },
+    ),
+  );
   note(
-    `${deduped.alreadyPublished} tanesi önceki sayılarda yayınlanmıştı, ` +
-      `${deduped.duplicatesDropped} tanesi kopyaydı.`,
+    ui(
+      {
+        tr:
+          "{published} tanesi önceki sayılarda yayınlanmıştı, " +
+          "{duplicates} tanesi kopyaydı.",
+        en:
+          "{published} appeared in earlier issues, " +
+          "{duplicates} were duplicates.",
+      },
+      {
+        published: deduped.alreadyPublished,
+        duplicates: deduped.duplicatesDropped,
+      },
+    ),
   );
 
   if (deduped.fresh.length === 0) {
-    warn("Bu hafta yeni bir şey yok. Daha sonra tekrar dene.");
+    warn(
+      ui({
+        tr: "Bu hafta yeni bir şey yok. Daha sonra tekrar dene.",
+        en: "Nothing new this week. Try again later.",
+      }),
+    );
     process.exitCode = 1;
     return;
   }
 
-  step("İçerikler puanlanıyor...");
+  step(ui({ tr: "İçerikler puanlanıyor...", en: "Scoring candidates..." }));
   const issueId = isoWeekId(new Date());
   const scored = await scoreCandidates(config, deduped.fresh, { seed: issueId });
-  done(`${scored.length} içerik değerlendirildi`);
+  done(
+    ui(
+      { tr: "{count} içerik değerlendirildi", en: "{count} rated" },
+      { count: scored.length },
+    ),
+  );
 
   const selected = select(scored, {
     minScore: config.minScore,
@@ -106,26 +164,54 @@ async function main(): Promise<void> {
   });
 
   if (selected.length === 0) {
-    warn("Eşiği geçen içerik çıkmadı.");
+    warn(
+      ui({
+        tr: "Eşiği geçen içerik çıkmadı.",
+        en: "Nothing cleared the threshold.",
+      }),
+    );
     process.exitCode = 1;
     return;
   }
 
-  step(`${selected.length} haber okunup özetleniyor...`);
+  step(
+    ui(
+      {
+        tr: "{count} haber okunup özetleniyor...",
+        en: "Reading and summarising {count} stories...",
+      },
+      { count: selected.length },
+    ),
+  );
   const items = await enrichItems(config, selected);
-  done(`${items.length} haber yazıldı`);
+  done(
+    ui(
+      { tr: "{count} haber yazıldı", en: "{count} stories written" },
+      { count: items.length },
+    ),
+  );
 
   if (items.length === 0) {
-    warn("Hiçbir haber özetlenemedi.");
+    warn(
+      ui({
+        tr: "Hiçbir haber özetlenemedi.",
+        en: "Not one story could be summarised.",
+      }),
+    );
     process.exitCode = 1;
     return;
   }
 
-  step("Sayı derleniyor...");
+  step(ui({ tr: "Sayı derleniyor...", en: "Composing the issue..." }));
   const archive = await listIssues(config.id);
   const previous = archive[0];
   const composition = await composeIssue(config, items, previous);
-  done("giriş ve sıralama hazır");
+  done(
+    ui({
+      tr: "giriş ve sıralama hazır",
+      en: "intro and running order ready",
+    }),
+  );
 
   const now = new Date();
   const highlight = items[composition.highlightIndex] ?? items[0];
@@ -158,7 +244,7 @@ async function main(): Promise<void> {
     sources: sourceStats(collected.candidates, scored, items),
   };
 
-  step("Sayfa üretiliyor...");
+  step(ui({ tr: "Sayfa üretiliyor...", en: "Writing the pages..." }));
 
   for (const item of issue.items) {
     seen[item.id] = {
@@ -180,33 +266,69 @@ async function main(): Promise<void> {
     siteUrl,
   );
   const hubPath = await writeHub(await hubEntries(), config.language);
-  done(`sayı ${issue.number} hazır`);
+  done(
+    ui(
+      { tr: "sayı {number} hazır", en: "issue {number} is ready" },
+      { number: issue.number },
+    ),
+  );
 
   console.log("");
-  result("Bülten  :", paths.html);
-  result("Markdown:", paths.markdown);
-  result("Arşiv   :", paths.index);
-  result("Alanlar :", hubPath);
+  const label = (text: { tr: string; en: string }) => ui(text).padEnd(9) + ":";
+
+  result(label({ tr: "Bülten", en: "Issue" }), paths.html);
+  result(label({ tr: "Markdown", en: "Markdown" }), paths.markdown);
+  result(label({ tr: "Arşiv", en: "Archive" }), paths.index);
+  result(label({ tr: "Alanlar", en: "Domains" }), hubPath);
 
   if (paths.feed) {
-    result("RSS     :", paths.feed);
+    result(label({ tr: "RSS", en: "RSS" }), paths.feed);
   } else {
     note(
-      `RSS akışı üretilmedi: presets/${config.id}.json içindeki "siteUrl" boş ` +
-        "(ya da RADAR_SITE_URL tanımla). Mutlak adres olmadan akış geçersiz olur.",
+      ui(
+        {
+          tr:
+            'RSS akışı üretilmedi: presets/{id}.json içindeki "siteUrl" boş ' +
+            "(ya da RADAR_SITE_URL tanımla). Mutlak adres olmadan akış geçersiz olur.",
+          en:
+            'No RSS feed was written: "siteUrl" in presets/{id}.json is empty ' +
+            "(or set RADAR_SITE_URL). Without an absolute address the feed is invalid.",
+        },
+        { id: config.id },
+      ),
     );
   }
 
   result(
-    "Maliyet :",
-    `$${issue.usage.estimatedCostUsd.toFixed(3)} (${issue.usage.inputTokens} girdi / ${issue.usage.outputTokens} çıktı token)`,
+    label({ tr: "Maliyet", en: "Cost" }),
+    `$${issue.usage.estimatedCostUsd.toFixed(3)} ` +
+      ui(
+        {
+          tr: "({input} girdi / {output} çıktı token)",
+          en: "({input} in / {output} out tokens)",
+        },
+        {
+          input: issue.usage.inputTokens,
+          output: issue.usage.outputTokens,
+        },
+      ),
   );
 
   for (const stage of issue.usage.stages ?? []) {
     note(
       `${stage.stage.padEnd(8)} ${stage.model.padEnd(12)} ` +
         `$${stage.estimatedCostUsd.toFixed(4).padStart(8)}  ` +
-        `${stage.calls} çağrı, ${stage.inputTokens}/${stage.outputTokens} token`,
+        ui(
+          {
+            tr: "{calls} çağrı, {input}/{output} token",
+            en: "{calls} calls, {input}/{output} tokens",
+          },
+          {
+            calls: stage.calls,
+            input: stage.inputTokens,
+            output: stage.outputTokens,
+          },
+        ),
     );
   }
 
@@ -214,8 +336,17 @@ async function main(): Promise<void> {
 
   if (unpriced.length > 0) {
     warn(
-      `Fiyatı bilinmeyen model: ${unpriced.join(", ")}. ` +
-        "Gösterilen maliyet eksik — src/llm.ts içindeki PRICING tablosuna ekle.",
+      ui(
+        {
+          tr:
+            "Fiyatı bilinmeyen model: {models}. " +
+            "Gösterilen maliyet eksik — src/llm.ts içindeki PRICING tablosuna ekle.",
+          en:
+            "No price is known for: {models}. " +
+            "The reported cost is short — add it to PRICING in src/llm.ts.",
+        },
+        { models: unpriced.join(", ") },
+      ),
     );
   }
   console.log("");
@@ -225,7 +356,8 @@ async function main(): Promise<void> {
 
 main().catch((error: unknown) => {
   console.error(
-    `\n  Hata: ${error instanceof Error ? error.message : String(error)}\n`,
+    `\n  ${ui({ tr: "Hata", en: "Error" })}: ` +
+      `${error instanceof Error ? error.message : String(error)}\n`,
   );
   process.exitCode = 1;
 });

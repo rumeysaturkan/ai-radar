@@ -1,3 +1,4 @@
+import { ui } from "../i18n.js";
 import { searchWeb } from "../tools/search-web.js";
 import { isBlockedSource } from "../util/blocklist.js";
 import { note, warn } from "../util/log.js";
@@ -39,13 +40,34 @@ export async function findCandidateSites(
   }
 
   for (const domain of brief.seedDomains) {
-    add(domain, domain, "modelin bildiği yayın", "llm");
+    add(
+      domain,
+      domain,
+      ui({
+        tr: "modelin bildiği yayın",
+        en: "a publication the model knows",
+      }),
+      "llm",
+    );
   }
 
-  onProgress?.(`${byOrigin.size} aday model hafızasından`);
+  onProgress?.(
+    ui(
+      {
+        tr: "{count} aday model hafızasından",
+        en: "{count} candidates from the model's memory",
+      },
+      { count: byOrigin.size },
+    ),
+  );
 
   if (!process.env.TAVILY_API_KEY) {
-    note("TAVILY_API_KEY yok, arama atlanıyor — yalnızca model önerileriyle devam.");
+    note(
+      ui({
+        tr: "TAVILY_API_KEY yok, arama atlanıyor — yalnızca model önerileriyle devam.",
+        en: "No TAVILY_API_KEY, skipping search — carrying on with the model's suggestions only.",
+      }),
+    );
     return [...byOrigin.values()].slice(0, MAX_SITES);
   }
 
@@ -59,11 +81,27 @@ export async function findCandidateSites(
         add(result.title, result.url, result.snippet, "search");
       }
 
-      onProgress?.(`"${query.slice(0, 40)}" → ${byOrigin.size} aday`);
+      onProgress?.(
+        ui(
+          {
+            tr: '"{query}" → {count} aday',
+            en: '"{query}" → {count} candidates',
+          },
+          { query: query.slice(0, 40), count: byOrigin.size },
+        ),
+      );
     } catch (error) {
       warn(
-        `Arama "${query.slice(0, 40)}" atlandı: ` +
-          (error instanceof Error ? error.message : String(error)),
+        ui(
+          {
+            tr: 'Arama "{query}" atlandı: {reason}',
+            en: 'Search "{query}" skipped: {reason}',
+          },
+          {
+            query: query.slice(0, 40),
+            reason: error instanceof Error ? error.message : String(error),
+          },
+        ),
       );
     }
   }

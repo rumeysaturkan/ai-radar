@@ -10,6 +10,8 @@ with no code change.
 
 *[Türkçe README](README.tr.md)*
 
+Node 22 or newer, then:
+
 ```bash
 npm install
 npm start
@@ -18,6 +20,11 @@ npm start
 The first run asks which domain you want, takes your API key, writes it to
 `.env`, produces the issue and opens it in your browser. There is no other
 setup step.
+
+The interface speaks English or Turkish, following your system locale. Pin it
+with `RADAR_LANG=en` (or `tr`), which also sets the default `--lang` for
+source discovery. The language of what gets *published* is a separate thing,
+and it lives in each preset's `language` field.
 
 <!--
 Screenshot: open dist/ai/2026-W38.html in a browser, capture it, save it as
@@ -194,6 +201,39 @@ published per source — so a feed that produces volume and no results becomes
 visible. It only ever recommends, and only after three issues; quietly
 rewriting your preset would be a bad default, and one bad week is not
 evidence.
+
+## Publishing on a schedule
+
+The weekly run is **not** automated by default. `.github/workflows/bulletin.yml`
+has a `workflow_dispatch` trigger and no `schedule:`, so it never fires on its
+own: an issue costs money and goes out under your name, so a person starts it.
+
+To run one from GitHub:
+
+1. Add `OPENAI_API_KEY` as a repository secret (Settings → Secrets and
+   variables → Actions). `TAVILY_API_KEY` is optional; without it web search is
+   skipped.
+2. Actions → **bulletin** → *Run workflow*, and type the domain — the preset
+   file name without `.json`, e.g. `yazilim`.
+3. The run builds the issue, commits `data/`, and that commit makes the `pages`
+   workflow republish the site. Untick **commit** for a trial run: the pages
+   are still uploaded as a build artifact, so you can read the issue before
+   anything is published.
+
+Nothing has to be switched off afterwards — with no `schedule:` the workflow is
+already idle. To make it weekly, add the block and mean it:
+
+```yaml
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Mondays, 06:00 UTC
+  workflow_dispatch:
+```
+
+A run in CI starts from a fresh checkout, where `seen.json` does not exist
+because it is not committed. The index of already-published stories is rebuilt
+from the archived issues instead, so last week's stories stay out of this
+week's.
 
 ## Keys
 

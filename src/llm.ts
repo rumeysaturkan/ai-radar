@@ -1,5 +1,6 @@
 import "dotenv/config";
 import OpenAI from "openai";
+import { ui } from "./i18n.js";
 import type { StageUsage, Usage } from "./types.js";
 import { warn } from "./util/log.js";
 
@@ -173,7 +174,12 @@ export async function structured<T>(request: StructuredRequest): Promise<T> {
       const content = response.choices[0]?.message.content;
 
       if (!content) {
-        throw new Error("Model boş cevap döndü");
+        throw new Error(
+          ui({
+            tr: "Model boş cevap döndü",
+            en: "The model returned an empty answer",
+          }),
+        );
       }
 
       return JSON.parse(content) as T;
@@ -182,8 +188,13 @@ export async function structured<T>(request: StructuredRequest): Promise<T> {
 
       if (effort && rejectsReasoningEffort(error)) {
         warn(
-          `${request.model} "reasoningEffort: ${effort}" değerini kabul etmedi; ` +
-            "ayar yok sayılıyor.",
+          ui(
+            {
+              tr: '{model} "reasoningEffort: {effort}" değerini kabul etmedi; ayar yok sayılıyor.',
+              en: '{model} rejected "reasoningEffort: {effort}"; the setting is ignored.',
+            },
+            { model: request.model, effort },
+          ),
         );
         effort = undefined;
       }

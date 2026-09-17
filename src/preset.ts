@@ -2,6 +2,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 import { listPresets, type PresetSummary } from "./config.js";
+import { ui } from "./i18n.js";
 import { color } from "./util/log.js";
 
 const dataDir = fileURLToPath(new URL("../data/", import.meta.url));
@@ -24,14 +25,25 @@ async function writeLastPreset(id: string): Promise<void> {
 }
 
 function render(presets: readonly PresetSummary[], defaultIndex: number): void {
-  console.log("  Hangi alanda bülten üretilsin?");
+  console.log(
+    ui({
+      tr: "  Hangi alanda bülten üretilsin?",
+      en: "  Which domain should the issue come from?",
+    }),
+  );
   console.log("");
 
   presets.forEach((preset, index) => {
     const marker = index === defaultIndex ? color.cyan("›") : " ";
     console.log(`  ${marker} ${index + 1}) ${preset.name}`);
     console.log(
-      `       ${color.dim(`${preset.tagline} · ${preset.feedCount} kaynak`)}`,
+      `       ${color.dim(
+         `${preset.tagline} · ` +
+           ui(
+             { tr: "{count} kaynak", en: "{count} sources" },
+             { count: preset.feedCount },
+           ),
+       )}`,
     );
   });
 
@@ -42,7 +54,12 @@ export async function resolvePreset(argv: readonly string[]): Promise<string> {
   const presets = await listPresets();
 
   if (presets.length === 0) {
-    throw new Error("Hiç alan tanımlı değil. presets/ klasörüne bir .json ekle.");
+    throw new Error(
+      ui({
+        tr: "Hiç alan tanımlı değil. presets/ klasörüne bir .json ekle.",
+        en: "No domains are defined. Add a .json file to presets/.",
+      }),
+    );
   }
 
   const requested = argv.find((arg) => !arg.startsWith("-"));
@@ -55,7 +72,13 @@ export async function resolvePreset(argv: readonly string[]): Promise<string> {
     if (!match) {
       const known = presets.map((preset) => preset.id).join(", ");
       throw new Error(
-        `"${requested}" diye bir alan yok. Tanımlı alanlar: ${known}`,
+        ui(
+          {
+            tr: '"{requested}" diye bir alan yok. Tanımlı alanlar: {known}',
+            en: 'There is no domain called "{requested}". Defined: {known}',
+          },
+          { requested, known },
+        ),
       );
     }
 
@@ -80,7 +103,13 @@ export async function resolvePreset(argv: readonly string[]): Promise<string> {
     while (true) {
       const answer = (
         await rl.question(
-          `  Seçim [1-${presets.length}, boş = ${fallback.name}]: `,
+          ui(
+            {
+              tr: "  Seçim [1-{count}, boş = {fallback}]: ",
+              en: "  Pick [1-{count}, empty = {fallback}]: ",
+            },
+            { count: presets.length, fallback: fallback.name },
+          ),
         )
       ).trim();
 
@@ -109,7 +138,12 @@ export async function resolvePreset(argv: readonly string[]): Promise<string> {
       }
 
       console.log(
-        `  ${color.yellow("!")} ${color.dim("Listedeki bir numarayı ya da kimliği yaz.")}`,
+        `  ${color.yellow("!")} ${color.dim(
+          ui({
+            tr: "Listedeki bir numarayı ya da kimliği yaz.",
+            en: "Type a number from the list, or an id.",
+          }),
+        )}`,
       );
     }
   } finally {

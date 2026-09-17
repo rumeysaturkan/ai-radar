@@ -32,20 +32,48 @@ export function hashUrl(canonicalUrl: string): string {
   return createHash("sha1").update(canonicalUrl).digest("hex").slice(0, 12);
 }
 
+function withinRetention(index: SeenIndex, now: Date): SeenIndex {
+  const cutoff = now.getTime() - SEEN_RETENTION_DAYS * 86_400_000;
+
+  return Object.fromEntries(
+    Object.entries(index).filter(
+      ([, entry]) => new Date(entry.firstSeen).getTime() >= cutoff,
+    ),
+  );
+}
+
+export function seenFromIssues(
+  issues: readonly Issue[],
+  now: Date = new Date(),
+): SeenIndex {
+  const index: SeenIndex = {};
+
+  for (const issue of [...issues].sort((a, b) => a.id.localeCompare(b.id))) {
+    for (const item of issue.items) {
+      index[item.id] ??= {
+        url: item.url,
+        title: item.title,
+        firstSeen: issue.generatedAt,
+      };
+    }
+  }
+
+  return withinRetention(index, now);
+}
+
 export async function readSeen(presetId: string): Promise<SeenIndex> {
   try {
     const raw = await readFile(seenPathOf(presetId), "utf8");
     const parsed = JSON.parse(raw) as SeenIndex;
-    const cutoff = Date.now() - SEEN_RETENTION_DAYS * 86_400_000;
+    const index = withinRetention(parsed, new Date());
 
-    return Object.fromEntries(
-      Object.entries(parsed).filter(
-        ([, entry]) => new Date(entry.firstSeen).getTime() >= cutoff,
-      ),
-    );
+    if (Object.keys(index).length > 0) {
+      return index;
+    }
   } catch {
-    return {};
   }
+
+  return seenFromIssues(await listIssues(presetId));
 }
 
 export async function writeSeen(

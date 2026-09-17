@@ -1,5 +1,6 @@
 import Parser from "rss-parser";
 import type { Config } from "../config.js";
+import { t, ui } from "../i18n.js";
 import { searchNews } from "../tools/search-web.js";
 import type { Candidate } from "../types.js";
 import { daysAgo } from "../util/date.js";
@@ -139,7 +140,15 @@ async function collectHackerNews(
         }
       }
     } catch (error) {
-      warn(`Hacker News "${query}" atlandı: ${describe(error)}`);
+      warn(
+        ui(
+          {
+            tr: 'Hacker News "{query}" atlandı: {reason}',
+            en: 'Hacker News "{query}" skipped: {reason}',
+          },
+          { query, reason: describe(error) },
+        ),
+      );
     }
   }
 
@@ -148,7 +157,12 @@ async function collectHackerNews(
 
 async function collectWebSearch(config: Config): Promise<Candidate[]> {
   if (!process.env.TAVILY_API_KEY) {
-    note("TAVILY_API_KEY yok, web araması atlanıyor (RSS ile devam).");
+    note(
+      ui({
+        tr: "TAVILY_API_KEY yok, web araması atlanıyor (RSS ile devam).",
+        en: "No TAVILY_API_KEY, skipping web search (carrying on with RSS).",
+      }),
+    );
     return [];
   }
 
@@ -166,7 +180,7 @@ async function collectWebSearch(config: Config): Promise<Candidate[]> {
         const candidate = toCandidate(
           item.title,
           item.url,
-          "Web araması",
+          t(config.language, "source.webSearch"),
           item.publishedAt,
           item.snippet,
         );
@@ -176,7 +190,15 @@ async function collectWebSearch(config: Config): Promise<Candidate[]> {
         }
       }
     } catch (error) {
-      warn(`Arama "${query}" atlandı: ${describe(error)}`);
+      warn(
+        ui(
+          {
+            tr: 'Arama "{query}" atlandı: {reason}',
+            en: 'Search "{query}" skipped: {reason}',
+          },
+          { query, reason: describe(error) },
+        ),
+      );
     }
   }
 
@@ -210,7 +232,15 @@ export async function collectCandidates(
         return items;
       } catch (error) {
         sourcesFailed += 1;
-        warn(`${feed.name} okunamadı: ${describe(error)}`);
+        warn(
+          ui(
+            {
+              tr: "{name} okunamadı: {reason}",
+              en: "{name} could not be read: {reason}",
+            },
+            { name: feed.name, reason: describe(error) },
+          ),
+        );
         return [];
       }
     },

@@ -1,7 +1,7 @@
 import type { Config } from "../config.js";
 import { structured } from "../llm.js";
 import type { Candidate, ScoredCandidate } from "../types.js";
-import { outputLanguageRule } from "../i18n.js";
+import { outputLanguageRule, ui } from "../i18n.js";
 import { isoWeekId } from "../util/date.js";
 import { mapWithConcurrency } from "../util/pool.js";
 import { shuffle } from "../util/shuffle.js";
@@ -108,7 +108,7 @@ export async function scoreCandidates(
         const response = await deps.structured<{ ratings: Rating[] }>({
           model: config.models.scorer,
           system: systemPrompt(config),
-          user: `Adaylar:\n${JSON.stringify(payload, null, 1)}`,
+          user: `Candidates:\n${JSON.stringify(payload, null, 1)}`,
           schemaName: "ratings",
           schema,
           stage: "score",
@@ -135,9 +135,15 @@ export async function scoreCandidates(
         return scored;
       } catch (error) {
         warn(
-          `Bir puanlama grubu atlandı: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
+          ui(
+            {
+              tr: "Bir puanlama grubu atlandı: {reason}",
+              en: "One scoring batch was skipped: {reason}",
+            },
+            {
+              reason: error instanceof Error ? error.message : String(error),
+            },
+          ),
         );
         return [];
       }

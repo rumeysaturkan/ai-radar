@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { aggregate, verdictFor } from "../src/health-stats.js";
+process.env.RADAR_LANG = "en";
+
+const { aggregate, verdictFor } = await import("../src/health-stats.js");
 import type { SourceStat } from "../src/types.js";
 
 function stat(
@@ -87,7 +89,7 @@ describe("verdictFor", () => {
   it("flags a source that has never produced a published story", () => {
     const verdict = verdictFor({ ...base, scanned: 200, scored: 40 }, 5);
 
-    assert.match(verdict ?? "", /çıkarmayı düşün/);
+    assert.match(verdict ?? "", /consider dropping it/);
   });
 
   it("flags a high-volume source with a negligible hit rate", () => {
@@ -96,7 +98,7 @@ describe("verdictFor", () => {
       5,
     );
 
-    assert.match(verdict ?? "", /kotasını düşür/);
+    assert.match(verdict ?? "", /lower its max quota/);
   });
 
   it("says nothing about a source that is doing its job", () => {

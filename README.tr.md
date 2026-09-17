@@ -10,6 +10,8 @@ bülteni çıkar.
 
 *[English README](README.md)*
 
+Node 22 ya da üstü, sonra:
+
 ```bash
 npm install
 npm start
@@ -18,6 +20,11 @@ npm start
 İlk çalıştırmada hangi alanda bülten istediğinizi sorar, API anahtarınızı alıp
 `.env` dosyasına kaydeder, bülteni üretip tarayıcınızda açar. Başka kurulum
 adımı yok.
+
+Arayüz sistem diline göre Türkçe ya da İngilizce konuşuyor. `RADAR_LANG=tr`
+(ya da `en`) ile sabitleyebilirsiniz; bu aynı zamanda kaynak keşfindeki
+varsayılan `--lang` değerini de belirler. *Yayınlanan* içeriğin dili ayrı bir
+şey ve her preset'in `language` alanında duruyor.
 
 ## Kimin için
 
@@ -188,6 +195,38 @@ puanlanan, yayınlanan — yani hacim üretip sonuç vermeyen bir besleme görü
 oluyor. Yalnızca öneri veriyor ve en az üç sayıdan sonra: kullanıcının
 preset'ini arkasından yeniden yazmak kötü bir varsayılan, ve tek bir kötü
 hafta kanıt değil.
+
+## Zamanlanmış yayın
+
+Haftalık üretim varsayılan olarak **otomatik değil**.
+`.github/workflows/bulletin.yml` yalnızca `workflow_dispatch` ile tetikleniyor,
+içinde `schedule:` yok — yani kendi kendine asla çalışmıyor. Bir sayı para
+harcıyor ve senin adınla yayına gidiyor; o yüzden düğmeye bir insan basıyor.
+
+GitHub üzerinden çalıştırmak için:
+
+1. `OPENAI_API_KEY`'i repo secret'ı olarak ekle (Settings → Secrets and
+   variables → Actions). `TAVILY_API_KEY` opsiyonel; yoksa web araması atlanır.
+2. Actions → **bulletin** → *Run workflow*, ve alan adını yaz — preset dosya
+   adının `.json`'sız hali, örneğin `yazilim`.
+3. Çalışma sayıyı üretir, `data/` klasörünü commit'ler, o commit de `pages`
+   workflow'unu tetikleyip siteyi yeniden basar. Deneme için **commit**
+   kutusunu boşalt: sayfalar yine build artifact'ı olarak yüklenir, yani hiçbir
+   şey yayınlanmadan sayıyı okuyabilirsin.
+
+Sonrasında kapatılacak bir şey yok — `schedule:` olmadığı için workflow zaten
+uykuda. Haftalık yapmak istersen bloğu bilerek ekleyeceksin:
+
+```yaml
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # pazartesi, 06:00 UTC
+  workflow_dispatch:
+```
+
+CI'daki çalışma temiz bir checkout'tan başlar; `seen.json` commit'lenmediği için
+orada yoktur. Daha önce yayınlanmış haberlerin indeksi bu durumda arşivlenmiş
+sayılardan yeniden kurulur, böylece geçen haftanın haberleri bu haftaya sızmaz.
 
 ## Anahtarlar
 

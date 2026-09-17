@@ -1,0 +1,68 @@
+name: bulletin
+
+# Deliberately manual. There is no `schedule:` here, so this workflow never
+# fires on its own -- an issue costs money and goes out under your name, so it
+# is triggered by a person from the Actions tab and stops there. Turning it
+# into a weekly job is one `schedule:` block, and that is a decision, not a
+# default.
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: "Which preset to run (the file name in presets/, without .json)"
+        required: true
+        default: "yazilim"
+        type: string
+      commit:
+        description: "Commit the new issue, which republishes the site"
+        required: false
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bulletin-${{ inputs.domain }}
+  cancel-in-progress: false
+
+jobs:
+  bulletin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      # seen.json is not committed, so on a fresh checkout the run rebuilds the
+      # "already published" index from the archived issues. Without that, a
+      # story from last week could come back.
+      - name: Build the issue
+        run: npm start -- "${{ inputs.domain }}"
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+
+      - name: Commit the issue
+        if: ${{ inputs.commit }}
+        run: |
+          if git diff --quiet -- data presets; then
+            echo "Nothing changed; no commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data presets
+          git commit -m "Publish the ${{ inputs.domain }} issue"
+          git push
+
+      # Kept whether or not the run was committed, so a trial run can be read
+      # before anything is published.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: issue-${{ inputs.domain }}
+          path: dist/${{ inputs.domain }}
+          if-no-files-found: warn

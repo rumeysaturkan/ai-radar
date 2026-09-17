@@ -63,15 +63,21 @@ export function sanitizeProfile(
 ): DomainProfile {
   const categories = clean(raw.categories, 28).slice(0, MAX_CATEGORIES);
 
-  const filler = ["Genel", "Öne Çıkanlar", "Diğer"];
+  const filler =
+    request.language === "tr"
+      ? ["Genel", "Öne Çıkanlar", "Diğer"]
+      : ["General", "Highlights", "Other"];
+
+  const section = (n: number): string =>
+    request.language === "tr" ? `Bölüm ${n}` : `Section ${n}`;
 
   while (categories.length < MIN_CATEGORIES) {
-    const next = filler[categories.length] ?? `Bölüm ${categories.length + 1}`;
+    const next = filler[categories.length] ?? section(categories.length + 1);
 
     if (!categories.some((c) => c.toLocaleLowerCase("tr") === next.toLocaleLowerCase("tr"))) {
       categories.push(next);
     } else {
-      categories.push(`Bölüm ${categories.length + 1}`);
+      categories.push(section(categories.length + 1));
     }
   }
 

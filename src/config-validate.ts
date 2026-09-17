@@ -1,4 +1,5 @@
 import type { Config, Feed } from "./config.js";
+import { ui } from "./i18n.js";
 import { isHttpUrl } from "./util/url.js";
 
 const REASONING_EFFORTS = ["none", "minimal", "low", "medium", "high"];
@@ -31,7 +32,15 @@ function checkString(
   }
 
   if (typeof value !== "string" || value.trim() === "") {
-    problems.push(`"${field}" boş olmayan bir metin olmalı.`);
+    problems.push(
+      ui(
+        {
+          tr: '"{field}" boş olmayan bir metin olmalı.',
+          en: '"{field}" must be a non-empty string.',
+        },
+        { field },
+      ),
+    );
   }
 }
 
@@ -48,14 +57,35 @@ function checkInteger(
 
   if (typeof value !== "number" || !Number.isInteger(value)) {
     problems.push(
-      `"${field}" bir tam sayı olmalı` +
-        (typeof value === "string" ? " — tırnak içinde yazılmış." : "."),
+      typeof value === "string"
+        ? ui(
+            {
+              tr: '"{field}" bir tam sayı olmalı — tırnak içinde yazılmış.',
+              en: '"{field}" must be a whole number — it is written in quotes.',
+            },
+            { field },
+          )
+        : ui(
+            {
+              tr: '"{field}" bir tam sayı olmalı.',
+              en: '"{field}" must be a whole number.',
+            },
+            { field },
+          ),
     );
     return;
   }
 
   if (value < min || value > max) {
-    problems.push(`"${field}" ${min} ile ${max} arasında olmalı (${value} verildi).`);
+    problems.push(
+      ui(
+        {
+          tr: '"{field}" {min} ile {max} arasında olmalı ({value} verildi).',
+          en: '"{field}" must be between {min} and {max} ({value} given).',
+        },
+        { field, min, max, value },
+      ),
+    );
   }
 }
 
@@ -69,7 +99,12 @@ function checkStringArray(
   }
 
   if (!Array.isArray(value)) {
-    problems.push(`"${field}" bir dizi olmalı.`);
+    problems.push(
+      ui(
+        { tr: '"{field}" bir dizi olmalı.', en: '"{field}" must be an array.' },
+        { field },
+      ),
+    );
     return null;
   }
 
@@ -78,7 +113,15 @@ function checkStringArray(
   );
 
   if (bad.length > 0) {
-    problems.push(`"${field}" yalnızca boş olmayan metinler içerebilir.`);
+    problems.push(
+      ui(
+        {
+          tr: '"{field}" yalnızca boş olmayan metinler içerebilir.',
+          en: '"{field}" may only contain non-empty strings.',
+        },
+        { field },
+      ),
+    );
     return null;
   }
 
@@ -91,7 +134,9 @@ function checkFeeds(value: unknown, problems: string[]): void {
   }
 
   if (!Array.isArray(value)) {
-    problems.push('"feeds" bir dizi olmalı.');
+    problems.push(
+      ui({ tr: '"feeds" bir dizi olmalı.', en: '"feeds" must be an array.' }),
+    );
     return;
   }
 
@@ -101,20 +146,41 @@ function checkFeeds(value: unknown, problems: string[]): void {
     const where = `feeds[${index}]`;
 
     if (!isRecord(entry)) {
-      problems.push(`${where} bir nesne olmalı.`);
+      problems.push(
+        ui(
+          { tr: '{where} bir nesne olmalı.', en: '{where} must be an object.' },
+          { where },
+        ),
+      );
       return;
     }
 
     const feed = entry as Partial<Feed>;
 
     if (typeof feed.name !== "string" || feed.name.trim() === "") {
-      problems.push(`${where}.name boş olmayan bir metin olmalı.`);
+      problems.push(
+        ui(
+          {
+            tr: '{where}.name boş olmayan bir metin olmalı.',
+            en: '{where}.name must be a non-empty string.',
+          },
+          { where },
+        ),
+      );
     } else {
       names.set(feed.name, (names.get(feed.name) ?? 0) + 1);
     }
 
     if (typeof feed.url !== "string" || !isHttpUrl(feed.url)) {
-      problems.push(`${where}.url http(s) ile başlayan geçerli bir adres olmalı.`);
+      problems.push(
+        ui(
+          {
+            tr: '{where}.url http(s) ile başlayan geçerli bir adres olmalı.',
+            en: '{where}.url must be a valid http(s) address.',
+          },
+          { where },
+        ),
+      );
     }
 
     if (feed.max !== undefined) {
@@ -125,8 +191,17 @@ function checkFeeds(value: unknown, problems: string[]): void {
   for (const [name, count] of names) {
     if (count > 1) {
       problems.push(
-        `"${name}" adlı ${count} besleme var. Adlar benzersiz olmalı: ` +
-          "kaynak başına kota bu adla tutuluyor.",
+        ui(
+          {
+            tr:
+              '"{name}" adlı {count} besleme var. Adlar benzersiz olmalı: ' +
+              "kaynak başına kota bu adla tutuluyor.",
+            en:
+              'There are {count} feeds named "{name}". Names must be unique: ' +
+              "the per-source quota is kept under that name.",
+          },
+          { name, count },
+        ),
       );
     }
   }
@@ -137,18 +212,40 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
   const warnings: string[] = [];
 
   if (!isRecord(raw)) {
-    return { problems: ["Preset dosyası bir JSON nesnesi olmalı."], warnings };
+    return {
+      problems: [
+        ui({
+          tr: "Preset dosyası bir JSON nesnesi olmalı.",
+          en: "A preset file must be a JSON object.",
+        }),
+      ],
+      warnings,
+    };
   }
 
   if (!SAFE_ID.test(id)) {
     problems.push(
-      `Alan kimliği "${id}" geçersiz. Yalnızca küçük harf, rakam ve tire.`,
+      ui(
+        {
+          tr: 'Alan kimliği "{id}" geçersiz. Yalnızca küçük harf, rakam ve tire.',
+          en: 'The domain id "{id}" is invalid. Lowercase, digits and hyphens only.',
+        },
+        { id },
+      ),
     );
   }
 
   for (const key of Object.keys(raw)) {
     if (!KNOWN_KEYS.has(key)) {
-      warnings.push(`"${key}" bilinmeyen bir alan, yok sayılıyor.`);
+      warnings.push(
+        ui(
+          {
+            tr: '"{key}" bilinmeyen bir alan, yok sayılıyor.',
+            en: '"{key}" is not a known field and is ignored.',
+          },
+          { key },
+        ),
+      );
     }
   }
 
@@ -158,10 +255,18 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
 
   if (raw.siteUrl !== undefined) {
     if (typeof raw.siteUrl !== "string") {
-      problems.push('"siteUrl" bir metin olmalı.');
+      problems.push(
+        ui({
+          tr: '"siteUrl" bir metin olmalı.',
+          en: '"siteUrl" must be a string.',
+        }),
+      );
     } else if (raw.siteUrl.trim() !== "" && !isHttpUrl(raw.siteUrl)) {
       problems.push(
-        '"siteUrl" http(s) ile başlayan tam bir adres olmalı ya da boş bırakılmalı.',
+        ui({
+          tr: '"siteUrl" http(s) ile başlayan tam bir adres olmalı ya da boş bırakılmalı.',
+          en: '"siteUrl" must be a full http(s) address, or left empty.',
+        }),
       );
     }
   }
@@ -169,20 +274,39 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
   const topics = checkStringArray(raw.topics, "topics", problems);
 
   if (topics && topics.length === 0) {
-    problems.push('"topics" boş olamaz: puanlama neyi eleyeceğini bilemez.');
+    problems.push(
+      ui({
+        tr: '"topics" boş olamaz: puanlama neyi eleyeceğini bilemez.',
+        en: '"topics" cannot be empty: scoring has nothing to cut on.',
+      }),
+    );
   }
 
   const categories = checkStringArray(raw.categories, "categories", problems);
 
   if (categories) {
     if (categories.length === 0) {
-      problems.push('"categories" en az bir başlık içermeli.');
+      problems.push(
+        ui({
+          tr: '"categories" en az bir başlık içermeli.',
+          en: '"categories" must contain at least one heading.',
+        }),
+      );
     }
 
     if (categories.length > 8) {
       problems.push(
-        `"categories" en fazla 8 olmalı (${categories.length} verildi). ` +
-          "Uzun liste puanlamayı zorlaştırıyor.",
+        ui(
+          {
+            tr:
+              '"categories" en fazla 8 olmalı ({count} verildi). ' +
+              "Uzun liste puanlamayı zorlaştırıyor.",
+            en:
+              '"categories" may hold at most 8 ({count} given). ' +
+              "A long list makes scoring harder.",
+          },
+          { count: categories.length },
+        ),
       );
     }
 
@@ -192,7 +316,15 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
       const key = category.toLocaleLowerCase("tr");
 
       if (seen.has(key)) {
-        problems.push(`"categories" içinde tekrar eden başlık: "${category}".`);
+        problems.push(
+          ui(
+            {
+              tr: '"categories" içinde tekrar eden başlık: "{category}".',
+              en: '"categories" repeats a heading: "{category}".',
+            },
+            { category },
+          ),
+        );
       }
 
       seen.add(key);
@@ -207,7 +339,12 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
 
   if (raw.models !== undefined) {
     if (!isRecord(raw.models)) {
-      problems.push('"models" bir nesne olmalı.');
+      problems.push(
+        ui({
+          tr: '"models" bir nesne olmalı.',
+          en: '"models" must be an object.',
+        }),
+      );
     } else {
       checkString(raw.models.scorer, "models.scorer", problems);
       checkString(raw.models.writer, "models.writer", problems);
@@ -220,7 +357,13 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
       !REASONING_EFFORTS.includes(raw.reasoningEffort))
   ) {
     problems.push(
-      `"reasoningEffort" şunlardan biri olmalı: ${REASONING_EFFORTS.join(", ")}.`,
+      ui(
+        {
+          tr: '"reasoningEffort" şunlardan biri olmalı: {list}.',
+          en: '"reasoningEffort" must be one of: {list}.',
+        },
+        { list: REASONING_EFFORTS.join(", ") },
+      ),
     );
   }
 
@@ -228,13 +371,23 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
 
   if (raw.hackerNews !== undefined) {
     if (!isRecord(raw.hackerNews)) {
-      problems.push('"hackerNews" bir nesne olmalı.');
+      problems.push(
+        ui({
+          tr: '"hackerNews" bir nesne olmalı.',
+          en: '"hackerNews" must be an object.',
+        }),
+      );
     } else {
       if (
         raw.hackerNews.enabled !== undefined &&
         typeof raw.hackerNews.enabled !== "boolean"
       ) {
-        problems.push('"hackerNews.enabled" true ya da false olmalı.');
+        problems.push(
+          ui({
+            tr: '"hackerNews.enabled" true ya da false olmalı.',
+            en: '"hackerNews.enabled" must be true or false.',
+          }),
+        );
       }
 
       checkInteger(raw.hackerNews.minPoints, "hackerNews.minPoints", 0, 10_000, problems);
@@ -244,13 +397,23 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
 
   if (raw.webSearch !== undefined) {
     if (!isRecord(raw.webSearch)) {
-      problems.push('"webSearch" bir nesne olmalı.');
+      problems.push(
+        ui({
+          tr: '"webSearch" bir nesne olmalı.',
+          en: '"webSearch" must be an object.',
+        }),
+      );
     } else {
       if (
         raw.webSearch.enabled !== undefined &&
         typeof raw.webSearch.enabled !== "boolean"
       ) {
-        problems.push('"webSearch.enabled" true ya da false olmalı.');
+        problems.push(
+          ui({
+            tr: '"webSearch.enabled" true ya da false olmalı.',
+            en: '"webSearch.enabled" must be true or false.',
+          }),
+        );
       }
 
       checkStringArray(raw.webSearch.queries, "webSearch.queries", problems);
@@ -263,7 +426,10 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
 
   if (!hasFeeds && !hasHn && !hasSearch) {
     problems.push(
-      "Hiç kaynak yok: en az bir besleme ekle ya da hackerNews/webSearch aç.",
+      ui({
+        tr: "Hiç kaynak yok: en az bir besleme ekle ya da hackerNews/webSearch aç.",
+        en: "No sources at all: add a feed, or turn on hackerNews/webSearch.",
+      }),
     );
   }
 
@@ -272,7 +438,13 @@ export function validateConfig(raw: unknown, id: string): ValidationResult {
 
 export function describeProblems(id: string, problems: readonly string[]): string {
   return [
-    `presets/${id}.json geçerli değil:`,
+    ui(
+      {
+        tr: "presets/{id}.json geçerli değil:",
+        en: "presets/{id}.json is not valid:",
+      },
+      { id },
+    ),
     ...problems.map((problem) => `  - ${problem}`),
   ].join("\n");
 }

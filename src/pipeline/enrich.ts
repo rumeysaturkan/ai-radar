@@ -1,6 +1,6 @@
 import type { Config } from "../config.js";
 import { structured } from "../llm.js";
-import { outputLanguageRule } from "../i18n.js";
+import { outputLanguageRule, ui } from "../i18n.js";
 import { readSource } from "../tools/read-source.js";
 import type { Item, ScoredCandidate } from "../types.js";
 import { mapWithConcurrency } from "../util/pool.js";
@@ -72,11 +72,11 @@ export async function enrichItems(
           model: config.models.writer,
           system: systemPrompt(config),
           user: [
-            `Başlık: ${candidate.title}`,
-            `Kaynak: ${candidate.source}`,
+            `Headline: ${candidate.title}`,
+            `Source: ${candidate.source}`,
             `URL: ${candidate.url}`,
             "",
-            "Sayfa metni:",
+            "Page text:",
             text,
           ].join("\n"),
           schemaName: "summary",
@@ -88,9 +88,16 @@ export async function enrichItems(
         return { ...candidate, ...summary };
       } catch (error) {
         warn(
-          `"${candidate.title.slice(0, 50)}" özetlenemedi: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
+          ui(
+            {
+              tr: '"{title}" özetlenemedi: {reason}',
+              en: '"{title}" could not be summarised: {reason}',
+            },
+            {
+              title: candidate.title.slice(0, 50),
+              reason: error instanceof Error ? error.message : String(error),
+            },
+          ),
         );
         return null;
       }

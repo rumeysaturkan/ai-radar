@@ -26,7 +26,7 @@ type Rating = {
 type Payload = { index: number; title: string; snippet: string };
 
 function parsePayload(user: string): Payload[] {
-  return JSON.parse(user.replace(/^Adaylar:\n/, "")) as Payload[];
+  return JSON.parse(user.replace(/^Candidates:\n/, "")) as Payload[];
 }
 
 function fakeStructured(

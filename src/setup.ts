@@ -2,6 +2,7 @@ import "dotenv/config";
 import { readFile, writeFile } from "node:fs/promises";
 import { createInterface } from "node:readline/promises";
 import { fileURLToPath } from "node:url";
+import { ui } from "./i18n.js";
 import { verifyApiKey } from "./llm.js";
 
 const envPath = fileURLToPath(new URL("../.env", import.meta.url));
@@ -39,19 +40,51 @@ export async function ensureKeys(): Promise<void> {
     return;
   }
 
+  if (!process.stdin.isTTY) {
+    if (needsOpenAi) {
+      throw new Error(
+        ui({
+          tr:
+            "OPENAI_API_KEY tanımlı değil. Etkileşimsiz bir ortamda anahtar " +
+            "sorulamaz; ortam değişkeni olarak ver.",
+          en:
+            "OPENAI_API_KEY is not set. A key cannot be asked for in a " +
+            "non-interactive environment; pass it as an environment variable.",
+        }),
+      );
+    }
+
+    return;
+  }
+
   let content = await readEnvFile();
 
   const rl = createInterface({ input: process.stdin, output: process.stdout });
 
   try {
     if (needsOpenAi) {
-      console.log("  Kurulum — anahtarlar .env dosyasına kaydedilecek.");
-      console.log("  OpenAI anahtarı: https://platform.openai.com/api-keys\n");
+      console.log(
+        ui({
+          tr: "  Kurulum — anahtarlar .env dosyasına kaydedilecek.",
+          en: "  Setup — the keys are saved to the .env file.",
+        }),
+      );
+      console.log(
+        ui({
+          tr: "  OpenAI anahtarı: https://platform.openai.com/api-keys\n",
+          en: "  OpenAI key: https://platform.openai.com/api-keys\n",
+        }),
+      );
 
       const key = (await rl.question("  OPENAI_API_KEY: ")).trim();
 
       if (!key) {
-        throw new Error("OpenAI anahtarı olmadan bülten üretilemez.");
+        throw new Error(
+          ui({
+            tr: "OpenAI anahtarı olmadan bülten üretilemez.",
+            en: "No issue can be produced without an OpenAI key.",
+          }),
+        );
       }
 
       process.env.OPENAI_API_KEY = key;
@@ -60,11 +93,26 @@ export async function ensureKeys(): Promise<void> {
 
     if (needsTavily) {
       console.log(
-        "\n  Tavily anahtarı opsiyonel; boş bırakırsan sadece RSS kaynakları taranır.",
+        ui({
+          tr: "\n  Tavily anahtarı opsiyonel; boş bırakırsan sadece RSS kaynakları taranır.",
+          en: "\n  The Tavily key is optional; leave it empty and only RSS is scanned.",
+        }),
       );
-      console.log("  Ücretsiz anahtar: https://app.tavily.com/\n");
+      console.log(
+        ui({
+          tr: "  Ücretsiz anahtar: https://app.tavily.com/\n",
+          en: "  Free key: https://app.tavily.com/\n",
+        }),
+      );
 
-      const key = (await rl.question("  TAVILY_API_KEY (boş geçilebilir): ")).trim();
+      const key = (
+        await rl.question(
+          ui({
+            tr: "  TAVILY_API_KEY (boş geçilebilir): ",
+            en: "  TAVILY_API_KEY (optional): ",
+          }),
+        )
+      ).trim();
 
       if (key) {
         process.env.TAVILY_API_KEY = key;
@@ -77,7 +125,14 @@ export async function ensureKeys(): Promise<void> {
 
   await writeFile(envPath, content, "utf8");
 
-  process.stdout.write("\n  Anahtar doğrulanıyor... ");
+  process.stdout.write(
+    ui({ tr: "\n  Anahtar doğrulanıyor... ", en: "\n  Verifying the key... " }),
+  );
   await verifyApiKey();
-  console.log("tamam. .env dosyasına kaydedildi.\n");
+  console.log(
+    ui({
+      tr: "tamam. .env dosyasına kaydedildi.\n",
+      en: "done. Saved to .env.\n",
+    }),
+  );
 }
