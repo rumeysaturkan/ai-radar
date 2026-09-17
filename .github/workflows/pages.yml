@@ -11,6 +11,9 @@ on:
       - "src/pipeline/render.ts"
       - "src/i18n.ts"
   workflow_dispatch:
+  # Called by the bulletin workflow. A commit pushed with GITHUB_TOKEN does not
+  # start another workflow, so a new issue has to hand over explicitly.
+  workflow_call:
 
 permissions:
   contents: read
@@ -25,7 +28,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # The branch head, not the run's SHA: when the bulletin workflow calls
+      # this one, the issue it just committed is newer than the run.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
       - uses: actions/setup-node@v4
         with:
           node-version: "22"

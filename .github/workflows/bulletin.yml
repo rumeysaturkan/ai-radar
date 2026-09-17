@@ -66,3 +66,14 @@ jobs:
           name: issue-${{ inputs.domain }}
           path: dist/${{ inputs.domain }}
           if-no-files-found: warn
+
+  # Republishing the site is a separate workflow so that it stays runnable on
+  # its own; it is called here because the commit above cannot trigger it.
+  publish:
+    needs: bulletin
+    if: ${{ inputs.commit }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/pages.yml
