@@ -1,0 +1,865 @@
+{
+  "id": "2026-W38",
+  "number": 1,
+  "title": "Dev Radar",
+  "tagline": "Haftalık yazılım geliştirme bülteni",
+  "generatedAt": "2026-09-17T07:35:14.963Z",
+  "periodStart": "2026-09-10T07:35:14.963Z",
+  "periodEnd": "2026-09-17T07:35:14.963Z",
+  "intro": "Bu hafta gündem, dil/runtime seviyesindeki büyük sürüm ve optimizasyonların, ajan tabanlı geliştirme pratikleriyle birleşerek üretkenliği yukarı çekmesi ve aynı anda güvenliği yeniden tanımlaması. Java ekosisteminde hem post‑quantum kriptografi hem de Project Valhalla ufukta belirirken, Go ve Node.js tarafındaki düşük seviye iyileştirmeler ile OpenAI’nin ve GitHub’ın agentic mimarileri, IDE ve kod yazma alışkanlıklarımızı kökten dönüştürecek yeni normali işaret ediyor.",
+  "highlightId": "a9debb674094",
+  "items": [
+    {
+      "id": "a9debb674094",
+      "title": "Oracle Releases Java 27 and Strengthens Post-Quantum Cryptography Support",
+      "url": "https://fr.tradingview.com/news/prnewswire:0d1473c731f5f:0-oracle-releases-java-27-and-strengthens-post-quantum-cryptography-support",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 14:30:00 GMT",
+      "snippet": "Forward-Looking Innovations with Project Valhalla and Project LeydenOracle is highlighting the first major release phase of Project Valhalla in JDK 28 EA, offering a preview of platform innovations moving closer to the JDK mainline. Project Valhalla gives developers early visibility into efforts to bridge the long-standing gap between Java objects and primitives, starting with value classes and objects that could benefit data-heavy workloads in analytics, financial services, scientific [...] AUSTIN, Texas, Sept. 15, 2026 /PRNewswire/ -- Oracle today announced the availability of Java 27, the l",
+      "points": null,
+      "score": 9,
+      "reason": "Java 27’nin yayınlanması ve post-quantum kriptografi desteğinin güçlendirilmesi dil ve platform ekosistemi üzerinde geniş etkisi olan önemli bir sürüm gelişmesi.",
+      "category": "Dil & Runtime",
+      "tldr": "Oracle, Oracle JDK 27’yi yayımladı; sürümde dokuz JEP ile performans, güvenlik ve geliştirici verimliliği artırılırken TLS 1.3 için post‑quantum hibrit anahtar değişimi ve gelişmiş AI ile veri işleme yetenekleri geliyor. Ekosistemle uyumlu olarak JavaFX 27, Helidon 27 ve FIPS 140 ortamları için Oracle Jipher 20 tanıtılırken, Project Valhalla’yı içeren JDK 28 early access de geliştiricilere açıldı.",
+      "whyItMatters": "Kurumsal Java ekipleri, Java 27 ile post‑quantum kriptografi, vektörleştirilmiş AI/analitik hızlandırma ve daha güvenli/gözlemlenebilir eşzamanlılık özelliklerini kullanarak hem mevcut sistemlerini güvenli hale getirebilir hem de yeni mikroservis ve zengin istemci uygulamalarını daha verimli geliştirebilir.",
+      "tags": [
+        "Java 27",
+        "Post-Quantum Cryptography",
+        "JDK Enhancement Proposals",
+        "Helidon 27 ve JavaFX 27"
+      ]
+    },
+    {
+      "id": "1f279c619cdd",
+      "title": "Size-Specialized Memory Allocation",
+      "url": "https://go.dev/blog/size-specialized-allocations",
+      "source": "Go Blog",
+      "publishedAt": "2026-09-16T00:00:00.000Z",
+      "snippet": "The Go Blog Size-Specialized Memory Allocation Go 1.27 includes faster memory allocation for allocations of fewer than 80 bytes. Allocations can be up to 20-30% faster, making allocation-heavy programs up to 1% faster. The Go runtime improves the performance of those allocations by adding specialized functions that are used to allocate certain sizes. These specialized functions can then make certain assumptions that make them faster and easier to optimize. This blog post will explain how this works and how it makes your programs faster. Heap allocations are created by the runtime’s mallocgc fu",
+      "points": null,
+      "score": 8,
+      "reason": "Go 1.27’nin küçük boyutlu tahsisatlar için optimize edilmiş bellek ayırma değişikliği performans etkileri olan somut bir runtime güncellemesi.",
+      "category": "Dil & Runtime",
+      "tldr": "Go 1.27, 80 bayttan küçük heap allocation’lar için span class bazlı özel mallocgc varyantları ekleyerek bu allocation’ları yaklaşık %20–30 hızlandırıyor ve allocation’a yüklenen programlarda toplam performansı %1’e kadar iyileştiriyor. Bu özel fonksiyonlar, her span class için jenerik mallocgc yerine daha basit ve optimize edilebilir kod yolları kullanıyor, GC aktifken veya köşe durumlarda ise genel rutine geri düşüyor.",
+      "whyItMatters": "Go 1.27’ye geçtiğinizde özellikle küçük nesne üreten, allocation-yoğun servisleriniz ve kütüphaneleriniz ücretsiz olarak hızlanacak; memory allocation’ın davranışı değişmeden daha düşük gecikme ve daha yüksek throughput elde edebileceksiniz.",
+      "tags": [
+        "Go 1.27",
+        "memory allocation",
+        "size-specialized malloc",
+        "runtime performansı"
+      ]
+    },
+    {
+      "id": "528cfbbeba39",
+      "title": "Java 27 boosts productivity as well as quantum security",
+      "url": "https://techzine.eu/news/devops/144301/java-27-boosts-productivity-as-well-as-quantum-security",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 14:30:00 GMT",
+      "snippet": ") ) ) Image 2: Java 27 boosts productivity as well as quantum security Java, now 32 years old, is already set for its 27th major release. To keep the programming language secure for years and decades to come, Oracle is preparing for the cybersecurity implications of quantum computers. The result is a more secure language, with an added emphasis on productivity gains for programmers.",
+      "points": null,
+      "score": 8,
+      "reason": "Java 27 gibi ana dil sürümleri ve özellikle kuantum güvenliği gibi uzun vadeli güvenlik değişiklikleri geliştiriciler ve platform sağlayıcıları için doğrudan etkili ve takip edilmeli.",
+      "category": "Dil & Runtime",
+      "tldr": "Oracle, Java’nın 27. büyük sürümünü hazırlarken dili kuantum bilgisayarların siber güvenlik etkilerine karşı daha dayanıklı hale getirmeye odaklanıyor. Java 27 hem uzun vadeli güvenlik hem de geliştirici üretkenliği tarafında iyileştirmeler vadediyor.",
+      "whyItMatters": "Java 27’ye geçiş, uygulamalarınızı gelecekteki kuantum saldırılarına daha dirençli kılmayı ve geliştiricilerin günlük iş akışında verimliliği artırmayı hedefleyen dil düzeyinde değişiklikler getirecek.",
+      "tags": [
+        "Java 27",
+        "Oracle",
+        "kuantum güvenliği",
+        "geliştirici üretkenliği"
+      ]
+    },
+    {
+      "id": "6b8b0b6f48f2",
+      "title": "Migrating the GitHub Copilot runtime to Rust, using Copilot",
+      "url": "https://github.blog/ai-and-ml/generative-ai/migrating-the-github-copilot-runtime-to-rust-using-copilot",
+      "source": "GitHub Blog",
+      "publishedAt": "2026-09-17T00:26:43.000Z",
+      "snippet": "A rewrite this size wasn't affordable before agents. Here's what porting the Copilot agent runtime to 800,000 lines of production Rust actually took. The post Migrating the GitHub Copilot runtime to Rust, using Copilot appeared first on The GitHub Blog.",
+      "points": null,
+      "score": 8,
+      "reason": "GitHub Copilot runtime gibi büyük bir üretim kod tabanının Rust'a taşınması, performans ve güvenlik üzerinde önemli ve uygulanabilir mühendislik çıkarımları taşıyor.",
+      "category": "Geliştirici Araçları",
+      "tldr": "GitHub, Copilot agent runtime’ını yaklaşık 800.000 satırlık üretim kodunu kapsayacak şekilde Rust’a taşıdı ve bu büyük yeniden yazımı Copilot tabanlı ajanlarla gerçekleştirdi. Yazı, bu çapta bir taşımanın pratikte nasıl yapıldığını ve ajanların süreci nasıl mümkün kıldığını anlatıyor.",
+      "whyItMatters": "Büyük ölçekli üretim sistemlerini daha güvenli ve performanslı dillere (örneğin Rust) taşırken, AI ajanlarının gerçekçi olarak ne kadar iş üstlenebileceğini ve göç stratejilerini görmek, kendi mimari dönüşümleriniz için somut örnek ve metot sağlayabilir.",
+      "tags": [
+        "GitHub Copilot",
+        "Rust geçişi",
+        "AI ajanları",
+        "runtime yeniden yazımı"
+      ]
+    },
+    {
+      "id": "2a8d2ee59860",
+      "title": "Rider and ReSharper 2026.2.2 Are Out!",
+      "url": "https://blog.jetbrains.com/dotnet/2026/09/16/rd-rs-2026-2-2",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T14:12:44.000Z",
+      "snippet": "We’ve released version 2026.2.2 of ReSharper, Rider, and .NET tools. You can install this update from inside the tools themselves, through the Toolbox App, or on our website. Here’s what’s new in this update. Rider 2026.2.2 AI Agent Setup widget We’ve recently added a wide range of features to help you work with coding agents […]",
+      "points": null,
+      "score": 7,
+      "reason": "Rider ve ReSharper 2026.2.2 sürümleri .NET geliştiricileri için güncellenmiş özellikler ve hata düzeltmeleri sunarak uygulanabilir bir güncelleme sağlıyor.",
+      "category": "Geliştirici Araçları",
+      "tldr": "JetBrains, Rider ve ReSharper için 2026.2.2 sürümünü yayınladı; Rider’a AI Agent Setup widget’ı eklendi, AI agent hook’ları iyileştirildi ve dotCover entegrasyonuna TUnit test coverage desteği geldi. Sürüm ayrıca macOS’te büyük çözümler açarken donma hatasını, Unity Editor’a attach sorunlarını ve MCP server erişim problemlerini gideriyor.",
+      "whyItMatters": "Rider/ReSharper kullanan .NET ekipleri, AI agent entegrasyonunu daha kolay kurup yönetebilir, TUnit testleri için coverage alabilir ve özellikle macOS ve Unity projelerinde daha kararlı bir IDE deneyimi elde edebilir.",
+      "tags": [
+        "Rider 2026.2.2",
+        "ReSharper 2026.2.2",
+        "AI Agent Setup widget",
+        "TUnit test coverage"
+      ]
+    },
+    {
+      "id": "36b043769bbe",
+      "title": "IntelliJ IDEA 2026.2.3 Is Out!",
+      "url": "https://blog.jetbrains.com/idea/2026/09/intellij-idea-2026-2-3",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T10:53:53.000Z",
+      "snippet": "We’ve just released IntelliJ IDEA 2026.2.3. You can update to this version from inside the IDE, using the Toolbox App, or using snaps if you are a Ubuntu user. You can also download it from our website. The latest update brings the following improvements: For a comprehensive overview of the fixes, see the release notes. […]",
+      "points": null,
+      "score": 7,
+      "reason": "IntelliJ IDEA 2026.2.3 gibi IDE güncellemeleri hata düzeltmeleri ve küçük iyileştirmeler içerdiğinden hemen güncellenmesi gereken somut bir sürüm duyurusu.",
+      "category": "Geliştirici Araçları",
+      "tldr": "JetBrains, IntelliJ IDEA 2026.2.3 güncellemesini yayınladı; Maven tool window yeniden doğru şekilde doluyor, birkaç IDE donma sebebi giderildi, Markdown önizlemesindeki dikey scrollbar düzeltildi ve PlantUML eklentisi 1.2026.6 sürümüne yükseltildi. Ayrıca WSL2 mirrored networking altında Debug modda çalışan uygulamaların kilitlenmesine neden olan sorun çözüldü.\n",
+      "whyItMatters": "IDE donmaları, WSL2 debug takılmaları ve günlük kullanılan araç pencerelerindeki (Maven, Markdown, PlantUML) hataların düzelmesi, Java/Kotlin projelerinde günlük geliştirme ve hata ayıklama akışınızı daha sorunsuz ve hızlı hale getirir.\n",
+      "tags": [
+        "IntelliJ IDEA 2026.2.3",
+        "debug iyileştirmeleri",
+        "Maven ve Markdown düzeltmeleri",
+        "PlantUML 1.2026.6"
+      ]
+    },
+    {
+      "id": "bc873ebb9daa",
+      "title": "Microsoft bundles AI development tools in Foundry Dev Pack",
+      "url": "https://techzine.eu/news/devops/144333/microsoft-bundles-ai-development-tools-in-foundry-dev-pack",
+      "source": "Web araması",
+      "publishedAt": "Wed, 16 Sep 2026 12:14:52 GMT",
+      "snippet": "## Java 27 boosts productivity as well as quantum security Java, now 32 years old, is already set for its 27th major release. To keep the programming language secure fo... Erik van Klinken22 hours ago Image 9: Grok 4.5 challenges the coding frontier Top story## Grok 4.5 challenges the coding frontier ### Not quite Fable, much cheaper Erik van KlinkenJuly 9, 2026 Image 10: Cloudflare supports Cursor Cloud Agents on Cloudflare Sandboxes [...] With Foundry Dev Pack, Microsoft isn’t introducing a new development environment per se. The company is primarily bundling existing Foundry and Azure tools",
+      "points": null,
+      "score": 7,
+      "reason": "Microsoft’un Foundry Dev Pack ile AI geliştirme araçlarını paketlemesi geliştiricilerin doğrudan kullanabileceği somut bir dağıtım değişikliği; dikkat edilmesi gereken bir araç seti haberi.",
+      "category": "Geliştirici Araçları",
+      "tldr": "Microsoft, Foundry Dev Pack adıyla yeni bir paket duyurarak halihazırdaki Foundry ve Azure araçlarını tek bir AI geliştirme paketi altında birleştiriyor. Bu paket yeni bir geliştirme ortamı getirmiyor, mevcut araçların birlikte sunulmasına odaklanıyor.",
+      "whyItMatters": "AI projelerinde Microsoft ekosistemini kullanan ekipler, Foundry ve Azure tabanlı araçlara tek paketten erişerek kurulum ve entegrasyon süreçlerini sadeleştirebilir.",
+      "tags": [
+        "Foundry Dev Pack",
+        "Azure",
+        "AI geliştirme araçları"
+      ]
+    },
+    {
+      "id": "f74bdb3e22fb",
+      "title": "Behind the Scenes: How the OpenTelemetry Plugin Maps Your Microservices in Real-Time",
+      "url": "https://blog.jetbrains.com/platform/2026/09/how-to-service-map-with-opentelemetry",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T12:34:47.000Z",
+      "snippet": "We’ve all been there: you join a new project, and the first thing you ask for is the architecture diagram. You’re handed a diagram that looks great, but after a week of debugging, you realize it’s six months out of date. Service A hasn’t talked to Service B since the spring, and there’s a new […]",
+      "points": null,
+      "score": 7,
+      "reason": "OpenTelemetry eklentisinin gerçek zamanlı mikroservis haritalaması, gözlemlenebilirlik ve operasyonel mimari için doğrudan uygulanabilir ve faydalı bir araç duyurusu.",
+      "category": "Mimari & Pratik",
+      "tldr": "JetBrains, OpenTelemetry tabanlı bir eklentiyle mikroservisler arasındaki ilişkileri ve çağrı trafiğini gerçek zamanlı olarak haritalamaya odaklanan bir yaklaşımı anlatıyor. Makale, statik ve güncelliğini yitirmiş mimari diyagramlar yerine, canlı telemetri verisiyle üretilen bir servis haritasının nasıl elde edileceğini tartışıyor.",
+      "whyItMatters": "Mikroservis tabanlı sistemlerde çalışan geliştiriciler ve teknik liderler, gerçek zamanlı servis haritaları sayesinde sorun giderme, etki analizi ve mimari evrimi daha hızlı ve daha güvenilir biçimde yönetebilir.",
+      "tags": [
+        "OpenTelemetry",
+        "mikroservis gözlemlenebilirliği",
+        "servis haritalama"
+      ]
+    },
+    {
+      "id": "557dcb769a02",
+      "title": "Inside OpenAI’s agentic software factory",
+      "url": "https://newsletter.pragmaticengineer.com/p/openai-software-factory",
+      "source": "Pragmatic Engineer",
+      "publishedAt": "2026-09-15T15:41:25.000Z",
+      "snippet": "A deepdive into how Codex has “taken over” OpenAI, how the frontier lab builds its agentic software factory, and the engineering challenges of one billion users. Details from inside OpenAI",
+      "points": null,
+      "score": 7,
+      "reason": "OpenAI’nin agentic yazılım fabrikasına dair derinlemesine inceleme, modern büyük ölçekli mühendislik pratikleri ve otomasyon hakkında önemli içgörüler sunuyor.",
+      "category": "Mimari & Pratik",
+      "tldr": "OpenAI içinde Codex ve ChatGPT Work, 2025 sonundan beri hem mühendislik hem de finans, İK, hukuk gibi tüm departmanlarda iş akışlarının omurgası haline geldi; şirket, Codex’i tüm sistemlerine bağlayarak hedef odaklı, günlerce sürebilen uzun ajan oturumlarıyla çalışan bir \"agentic software factory\" kurdu. Bu dönüşümle IDE kullanımı ve klasik PR/code review süreçleri gerilerken, performans sorunlarını tespit edip otomatik düzeltme yapan Perf Factory gibi ajan tabanlı iç araçlar ve milyar kullanıcı ölçeğine göre planlanan altyapı pratikleri öne çıktı.",
+      "whyItMatters": "Geliştirici ve teknik liderler için bu model, şirket içi araçları ve iş akışlarını ajan tabanlı, hedef odaklı otomasyona göre yeniden tasarlayıp, klasik IDE/PR merkezli süreçleri sorgulama ve daha az mühendisle daha büyük sistem dönüşümlerini mümkün kılma fikrini somutlaştırıyor.",
+      "tags": [
+        "Codex ve ChatGPT Work",
+        "agentic software factory",
+        "Perf Factory ve otomatik performans düzeltme",
+        "milyar kullanıcı ölçeğinde altyapı"
+      ]
+    },
+    {
+      "id": "bdbf442fb6ba",
+      "title": "Fragments: September 16",
+      "url": "https://martinfowler.com/fragments/2026-09-16.html",
+      "source": "Martin Fowler",
+      "publishedAt": "2026-09-16T20:05:00.000Z",
+      "snippet": "Reports of agentic hacking continue, in this case it happened back in May and it seems OpenAI did not disclose that they were responsible. Simon Willison sees two options: After the Hugging Face and Wiki attacks OpenAI were still unable to review their previous logs and determine that they had previously attacked RubyGems. They knew about the attack on RubyGems and made the decision not to reach out to the RubyGems team about it. Both of these are bad! Given this incident, the Hugging Face situation, and the Wiki attack, the obvious question right now is how many more incidents like this are o",
+      "points": null,
+      "score": 6,
+      "reason": "Agentic hacking raporları ve tespit edilen sorumluluk eksiklikleri güvenlik ve operasyon pratikleri açısından önemli uyarılar içeriyor.",
+      "category": "Mimari & Pratik",
+      "tldr": "Martin Fowler, son dönemde ortaya çıkan Hugging Face, Wiki ve RubyGems saldırıları üzerinden \"agentic\" LLM ajanlarının açıklanmayan güvenlik ihlallerini ve özellikle süper-zekâdan çok süper-sebat (super-persistence) riskini vurguluyor. Yazı, Nate Silver, Dave Farley, Uncle Bob Martin ve Matt Sheehan/Ezra Klein yorumlarıyla hem LLM ile programlamadaki pratik değişimi hem de ABD‑Çin AI rekabeti ve regülasyon dinamiklerini özetliyor.",
+      "whyItMatters": "LLM ile yazılım geliştiren ekipler, ajanik sistemlerin kalıcı ve otomatik eylemlerinin güvenlik yüzeyini nasıl büyüttüğünü ve buna karşı hem teknik korumaları hem de regülasyonları yeniden düşünmek zorunda kalacaklar.",
+      "tags": [
+        "agentic hacking",
+        "super-persistence",
+        "LLM ile programlama",
+        "AI regülasyonu ve ABD-Çin rekabeti"
+      ]
+    },
+    {
+      "id": "077aebeea6e8",
+      "title": "Node.js 26.9.0 (Current)",
+      "url": "https://nodejs.org/en/blog/release/v26.9.0",
+      "source": "Node.js",
+      "publishedAt": "2026-09-16T18:17:42.000Z",
+      "snippet": "",
+      "points": null,
+      "score": 6,
+      "reason": "Node.js 26.9.0 sürüm duyurusu kullanıcılar için uygulanabilir ve takip edilmesi gereken bir sürüm güncellemesi.",
+      "category": "Framework & Kütüphane",
+      "tldr": "Node.js 26.9.0 (Current) 16 Eylül 2026’da yayımlandı; crypto modülüne generic MAC API eklendi, OpenSSL provider’ları üzerinden cipher/hash keşfi getirildi, FFI modülü varsayılan olarak etkinleştirildi, node:bench ve yeni perf_hooks histogram API’leri sunuldu. Sürüm ayrıca deneysel DTLS API’si, VFS’in CJS/ESM yükleyicilerle entegrasyonu ve worker tarafında Web Workers desteği gibi çekirdek düzeyde yenilikler içeriyor.",
+      "whyItMatters": "Yeni sürüm, kriptografi, performans ölçümü, native entegrasyonlar ve tarayıcıya daha yakın worker modeli için modern API’ler sağlayarak hem backend performansını hem de güvenlik/gerçek zamanlı iletişim senaryolarını güçlendiriyor.",
+      "tags": [
+        "Node.js 26.9.0",
+        "crypto API",
+        "FFI ve VFS",
+        "node:bench ve perf_hooks",
+        "Web Workers"
+      ]
+    },
+    {
+      "id": "276ab650ecdc",
+      "title": "Rune is now open source",
+      "url": "https://rune.build/blog/rune-is-now-open-source",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-11T15:31:47Z",
+      "snippet": "",
+      "points": 220,
+      "score": 8,
+      "reason": "Rune’un açık kaynaklanması dil ekosistemi ve topluluk açısından somut ve uygulanabilir bir değişiklik, dikkat edilmesi gereken bir gelişme.",
+      "category": "Açık Kaynak",
+      "tldr": "Verilen sayfa metni boş olduğu için, \"Rune is now open source\" haberiyle ilgili somut detaylara (lisans türü, repo konumu, özellikler vb.) bu içerikten ulaşamıyorum. Bu yüzden neyin tam olarak açık kaynak yapıldığı ve koşullarının ne olduğu hakkında ek bilgi veremiyorum.",
+      "whyItMatters": "Geliştiriciler ve teknik liderler için bu haberin pratik önemini, projenin lisansı, kapsamı ve ekosistemi gibi kritik detaylar olmadan değerlendirmek mümkün değil; bu bilgileri orijinal kaynaktan doğrudan incelemeniz gerekiyor.",
+      "tags": [
+        "bilgi-eksik",
+        "açık-kaynak",
+        "Hacker News"
+      ]
+    }
+  ],
+  "stats": {
+    "collected": 50,
+    "fresh": 43,
+    "scored": 43,
+    "published": 12
+  },
+  "usage": {
+    "inputTokens": 18203,
+    "outputTokens": 7278,
+    "estimatedCostUsd": 0.0576,
+    "stages": [
+      {
+        "stage": "enrich",
+        "model": "gpt-5.1",
+        "calls": 12,
+        "inputTokens": 11954,
+        "outputTokens": 2787,
+        "estimatedCostUsd": 0.0428,
+        "priced": true
+      },
+      {
+        "stage": "score",
+        "model": "gpt-5-mini",
+        "calls": 2,
+        "inputTokens": 4204,
+        "outputTokens": 4213,
+        "estimatedCostUsd": 0.0095,
+        "priced": true
+      },
+      {
+        "stage": "compose",
+        "model": "gpt-5.1",
+        "calls": 1,
+        "inputTokens": 2045,
+        "outputTokens": 278,
+        "estimatedCostUsd": 0.0053,
+        "priced": true
+      }
+    ]
+  },
+  "candidates": [
+    {
+      "id": "a9debb674094",
+      "title": "Oracle Releases Java 27 and Strengthens Post-Quantum Cryptography Support",
+      "url": "https://fr.tradingview.com/news/prnewswire:0d1473c731f5f:0-oracle-releases-java-27-and-strengthens-post-quantum-cryptography-support",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 14:30:00 GMT",
+      "snippet": "Forward-Looking Innovations with Project Valhalla and Project LeydenOracle is highlighting the first major release phase of Project Valhalla in JDK 28 EA, offering a preview of platform innovations moving closer to the JDK mainline. Project Valhalla gives developers early visibility into efforts to bridge the long-standing gap between Java objects and primitives, starting with value classes and objects that could benefit data-heavy workloads in analytics, financial services, scientific [...] AUSTIN, Texas, Sept. 15, 2026 /PRNewswire/ -- Oracle today announced the availability of Java 27, the l",
+      "points": null,
+      "score": 9,
+      "reason": "Java 27’nin yayınlanması ve post-quantum kriptografi desteğinin güçlendirilmesi dil ve platform ekosistemi üzerinde geniş etkisi olan önemli bir sürüm gelişmesi.",
+      "category": "Dil & Runtime"
+    },
+    {
+      "id": "276ab650ecdc",
+      "title": "Rune is now open source",
+      "url": "https://rune.build/blog/rune-is-now-open-source",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-11T15:31:47Z",
+      "snippet": "",
+      "points": 220,
+      "score": 8,
+      "reason": "Rune’un açık kaynaklanması dil ekosistemi ve topluluk açısından somut ve uygulanabilir bir değişiklik, dikkat edilmesi gereken bir gelişme.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "1f279c619cdd",
+      "title": "Size-Specialized Memory Allocation",
+      "url": "https://go.dev/blog/size-specialized-allocations",
+      "source": "Go Blog",
+      "publishedAt": "2026-09-16T00:00:00.000Z",
+      "snippet": "The Go Blog Size-Specialized Memory Allocation Go 1.27 includes faster memory allocation for allocations of fewer than 80 bytes. Allocations can be up to 20-30% faster, making allocation-heavy programs up to 1% faster. The Go runtime improves the performance of those allocations by adding specialized functions that are used to allocate certain sizes. These specialized functions can then make certain assumptions that make them faster and easier to optimize. This blog post will explain how this works and how it makes your programs faster. Heap allocations are created by the runtime’s mallocgc fu",
+      "points": null,
+      "score": 8,
+      "reason": "Go 1.27’nin küçük boyutlu tahsisatlar için optimize edilmiş bellek ayırma değişikliği performans etkileri olan somut bir runtime güncellemesi.",
+      "category": "Dil & Runtime"
+    },
+    {
+      "id": "528cfbbeba39",
+      "title": "Java 27 boosts productivity as well as quantum security",
+      "url": "https://techzine.eu/news/devops/144301/java-27-boosts-productivity-as-well-as-quantum-security",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 14:30:00 GMT",
+      "snippet": ") ) ) Image 2: Java 27 boosts productivity as well as quantum security Java, now 32 years old, is already set for its 27th major release. To keep the programming language secure for years and decades to come, Oracle is preparing for the cybersecurity implications of quantum computers. The result is a more secure language, with an added emphasis on productivity gains for programmers.",
+      "points": null,
+      "score": 8,
+      "reason": "Java 27 gibi ana dil sürümleri ve özellikle kuantum güvenliği gibi uzun vadeli güvenlik değişiklikleri geliştiriciler ve platform sağlayıcıları için doğrudan etkili ve takip edilmeli.",
+      "category": "Dil & Runtime"
+    },
+    {
+      "id": "6b8b0b6f48f2",
+      "title": "Migrating the GitHub Copilot runtime to Rust, using Copilot",
+      "url": "https://github.blog/ai-and-ml/generative-ai/migrating-the-github-copilot-runtime-to-rust-using-copilot",
+      "source": "GitHub Blog",
+      "publishedAt": "2026-09-17T00:26:43.000Z",
+      "snippet": "A rewrite this size wasn't affordable before agents. Here's what porting the Copilot agent runtime to 800,000 lines of production Rust actually took. The post Migrating the GitHub Copilot runtime to Rust, using Copilot appeared first on The GitHub Blog.",
+      "points": null,
+      "score": 8,
+      "reason": "GitHub Copilot runtime gibi büyük bir üretim kod tabanının Rust'a taşınması, performans ve güvenlik üzerinde önemli ve uygulanabilir mühendislik çıkarımları taşıyor.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "bc873ebb9daa",
+      "title": "Microsoft bundles AI development tools in Foundry Dev Pack",
+      "url": "https://techzine.eu/news/devops/144333/microsoft-bundles-ai-development-tools-in-foundry-dev-pack",
+      "source": "Web araması",
+      "publishedAt": "Wed, 16 Sep 2026 12:14:52 GMT",
+      "snippet": "## Java 27 boosts productivity as well as quantum security Java, now 32 years old, is already set for its 27th major release. To keep the programming language secure fo... Erik van Klinken22 hours ago Image 9: Grok 4.5 challenges the coding frontier Top story## Grok 4.5 challenges the coding frontier ### Not quite Fable, much cheaper Erik van KlinkenJuly 9, 2026 Image 10: Cloudflare supports Cursor Cloud Agents on Cloudflare Sandboxes [...] With Foundry Dev Pack, Microsoft isn’t introducing a new development environment per se. The company is primarily bundling existing Foundry and Azure tools",
+      "points": null,
+      "score": 7,
+      "reason": "Microsoft’un Foundry Dev Pack ile AI geliştirme araçlarını paketlemesi geliştiricilerin doğrudan kullanabileceği somut bir dağıtım değişikliği; dikkat edilmesi gereken bir araç seti haberi.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "f74bdb3e22fb",
+      "title": "Behind the Scenes: How the OpenTelemetry Plugin Maps Your Microservices in Real-Time",
+      "url": "https://blog.jetbrains.com/platform/2026/09/how-to-service-map-with-opentelemetry",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T12:34:47.000Z",
+      "snippet": "We’ve all been there: you join a new project, and the first thing you ask for is the architecture diagram. You’re handed a diagram that looks great, but after a week of debugging, you realize it’s six months out of date. Service A hasn’t talked to Service B since the spring, and there’s a new […]",
+      "points": null,
+      "score": 7,
+      "reason": "OpenTelemetry eklentisinin gerçek zamanlı mikroservis haritalaması, gözlemlenebilirlik ve operasyonel mimari için doğrudan uygulanabilir ve faydalı bir araç duyurusu.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "557dcb769a02",
+      "title": "Inside OpenAI’s agentic software factory",
+      "url": "https://newsletter.pragmaticengineer.com/p/openai-software-factory",
+      "source": "Pragmatic Engineer",
+      "publishedAt": "2026-09-15T15:41:25.000Z",
+      "snippet": "A deepdive into how Codex has “taken over” OpenAI, how the frontier lab builds its agentic software factory, and the engineering challenges of one billion users. Details from inside OpenAI",
+      "points": null,
+      "score": 7,
+      "reason": "OpenAI’nin agentic yazılım fabrikasına dair derinlemesine inceleme, modern büyük ölçekli mühendislik pratikleri ve otomasyon hakkında önemli içgörüler sunuyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "2a8d2ee59860",
+      "title": "Rider and ReSharper 2026.2.2 Are Out!",
+      "url": "https://blog.jetbrains.com/dotnet/2026/09/16/rd-rs-2026-2-2",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T14:12:44.000Z",
+      "snippet": "We’ve released version 2026.2.2 of ReSharper, Rider, and .NET tools. You can install this update from inside the tools themselves, through the Toolbox App, or on our website. Here’s what’s new in this update. Rider 2026.2.2 AI Agent Setup widget We’ve recently added a wide range of features to help you work with coding agents […]",
+      "points": null,
+      "score": 7,
+      "reason": "Rider ve ReSharper 2026.2.2 sürümleri .NET geliştiricileri için güncellenmiş özellikler ve hata düzeltmeleri sunarak uygulanabilir bir güncelleme sağlıyor.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "36b043769bbe",
+      "title": "IntelliJ IDEA 2026.2.3 Is Out!",
+      "url": "https://blog.jetbrains.com/idea/2026/09/intellij-idea-2026-2-3",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T10:53:53.000Z",
+      "snippet": "We’ve just released IntelliJ IDEA 2026.2.3. You can update to this version from inside the IDE, using the Toolbox App, or using snaps if you are a Ubuntu user. You can also download it from our website. The latest update brings the following improvements: For a comprehensive overview of the fixes, see the release notes. […]",
+      "points": null,
+      "score": 7,
+      "reason": "IntelliJ IDEA 2026.2.3 gibi IDE güncellemeleri hata düzeltmeleri ve küçük iyileştirmeler içerdiğinden hemen güncellenmesi gereken somut bir sürüm duyurusu.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "1252b6ebb61b",
+      "title": "Java 27 in IntelliJ IDEA",
+      "url": "https://blog.jetbrains.com/idea/2026/09/java-27-in-intellij-idea",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-15T14:49:02.000Z",
+      "snippet": "In line with the six-month release cadence, Java 27 was released on September 15, 2026. In this blog post, we will look at what’s included in this release, how IntelliJ IDEA continues to support the latest Java versions, and even how IntelliJ IDEA is benefiting from some of the changes to the JDK. Java 27 […]",
+      "points": null,
+      "score": 7,
+      "reason": "Java 27'nin IntelliJ desteği ve JDK değişikliklerinin IDE etkileri Java geliştiricileri için pratik ve doğrudan uygulanabilir bilgiler içeriyor.",
+      "category": "Dil & Runtime"
+    },
+    {
+      "id": "704f75701e9d",
+      "title": "Google copied our open-source code, removed engineers' names without credit",
+      "url": "https://reddit.com/r/reinforcementlearning/comments/1wg1unx/google_copied_our_opensource_code_removed_our",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-15T17:57:39Z",
+      "snippet": "",
+      "points": 147,
+      "score": 6,
+      "reason": "Google’ın açık kaynak kodu izinsiz kullandığı iddiası, telif ve kredi konularında topluluk için önemli ve uygulanabilir sonuçları olabilecek bir olay.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "ad857503cad5",
+      "title": "New Bug-Fix Releases Are Available for MPS Versions 2026.1.1, 2025.3.2, 2025.2.4, and 2025.1.4",
+      "url": "https://blog.jetbrains.com/mps/2026/09/mps-2026-1-1-released",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T20:06:31.000Z",
+      "snippet": "We’ve released updates for multiple major MPS versions that fix several issues. DOWNLOAD MPS 2026.1.1 Check out all the updates in each particular version below: MPS 2026.1.1 The Projectional Agent Toolkit receives several practical improvements that allow agents to: See and invoke intentions and quick-fixes on individual nodes. Manipulate NodeAttributes, PropertyAttributes, and others. Create copies […]",
+      "points": null,
+      "score": 6,
+      "reason": "MPS için birden fazla hata düzeltme sürümü mevcut kullanıcılar için uygulanabilir ve soruna yönelik doğrudan bir güncelleme sunuyor.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "78d50da3d66b",
+      "title": "Google stole open source code without crediting the authors (Artemis/Minitap)",
+      "url": "https://minitap.ai/blog/i-expected-better-from-google",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-12T02:39:39Z",
+      "snippet": "",
+      "points": 170,
+      "score": 6,
+      "reason": "Artemis/Minitap iddiaları gibi açık kaynak kodun izinsiz kullanımı ve kredi sorunları topluluk ve lisans uyumu açısından önem taşıyor.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "38de1c7f2258",
+      "title": "From better privacy to our new ChatGPT plugin, here's what's new on Stack Overflow for Agents",
+      "url": "https://stackoverflow.blog/2026/09/15/here-s-what-s-new-on-stack-overflow-for-agents",
+      "source": "Stack Overflow Blog",
+      "publishedAt": "2026-09-15T17:00:00.000Z",
+      "snippet": "We've learned a lot in the last three months since launching Stack Overflow for Agents, our API-first knowledge exchange for agents. Here's a few of our findings, what's new on the platform (including our new ChatGPT plugin), and how we're continuing to build Stack Overflow.",
+      "points": null,
+      "score": 6,
+      "reason": "Stack Overflow for Agents’a ChatGPT eklentisi gibi platform güncellemeleri geliştirici iş akışlarını ve entegrasyonları etkileyebilecek pratik bir haberdir.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "077aebeea6e8",
+      "title": "Node.js 26.9.0 (Current)",
+      "url": "https://nodejs.org/en/blog/release/v26.9.0",
+      "source": "Node.js",
+      "publishedAt": "2026-09-16T18:17:42.000Z",
+      "snippet": "",
+      "points": null,
+      "score": 6,
+      "reason": "Node.js 26.9.0 sürüm duyurusu kullanıcılar için uygulanabilir ve takip edilmesi gereken bir sürüm güncellemesi.",
+      "category": "Framework & Kütüphane"
+    },
+    {
+      "id": "bdbf442fb6ba",
+      "title": "Fragments: September 16",
+      "url": "https://martinfowler.com/fragments/2026-09-16.html",
+      "source": "Martin Fowler",
+      "publishedAt": "2026-09-16T20:05:00.000Z",
+      "snippet": "Reports of agentic hacking continue, in this case it happened back in May and it seems OpenAI did not disclose that they were responsible. Simon Willison sees two options: After the Hugging Face and Wiki attacks OpenAI were still unable to review their previous logs and determine that they had previously attacked RubyGems. They knew about the attack on RubyGems and made the decision not to reach out to the RubyGems team about it. Both of these are bad! Given this incident, the Hugging Face situation, and the Wiki attack, the obvious question right now is how many more incidents like this are o",
+      "points": null,
+      "score": 6,
+      "reason": "Agentic hacking raporları ve tespit edilen sorumluluk eksiklikleri güvenlik ve operasyon pratikleri açısından önemli uyarılar içeriyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "99b0c9886039",
+      "title": "AI writes half the code, but developers struggle to review it all",
+      "url": "https://techzine.eu/news/devops/144303/ai-writes-half-the-code-but-developers-struggle-to-review-it-all",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 13:35:44 GMT",
+      "snippet": "“Developers nearly doubled the time AI saves them in coding, to 13 hours a week. Not one of those hours came back,” as BairesDev CEO Darren Shimkus succinctly notes. ## Review becomes the bottleneck Among the CTOs surveyed specifically, 78 percent note spending more money on code review, QA and validation. Only 7 percent of developers are letting AI cover shipping decisions entirely. [...] However, that time is consumed rewriting and reviewing AI-generated code. Only 21 percent of developers still spend more than half of their workweek writing new code entirely on their own. 67 percent note re",
+      "points": null,
+      "score": 6,
+      "reason": "AI tarafından üretilen kodun incelenmesinin ekip süreçlerini darboğaza sokması, mühendislik iş akışları ve kalite güvencesi için önemli ve uygulanabilir bir operasyonel sorun.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "115895427a12",
+      "title": "GitHub Copilot app for Beginners: Using the diff, terminal, and browser",
+      "url": "https://github.blog/ai-and-ml/github-copilot/github-copilot-app-for-beginners-using-the-diff-terminal-and-browser",
+      "source": "GitHub Blog",
+      "publishedAt": "2026-09-10T21:31:19.000Z",
+      "snippet": "Checking agent-generated code usually means hopping between tabs. Learn how to view diffs, run terminal commands, and preview web apps side by side in the GitHub Copilot app. The post GitHub Copilot app for Beginners: Using the diff, terminal, and browser appeared first on The GitHub Blog.",
+      "points": null,
+      "score": 6,
+      "reason": "GitHub Copilot uygulamasının kullanım rehberi, kod denetimi ve iş akışı açısından pratik fayda sağladığı için geliştiricilerin hemen uygulayabileceği bilgiler sunuyor.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "9741c847e95d",
+      "title": "Vectorized and performance-portable Quicksort (2022)",
+      "url": "https://opensource.googleblog.com/2022/06/Vectorized%20and%20performance%20portable%20Quicksort.html",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-16T18:31:35Z",
+      "snippet": "",
+      "points": 167,
+      "score": 5,
+      "reason": "Vektörleştirilmiş ve performans-taşınabilir Quicksort teknikleri mühendislik açısından ilginç ve uygulanabilir optimizasyon fikirleri sunuyor ama alanı kökten değiştirmiyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "5a208102a6d1",
+      "title": "A few good ideas in programming languages",
+      "url": "https://prydt.xyz/blog/a-few-good-ideas-in-pl",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-12T13:07:52Z",
+      "snippet": "",
+      "points": 108,
+      "score": 5,
+      "reason": "Programlama dillerindeki birkaç iyi fikir derlemesi öğretici ve ufuk açıcı olsa da saha üzerinde doğrudan dönüştürücü bir etkisi yok.",
+      "category": "Dil & Runtime"
+    },
+    {
+      "id": "417161780727",
+      "title": "German Rheinmetall open-sources its Battlesuite connected weapon system protcol",
+      "url": "https://rheinmetall.github.io/onboardapi-documentation/9.10.0/index.html",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-15T21:07:47Z",
+      "snippet": "",
+      "points": 277,
+      "score": 5,
+      "reason": "Rheinmetall’in Battlesuite protokolünü açık kaynak yapması, savunma-sağlam protokoller bağlamında ilginç ve tartışmaya açık bir adım.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "4a4ff0ec56e9",
+      "title": "The Pulse #191: a new trend of CPU shortages",
+      "url": "https://newsletter.pragmaticengineer.com/p/the-pulse-191-a-new-trend-of-cpu",
+      "source": "Pragmatic Engineer",
+      "publishedAt": "2026-09-10T17:13:44.000Z",
+      "snippet": "For compute-intensive services: it’s worth reserving more compute now. Also: growth dreams end for more COVID-era unicorns, engineers losing touch with systems when AI handles incidents, and more",
+      "points": null,
+      "score": 5,
+      "reason": "CPU kıtlığı eğilimi gibi altyapı öngörüleri operasyonel planlama için önemli olsa da hemen alınacak tekil bir aksiyon önermiyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "ee884eac4f4a",
+      "title": "Logpoints Walkthrough",
+      "url": "https://blog.jetbrains.com/idea/2026/09/logpoints-walkthrough",
+      "source": "JetBrains",
+      "publishedAt": "2026-09-16T14:14:04.000Z",
+      "snippet": "Modern development tools, especially IntelliJ IDEA, have such comprehensive debugging support that for virtually any niche use case, there is a specialized tool for the job. This can make it hard to know where to begin. If you are new to debugging tools and want the biggest return on your learning investment, the best feature […]",
+      "points": null,
+      "score": 5,
+      "reason": "Logpoints kullanım kılavuzu gibi hata ayıklama rehberleri geliştirici verimliliğini artırır ama geniş etkisi sınırlı.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "2267286cfd5c",
+      "title": "DevFest 2026: Google Developer Events",
+      "url": "https://blog.google/innovation-and-ai/technology/developers-tools/devfest2026",
+      "source": "Web araması",
+      "publishedAt": "Mon, 14 Sep 2026 00:00:00 GMT",
+      "snippet": "Breadcrumb 1. Home 2. Innovation & AI 3. Technology 4. Developer tools # DevFest is back Sep 14, 2026 | x.com Facebook LinkedIn Mail DevFest 2026 is here, and from October 1 – December 31, 2026, you can join the nearly 1 million developers expected to participate to build, secure, and scale in the agentic era. Here’s how to join. Justyna Politanska-Pyszko DevFest Lead Natalie McHugh Program Manager Share x.com Facebook LinkedIn Mail [...] Check your inbox to confirm your subscription. You can also subscribe with a . Your information will be used in accordance with Google's privacy policy. You ",
+      "points": null,
+      "score": 5,
+      "reason": "DevFest gibi büyük etkinlikler ağ kurma ve eğitim fırsatları sunar, ancak genelde tekil bir teknolojik kırılma niteliğinde değiller.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "104f245aafbf",
+      "title": "Open-source AI and open models reading list",
+      "url": "https://interconnects.ai/p/open-source-ai-reading-list",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-14T00:22:51Z",
+      "snippet": "",
+      "points": 158,
+      "score": 4,
+      "reason": "Açık model ve açık kaynak AI okuma listesi faydalı bir kaynak ama doğrudan saha değiştiren bir gelişme sayılmaz.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "026c760e6322",
+      "title": "λ Snap – An inviting programming language for kids and adults for CS study",
+      "url": "https://snap.berkeley.edu/",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-11T17:36:11Z",
+      "snippet": "",
+      "points": 184,
+      "score": 4,
+      "reason": "Eğitim amaçlı yeni bir dil girişimi (λ Snap) öğretim açısından değerli ama profesyonel ortamda geniş etkisi sınırlı.",
+      "category": "Dil & Runtime"
+    },
+    {
+      "id": "621d5105d9d6",
+      "title": "OpenArm: An open-source 7DOF humanoid arm",
+      "url": "https://github.com/enactic/OpenArm",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-13T14:17:49Z",
+      "snippet": "",
+      "points": 213,
+      "score": 4,
+      "reason": "OpenArm gibi açık kaynak 7DOF kollar donanım meraklıları ve araştırma için faydalı olsa da yazılım mühendisliği alanını kökten değiştirmiyor.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "0dfff884420d",
+      "title": "AI cybersecurity is a cat and mouse game",
+      "url": "https://stackoverflow.blog/2026/09/11/ai-cybersecurity-is-a-cat-and-mouse-game",
+      "source": "Stack Overflow Blog",
+      "publishedAt": "2026-09-11T07:40:00.000Z",
+      "snippet": "Ryan chats with Sam Curry, CSO at Zscaler, about where human intelligence sits in the new security landscape with AI, why shifting security protections closer to applications helps limit probes for vulnerabilities, and why building more resilient code infrastructure is the best way to address the vulnerabilities AI does discover.",
+      "points": null,
+      "score": 4,
+      "reason": "AI güvenliği üzerine podcast/interview genel farkındalık sağlıyor ama doğrudan teknik yönergeler veya araçlar sunmuyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "c796101ee2ab",
+      "title": "G5 Labs Emerges From Stealth With $14M to Make Natural Language the New Source Code",
+      "url": "https://unite.ai/g5-labs-emerges-from-stealth-with-14m-to-make-natural-language-the-new-source-code",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 16:45:22 GMT",
+      "snippet": "### Funding # G5 Labs Emerges From Stealth With $14M to Make Natural Language the New Source Code Published By Antoine Tardif, CEO & Founder of Unite.AI Add Unite.AI to your preferred sources on Google G5 Labs, an MIT Computer Science and Artificial Intelligence Laboratory (CSAIL) spinout, has emerged from stealth with $14 million in seed funding and an ambitious thesis: the next major programming language may not look like a programming language at all. [...] Whether that becomes the next major abstraction layer in software engineering remains an open question. Existing programming languages,",
+      "points": null,
+      "score": 4,
+      "reason": "G5 Labs gibi startup finansman haberleri ilgi çekici olsa da, teknoloji veya açık kaynak ekosistemi üzerinde hemen uygulanabilir bir değişiklik getirmiyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "e47937a64c99",
+      "title": "PS5 Linux lead quits: \"a bunch of noobs using LLMs\" that \"they don't understand\"",
+      "url": "https://frvr.com/blog/news/ps5-linux-lead-quits-as-open-source-projects-have-become-a-bunch-of-noobs-using-llms-that-they-dont-even-understand",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-16T14:30:36Z",
+      "snippet": "",
+      "points": 312,
+      "score": 3,
+      "reason": "PS5 Linux ekibi liderinin ayrılması ve LLM eleştirisi ilginç dedikodu/duyuru ama geniş teknik etkisi ya da eylem çağrısı sınırlı.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "6512c1ea4d98",
+      "title": "(Re)introducing Developer Story",
+      "url": "https://stackoverflow.blog/2026/09/10/re-introducing-developer-story",
+      "source": "Stack Overflow Blog",
+      "publishedAt": "2026-09-10T18:01:54.000Z",
+      "snippet": "For the past few years, we’ve been looking at ways to bring a little more of the individual developer back to Stack.",
+      "points": null,
+      "score": 3,
+      "reason": "Developer Story gibi profil özelliklerinin yeniden tanıtımı bireysel geliştiriciler için ilgi çekici olabilir ancak teknik ekip liderleri için öncelikli bir haber değil.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "13371281df95",
+      "title": "Proof of Capture: Apple Reference Image, but open source and using steganography",
+      "url": "https://merybenavente.me/blog/proof-of-capture",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-10T19:44:15Z",
+      "snippet": "",
+      "points": 141,
+      "score": 3,
+      "reason": "Proof of Capture projesi niş ve akademik/deneysel bir ilgi alanı olup geniş geliştirici kitlesi için düşük öncelikli.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "8587315c03c9",
+      "title": "Marketing ops as code: Automating events from planning to follow-up on GitHub",
+      "url": "https://github.blog/ai-and-ml/github-copilot/marketing-ops-as-code-automating-events-from-planning-to-follow-up-on-github",
+      "source": "GitHub Blog",
+      "publishedAt": "2026-09-11T18:26:10.000Z",
+      "snippet": "If you can write down how you do your work, you can automate it. Here's what I did to support GitHub's APAC marketing team. The post Marketing ops as code: Automating events from planning to follow-up on GitHub appeared first on The GitHub Blog.",
+      "points": null,
+      "score": 3,
+      "reason": "Marketing ops otomasyonu ilginç bir vaka çalışması olsa da yazılım mühendisliği gündemi için sınırlı teknik önceliğe sahip.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "99d68e399a8b",
+      "title": "Gartner Unveils Top Strategic Predictions for 2027 and Beyond",
+      "url": "https://gartner.com/en/newsroom/press-releases/2026-09-15-gartner-unveils-top-strategic-predictions-for-2027-and-beyond",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 14:15:00 GMT",
+      "snippet": "risk-based governance frameworks, monitor business-created applications through automated registries, and update records retention policies to address AI-generated applications and agents. [...] take a strategic, safety-first approach by investing in scalable platforms, robust governance frameworks and the skills needed to deploy and manage physical AI systems effectively. [...] #### Media contact Emma Keen Gartner emma.keen@gartner.com #### Latest releases Announcement | Sep 15, 2026 ##### Gartner Unveils Top Strategic Predictions for 2027 and Beyond Information Technology Conference Highligh",
+      "points": null,
+      "score": 3,
+      "reason": "Gartner’ın stratejik tahminleri kavramsal ve üst düzey yönlendirme sunuyor fakat teknik ekipler için doğrudan uygulanabilirliği sınırlı.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "5b9612823628",
+      "title": "AI, JD, and other letters of the law",
+      "url": "https://stackoverflow.blog/2026/09/15/ai-jd-and-other-letters-of-the-law",
+      "source": "Stack Overflow Blog",
+      "publishedAt": "2026-09-15T07:40:00.000Z",
+      "snippet": "Ryan chats with Kevin Frazier, director of the AI Innovation and Law program at the University of Texas School of Law, about the legal and social impacts of data centers, the realities of workforce disruption, and regulating AI for child safety using existing consumer protection laws.",
+      "points": null,
+      "score": 3,
+      "reason": "AI ve hukuk arasındaki tartışma teknik kararları dolaylı etkileyebilir ama doğrudan geliştirici araçları veya diller üzerinde somut bir değişiklik getirmiyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "98264c64ca81",
+      "title": "We Must Pace the Frontier",
+      "url": "https://darioamodei.com/post/we-must-pace-the-frontier",
+      "source": "Web araması",
+      "publishedAt": "Sun, 13 Sep 2026 07:00:00 GMT",
+      "snippet": "I’m therefore proposing a three-step plan with the goal of pacing the frontier: building AI at a balanced rate that aims to ensure its safety while still achieving its benefits and grappling with important geopolitical dilemmas. To be clear, pacing does not mean halting model training or technical progress, but ensuring companies take adequate time to align and safeguard their models, and for third party evaluators to confirm this. Our pacing framework is an attempt to further strengthen our [...] strengthen our commitment to safety and encourage a race to the top. The first step is something ",
+      "points": null,
+      "score": 3,
+      "reason": "AI hızını sınırlamaya dair politika ve strateji önerileri önemli ama çoğunlukla niyet ve tartışma düzeyinde, geliştiricilerin hemen alacağı somut bir aksiyon sunmuyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "a768a64b397c",
+      "title": "Cadence Tensilica IP Powers Analog Devices' Next-Generation DSP Architecture – Company Announcement",
+      "url": "https://markets.ft.com/data/announce/detail?dockey=600-202609150900BIZWIRE_USPRX____20260915_BW140269-1",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 13:00:00 GMT",
+      "snippet": "audio inference at the edge. By supporting optimized NN kernel routines for popular AI/ML frameworks such as Google’s LiteRT™, the latest AI models can be easily offloaded to the SHARC-FX core for a high performance and energy-efficient implementation compared to running them on the host CPU. [...] As automotive audio and voice-enabled systems continue to evolve, many workloads are now transitioning from traditional signal-processing algorithms to AI-driven approaches that deliver higher accuracy, greater adaptability, and more personalized user experiences. The SHARC-FX core’s expanded instru",
+      "points": null,
+      "score": 2,
+      "reason": "Cadence Tensilica IP duyurusu daha çok pazarlama/ürün tanıtımı içerikli; genel geliştirici kitlesi için sınırlı teknik yenilik barındırıyor.",
+      "category": "Geliştirici Araçları"
+    },
+    {
+      "id": "8356199c8c98",
+      "title": "Nail the Narrative",
+      "url": "https://martinfowler.com/articles/never-send-slides/nail-your-narrative.html",
+      "source": "Martin Fowler",
+      "publishedAt": "2026-09-15T15:11:00.000Z",
+      "snippet": "Sumeet Gayathri Moghe finds many folks building presentations get tangled in building slides without a coherent narrative. He advises distilling the big idea, visualizing the audience, and building a structured storyline. more…",
+      "points": null,
+      "score": 2,
+      "reason": "Sunum ve anlatı inşa etme tavsiyeleri faydalı ama teknik liderler için kritik veya eyleme dönüştürücü bir haber değil.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "9af4424a05ab",
+      "title": "Ask HN: Can we please limit the AI news flood?",
+      "url": "https://news.ycombinator.com/item?id=49657850",
+      "source": "Hacker News",
+      "publishedAt": "2026-09-11T13:11:04Z",
+      "snippet": "Over past couple months I noticed that HN feed is almost exclusively AI or AI-adjacent news. Meanwhile the legitimately, broadly-hacker stuff gets left out for the most part.<p>I noticed that because the things I find genuinely interesting that I post here now get zero traction, which is the stuff that I believe would previously be met with some discussion.<p>Note that I don&#x27;t care that my submissions were ignored, I don&#x27;t need that validation. Problem is that if my stuff gains no traction, I am myself not seeing similar stuff posted by others, stuff I am genuinely <i>also</i> intere",
+      "points": 860,
+      "score": 2,
+      "reason": "Hacker News'teki haber akışıyla ilgili şikayetler topluluk tartışması kapsamında; teknik bir gelişme veya eyleme dönüştürülebilir içerik sağlamıyor.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "bd7d9ea73d66",
+      "title": "Plea In Supreme Court Challenges Charges On UPI Transactions Above ₹2,000",
+      "url": "https://livelaw.in/top-stories/plea-in-supreme-court-challenges-centres-decision-to-introduce-charges-on-upi-transactions-above-2000-550329",
+      "source": "Web araması",
+      "publishedAt": "Wed, 16 Sep 2026 12:46:23 GMT",
+      "snippet": "The announced framework places the MDR within the merchant payment ecosystem. The Finance Ministry has advised banks to ensure that merchants do not pass the charge on to consumers. UPI application providers have also been prohibited from imposing platform fees or hidden charges on users under the framework. [...] Under the announced framework, the MDR will apply to specified person-to-merchant (P2M) UPI transactions above ₹2,000. The standard rate is 0.4%, with a maximum charge of ₹300 for transactions of ₹75,000 or more. Certain essential and thin-margin sectors, including railways, telecomm",
+      "points": null,
+      "score": 1,
+      "reason": "UPI işlemlerindeki hukuki/finansal gelişme yerel finans regülasyonuna ilişkin olup teknik okuyucu kitlesi için doğrudan alaka düzeyi düşük.",
+      "category": "Mimari & Pratik"
+    },
+    {
+      "id": "6eac86a7cc3f",
+      "title": "CUET BHU Cut Off 2026 (OUT): Check CUET Marks for BSc, BCom, BA, Shastri",
+      "url": "https://shiksha.com/science/articles/cuet-bhu-cut-off-blogId-130901",
+      "source": "Web araması",
+      "publishedAt": "Mon, 14 Sep 2026 10:54:40 GMT",
+      "snippet": "| Release of BHU UG 2026 Spot Round 1 Cut Off | 28-Aug-2026 | | Release of BHU BFA-BPA Round 2 allotment | 31-Aug-2026 | | Release of BHU UG 2026 Spot Round 2 Cut Off | 31-Aug-2026 | [...] Events Dates BHU counselling registration starts 10-Jul-2026 Last date of registration 25-Jul-2026 BHU UG registration correction window 28-Jul-2026 to 30-Jul-2026 03-Aug-2026 Release of BHU UG 2026 second allotment 08-Aug-2026 Release of BHU UG 2026 third allotment 14-Aug-2026 Release of BHU UG 2026 fourth allotment 19-Aug-2026 Release of BHU BFA-BPA Round 1 allotment 27-Aug-2026 Release of BHU UG 2026 Spot",
+      "points": null,
+      "score": 0,
+      "reason": "BHU üniversitesi taban puanları gibi yerel eğitim duyuruları yazılım geliştirici okuyucu kitlesi için alakasız.",
+      "category": "Açık Kaynak"
+    },
+    {
+      "id": "2b00bb459b3f",
+      "title": "Environmental science major hones her skills at Chobani - Binghamton News",
+      "url": "https://binghamton.edu/news/story/6478/greener-yogurt-environmental-science-major-hones-her-skills-at-chobani",
+      "source": "Web araması",
+      "publishedAt": "Tue, 15 Sep 2026 07:00:00 GMT",
+      "snippet": "A plant operations internship might seem an odd choice for a dual major in anthropology and environmental science, but the Binghamton University student was prepared. In high school, she participated in Project Leading the Way, which taught her the basics of Python, the programming language used at Chobani. Her environmental science major also helped, as it provided her with a foundation in sustainability and circular economics. “I knew a lot of the principles,” she said. [...] When she found out that the company was offering 10-week summer internships, she jumped at the chance. “I was origina",
+      "points": null,
+      "score": 0,
+      "reason": "Üniversite staj haberi teknik okuyucu kitlesi için alaka düzeyi çok düşük ve haber değeri yok.",
+      "category": "Mimari & Pratik"
+    }
+  ],
+  "sources": [
+    {
+      "name": "Web araması",
+      "scanned": 17,
+      "scored": 12,
+      "published": 3
+    },
+    {
+      "name": "JetBrains",
+      "scanned": 8,
+      "scored": 6,
+      "published": 3
+    },
+    {
+      "name": "Hacker News",
+      "scanned": 12,
+      "scored": 12,
+      "published": 1
+    },
+    {
+      "name": "GitHub Blog",
+      "scanned": 3,
+      "scored": 3,
+      "published": 1
+    },
+    {
+      "name": "Martin Fowler",
+      "scanned": 2,
+      "scored": 2,
+      "published": 1
+    },
+    {
+      "name": "Pragmatic Engineer",
+      "scanned": 2,
+      "scored": 2,
+      "published": 1
+    },
+    {
+      "name": "Go Blog",
+      "scanned": 1,
+      "scored": 1,
+      "published": 1
+    },
+    {
+      "name": "Node.js",
+      "scanned": 1,
+      "scored": 1,
+      "published": 1
+    },
+    {
+      "name": "Stack Overflow Blog",
+      "scanned": 4,
+      "scored": 4,
+      "published": 0
+    }
+  ]
+}
